@@ -14,22 +14,6 @@ Plataforma web dedicada a la integración, consulta y análisis de información 
 
 ---
 
-## Historial de entregas
-
-### Entrega 1 — Propuesta de idea y alcance
-
-Se definió **Motorsport Analytics** como una plataforma web para centralizar y analizar información de automovilismo. La propuesta inicial delimitó el MVP a Fórmula 1 (F1), World Rally Championship (WRC) y Turismo Carretera (TC), e identificó como funcionalidades principales la consulta de categorías, el calendario unificado, los resultados y las estadísticas. La documentación original se conserva en [README-entrega1.md](docs/referencias/README-entrega1.md).
-
-### Entrega 2 — Diseño técnico y estructura inicial
-
-En esta etapa se avanzó desde la propuesta hacia el diseño de la solución y la organización inicial del repositorio:
-
-- Se definió **PostgreSQL** como motor de base de datos, en reemplazo de las alternativas MySQL / SQL Server consideradas en la Entrega 1. La decisión se basa en su licencia open source, integridad transaccional, soporte de fechas y zonas horarias, e integración con Spring Data JPA e Hibernate; además, es compatible con las opciones PaaS evaluadas para el despliegue.
-- Se documentaron el esquema relacional y el DDL con las entidades deportivas, relaciones, índices principales y campos de auditoría; se agregó un DML con categorías iniciales para F1, WRC y TC.
-- Se definieron la arquitectura monolítica por capas con API REST y SPA, y los módulos funcionales del sistema.
-- Se especificó la integración de datos mediante consumo de APIs externas y se incorporó como funcionalidad plus la telemetría en vivo, limitada a F1 y sujeta a la disponibilidad del proveedor.
-- Se organizaron los documentos en `docs/`, el esquema y los datos iniciales en `database/`, y se crearon las estructuras iniciales de `backend/` y `frontend/`.
-
 ## Descripción del proyecto
 
 **Motorsport Analytics** es una plataforma web dedicada a la integración, consulta y análisis de información de diversas categorías de automovilismo deportivo.
@@ -60,7 +44,7 @@ La plataforma permitirá visualizar información estadística por la categoría 
 
 Esto transformará datos estáticos en información visual y analítica de alto valor dinámico.
 
-También se prevé agregar la opción de **vincular la carrera que se desea notificar por fecha al calendario del celular**, ya sea Android o iOS.
+También se prevé agregar la opción de **vincular la carrera por fecha al calendario del celular**, ya sea Android o iOS.
 
 ## Alcance definido en la Entrega 1 — MVP
 
@@ -106,10 +90,6 @@ Generación de gráficos comparativos para facilitar el análisis del usuario, i
 - Tendencias de rendimiento.
 - Puntajes.
 
-### Telemetría en vivo (funcionalidad plus)
-
-Como funcionalidad adicional y sujeta a la disponibilidad de una API externa adecuada, se prevé mostrar telemetría en vivo exclusivamente para Fórmula 1. No forma parte del alcance base para WRC ni Turismo Carretera.
-
 ## Stack tecnológico
 
 El stack tecnológico definido para el desarrollo es el siguiente:
@@ -138,20 +118,14 @@ La propuesta combina:
 - Conversión de horarios según la zona horaria del usuario.
 - Posibilidad de vincular eventos con el calendario del dispositivo.
 
-## Estado del proyecto
-
-**Hito actual:** Entrega 2 — Diseño técnico y estructura inicial. Este README mantiene la propuesta de la Entrega 1 y registra debajo las decisiones y los avances de la Entrega 2.
-
-La propuesta inicial completa también se conserva como referencia en `docs/referencias/README-entrega1.md`.
-
 ## Estructura del repositorio
 
 ```text
 database/
 	schema.sql
-	seed.sql
+	datos_iniciales.sql
 docs/
-	aequitectura.md
+	arquitectura.md
 	diagramaUML.md
 	modulos.md
 	referencias/
@@ -164,3 +138,20 @@ README.md
 
 El esquema y los datos iniciales están en `database/`. La documentación técnica está en `docs/`. `backend/` y `frontend/` contienen únicamente archivos de seguimiento para mantener las carpetas en Git hasta que comience su implementación.
 
+## Estado del proyecto
+
+## Historial de entregas
+
+### **Hito Nro1:** Entrega 1 — Propuesta de idea y alcance
+
+Se definió **Motorsport Analytics** como una plataforma web para centralizar y analizar información de automovilismo. La propuesta inicial delimitó el MVP a Fórmula 1 (F1), World Rally Championship (WRC) y Turismo Carretera (TC), e identificó como funcionalidades principales la consulta de categorías, el calendario unificado, los resultados y las estadísticas.
+
+### **Hito actual:** Entrega 2 — Diseño técnico y estructura inicial
+
+En esta etapa se avanzó desde la propuesta hacia el diseño de la solución y la organización inicial del repositorio:
+
+- Se definió **PostgreSQL** como motor de base de datos, en reemplazo de las alternativas MySQL / SQL Server consideradas en la Entrega 1. La decisión se basa en su licencia open source, integridad transaccional, soporte de fechas y zonas horarias, e integración con Spring Data JPA e Hibernate; además, es compatible con las opciones PaaS evaluadas para el despliegue.
+- Se documentaron el esquema relacional y el DDL con las entidades deportivas, relaciones, índices principales y campos de auditoría; se agregó un DML con categorías iniciales para F1, WRC y TC.
+- Se definieron la arquitectura monolítica por capas con API REST y SPA, y los módulos funcionales del sistema.
+- Se especificó la integración de datos mediante consumo de APIs externas y se incorporó como funcionalidad plus la telemetría en vivo, limitada a F1 y sujeta a la disponibilidad del proveedor.
+- Se organizaron los documentos en `docs/`, el esquema y los datos iniciales en `database/`, y se crearon las estructuras iniciales de `backend/` y `frontend/`.
