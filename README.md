@@ -6,14 +6,29 @@ Plataforma web dedicada a la integración, consulta y análisis de información 
 > **Universidad Tecnológica Nacional (UTN)**  
 > **Grupo:** 190  
 > **Integrantes:** Salas Mateo Roman · Luna Genaro Nahuel  
-> **Hito:** Entrega 1 — Propuesta de Idea y Alcance  
-> **Fecha de entrega:** 30/08/2026
+> **Entrega actual:** Entrega 2 — Diseño técnico y estructura inicial
 
 ## Repositorio
 
 [GitHub — trabajo-final-utn](https://github.com/MRSalas07/trabajo-final-utn)
 
 ---
+
+## Historial de entregas
+
+### Entrega 1 — Propuesta de idea y alcance
+
+Se definió **Motorsport Analytics** como una plataforma web para centralizar y analizar información de automovilismo. La propuesta inicial delimitó el MVP a Fórmula 1 (F1), World Rally Championship (WRC) y Turismo Carretera (TC), e identificó como funcionalidades principales la consulta de categorías, el calendario unificado, los resultados y las estadísticas. La documentación original se conserva en [README-entrega1.md](docs/referencias/README-entrega1.md).
+
+### Entrega 2 — Diseño técnico y estructura inicial
+
+En esta etapa se avanzó desde la propuesta hacia el diseño de la solución y la organización inicial del repositorio:
+
+- Se definió **PostgreSQL** como motor de base de datos, en reemplazo de las alternativas MySQL / SQL Server consideradas en la Entrega 1. La decisión se basa en su licencia open source, integridad transaccional, soporte de fechas y zonas horarias, e integración con Spring Data JPA e Hibernate; además, es compatible con las opciones PaaS evaluadas para el despliegue.
+- Se documentaron el esquema relacional y el DDL con las entidades deportivas, relaciones, índices principales y campos de auditoría; se agregó un DML con categorías iniciales para F1, WRC y TC.
+- Se definieron la arquitectura monolítica por capas con API REST y SPA, y los módulos funcionales del sistema.
+- Se especificó la integración de datos mediante consumo de APIs externas y se incorporó como funcionalidad plus la telemetría en vivo, limitada a F1 y sujeta a la disponibilidad del proveedor.
+- Se organizaron los documentos en `docs/`, el esquema y los datos iniciales en `database/`, y se crearon las estructuras iniciales de `backend/` y `frontend/`.
 
 ## Descripción del proyecto
 
@@ -47,7 +62,7 @@ Esto transformará datos estáticos en información visual y analítica de alto 
 
 También se prevé agregar la opción de **vincular la carrera que se desea notificar por fecha al calendario del celular**, ya sea Android o iOS.
 
-## Alcance inicial — MVP
+## Alcance definido en la Entrega 1 — MVP
 
 Con el fin de garantizar la viabilidad del proyecto dentro del cronograma académico, el alcance del MVP se delimita estrictamente a la integración de tres categorías contrastantes de automovilismo:
 
@@ -79,6 +94,9 @@ Consulta de temporadas, fechas de carreras, circuitos/sedes y conversión autom�
 
 Visualización de tablas de posiciones finales de cada sesión competitiva.
 
+### Integración de datos
+
+Consumo de APIs externas para obtener datos de las categorías y normalizarlos antes de almacenarlos en PostgreSQL.
 
 ### Módulo estadístico y visual
 
@@ -88,15 +106,19 @@ Generación de gráficos comparativos para facilitar el análisis del usuario, i
 - Tendencias de rendimiento.
 - Puntajes.
 
+### Telemetría en vivo (funcionalidad plus)
+
+Como funcionalidad adicional y sujeta a la disponibilidad de una API externa adecuada, se prevé mostrar telemetría en vivo exclusivamente para Fórmula 1. No forma parte del alcance base para WRC ni Turismo Carretera.
+
 ## Stack tecnológico
 
-De acuerdo con el principio de que la familiaridad con la tecnología es el factor prioritario de viabilidad, se propone un stack robusto dominado por el equipo de desarrollo.
+El stack tecnológico definido para el desarrollo es el siguiente:
 
 | Componente | Tecnología | Rol y justificación técnica |
 |---|---|---|
 | **Backend** | Java 21 + Spring Boot 3.x | Responsable de la lógica de negocio, persistencia mediante Spring Data JPA, seguridad mediante Spring Security, validación de datos, normalización de información externa y exposición de la API REST. |
 | **Frontend** | Angular + TypeScript / HTML / CSS | Desarrollo de la interfaz web responsiva, consumo asíncrono de la API REST mediante HttpClient, navegación y renderizado dinámico de tablas de posiciones y gráficos. |
-| **Base de datos** | MySQL / SQL Server | Almacenamiento estructurado de temporadas, pilotos, equipos y resultados. Garantiza la integridad transaccional (ACID) y la consistencia de las complejas relaciones de datos del automovilismo. |
+| **Base de datos** | PostgreSQL | Almacenamiento relacional de temporadas, pilotos, equipos, eventos y resultados. Proporciona integridad transaccional (ACID), tipos adecuados para fechas y horarios, y compatibilidad con Spring Data JPA e Hibernate. |
 | **Plataforma / Cloud** | Servicio Cloud PaaS (Render / Railway / Vercel) | Alojamiento del backend y despliegue del frontend integrado de manera automática con el repositorio único de GitHub, cumpliendo el requisito de despliegue en la nube. |
 
 ---
@@ -118,7 +140,27 @@ La propuesta combina:
 
 ## Estado del proyecto
 
-**Hito actual:** Entrega 1 — Propuesta de Idea y Alcance.
+**Hito actual:** Entrega 2 — Diseño técnico y estructura inicial. Este README mantiene la propuesta de la Entrega 1 y registra debajo las decisiones y los avances de la Entrega 2.
 
-Este documento corresponde a la propuesta inicial del proyecto para el Trabajo Final Integrador de la Tecnicatura Universitaria en Programación.
+La propuesta inicial completa también se conserva como referencia en `docs/referencias/README-entrega1.md`.
+
+## Estructura del repositorio
+
+```text
+database/
+	schema.sql
+	seed.sql
+docs/
+	aequitectura.md
+	diagramaUML.md
+	modulos.md
+	referencias/
+backend/
+	.gitkeep
+frontend/
+	.gitkeep
+README.md
+```
+
+El esquema y los datos iniciales están en `database/`. La documentación técnica está en `docs/`. `backend/` y `frontend/` contienen únicamente archivos de seguimiento para mantener las carpetas en Git hasta que comience su implementación.
 
