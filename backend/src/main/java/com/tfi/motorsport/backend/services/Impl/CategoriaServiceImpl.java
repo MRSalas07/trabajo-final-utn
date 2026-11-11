@@ -34,9 +34,7 @@ public class CategoriaServiceImpl implements ICategoriaService {
 
     @Override
     public CategoriaDto obtenerCategoria(Long id) {
-        Categoria categoria = categoriaJPARepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "No se encontró la categoría con ID " + id));
+        Categoria categoria = buscarCategoria(id);
         return CategoriaDto.fromEntity(categoria);
     }
 
