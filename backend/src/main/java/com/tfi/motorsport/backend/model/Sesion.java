@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,10 +49,10 @@ public class Sesion extends AuditableEntity {
     private Integer numero;
 
     @Column(name = "fecha_inicio")
-    private LocalDateTime fechaInicio;
+    private Instant fechaInicio;
 
     @Column(name = "fecha_fin")
-    private LocalDateTime fechaFin;
+    private Instant fechaFin;
 
     @Column(name = "vueltas_programadas")
     private Integer vueltasProgramadas;

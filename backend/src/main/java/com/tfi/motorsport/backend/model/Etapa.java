@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,10 +50,10 @@ public class Etapa extends AuditableEntity {
     private BigDecimal distancia;
 
     @Column(name = "fecha_inicio")
-    private LocalDateTime fechaInicio;
+    private Instant fechaInicio;
 
     @Column(name = "fecha_fin")
-    private LocalDateTime fechaFin;
+    private Instant fechaFin;
 
     @Column(columnDefinition = "varchar")
     private String estado;

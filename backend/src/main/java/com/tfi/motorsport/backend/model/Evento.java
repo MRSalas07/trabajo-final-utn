@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,11 +57,14 @@ public class Evento extends AuditableEntity {
     @Column(columnDefinition = "varchar")
     private String circuito;
 
+    @Column(name = "zona_horaria", nullable = false, length = 64)
+    private String zonaHoraria;
+
     @Column(name = "fecha_inicio")
-    private LocalDateTime fechaInicio;
+    private Instant fechaInicio;
 
     @Column(name = "fecha_fin")
-    private LocalDateTime fechaFin;
+    private Instant fechaFin;
 
     @Column(columnDefinition = "varchar")
     private String estado;
