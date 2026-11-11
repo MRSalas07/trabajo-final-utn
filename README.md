@@ -96,7 +96,7 @@ El stack tecnológico definido para el desarrollo es el siguiente:
 
 | Componente | Tecnología | Rol y justificación técnica |
 |---|---|---|
-| **Backend** | Java 21 + Spring Boot 3.x | Responsable de la lógica de negocio, persistencia mediante Spring Data JPA, seguridad mediante Spring Security, validación de datos, normalización de información externa y exposición de la API REST. |
+| **Backend** | Java 21 + Spring Boot 4.1.2 | Responsable de la lógica de negocio, persistencia mediante Spring Data JPA, seguridad mediante Spring Security, validación de datos, normalización de información externa y exposición de la API REST. |
 | **Frontend** | Angular + TypeScript / HTML / CSS | Desarrollo de la interfaz web responsiva, consumo asíncrono de la API REST mediante HttpClient, navegación y renderizado dinámico de tablas de posiciones y gráficos. |
 | **Base de datos** | PostgreSQL | Almacenamiento relacional de temporadas, pilotos, equipos, eventos y resultados. Proporciona integridad transaccional (ACID), tipos adecuados para fechas y horarios, y compatibilidad con Spring Data JPA e Hibernate. |
 | **Plataforma / Cloud** | Servicio Cloud PaaS (Render / Railway / Vercel) | Alojamiento del backend y despliegue del frontend integrado de manera automática con el repositorio único de GitHub, cumpliendo el requisito de despliegue en la nube. |
@@ -130,15 +130,24 @@ docs/
 	modulos.md
 	referencias/
 backend/
-	.gitkeep
+		build.gradle
+		settings.gradle
+		src/
+			main/
+				java/com/tfi/motorsport/backend/
+					MotorsportAplication.java
+					model/ (entidades JPA)
+				resources/application.properties
 frontend/
 	.gitkeep
 README.md
 ```
 
-El esquema y los datos iniciales están en `database/`. La documentación técnica está en `docs/`. `backend/` y `frontend/` contienen únicamente archivos de seguimiento para mantener las carpetas en Git hasta que comience su implementación.
+El esquema y los datos iniciales están en `database/`. La documentación técnica está en `docs/`. `backend/` contiene el proyecto base con Gradle y los modelos JPA; todavía no incluye controladores, servicios ni repositorios. `frontend/` conserva un archivo de seguimiento hasta que comience su implementación.
 
 ## Estado del proyecto
+
+El backend utiliza Java 21 y Spring Boot 4.1.2. Los modelos representan las tablas del esquema y sus relaciones; Hibernate valida el esquema existente al iniciar la aplicación. La configuración de la base de datos y las dependencias adicionales están pendientes.
 
 ## Historial de entregas
 
