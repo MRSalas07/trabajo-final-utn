@@ -2,15 +2,25 @@ package com.tfi.motorsport.backend.handlers;
 
 
 import com.tfi.motorsport.backend.dtos.error.ErrorDto;
+import com.tfi.motorsport.backend.handlers.exceptions.ResourceNotFoundException;
+import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
-
+/**
+ * Traduce las excepciones de toda la API a respuestas JSON uniformes ({@link ErrorDto}).
+ *
+ * Importante: el orden de resolución de Spring elige el handler MÁS ESPECÍFICO,
+ * por eso el handler genérico de {@code Exception} solo atrapa lo que no se manejó antes.
+ */
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -29,6 +39,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorDto> handleNoEncontrado(ResourceNotFoundException ex) {
+        return responder(HttpStatus.NOT_FOUND, "Recurso no encontrado", List.of(ex.getMessage()));
+    }
+
+    @ExceptionHandler(RuleBusinessException.class)
+    public ResponseEntity<ErrorDto> handleReglaNegocio(RuleBusinessException ex) {
+        return responder(ex.getEstado(), "Operación no permitida", List.of(ex.getMessage()));
+    }
+
     // Maneja errores de ConstraintViolation (en otros contextos)
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorDto> handleConstraintViolation(ConstraintViolationException ex) {
@@ -41,6 +61,10 @@ public class GlobalExceptionHandler {
                 "Error de validación", detalles);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
+    }
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorDto> handleNoResource(NoResourceFoundException ex) {
+        return responder(HttpStatus.NOT_FOUND, "Ruta no encontrada", List.of("/" + ex.getResourcePath()));
     }
 
     // Maneja IllegalArgumentException (por ejemplo en validaciones manuales)
@@ -59,5 +83,9 @@ public class GlobalExceptionHandler {
                 "Error interno del servidor", ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
+    }
+
+    private ResponseEntity<ErrorDto> responder(HttpStatus estado, String error, List<String> detalles) {
+        return ResponseEntity.status(estado).body(ErrorDto.of(estado.value(), error, detalles));
     }
 }

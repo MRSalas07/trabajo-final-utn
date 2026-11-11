@@ -5,6 +5,7 @@ import com.tfi.motorsport.backend.dtos.categoria.CategoriaDto;
 import com.tfi.motorsport.backend.dtos.categoria.CategoriaUpdateDto;
 import com.tfi.motorsport.backend.services.ICategoriaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Consulta de categorías (público) y su administración (solo ADMIN, ver SecurityConfig).
+ * CORS ya no se declara aquí con "*": se configura de forma global para el origen del frontend.
+ */
+@Tag(name = "Categorías")
 @RestController
 @RequestMapping("/api/categorias")
 @CrossOrigin(origins = "*")
