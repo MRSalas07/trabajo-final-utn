@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.dtos.auth;
 
+import com.tfi.motorsport.backend.model.Usuario;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -34,6 +35,16 @@ public final class AuthDto {
             String zonaHoraria,
             List<String> roles
     ) {
+        public static UsuarioDto fromEntity(Usuario usuario, List<String> roles) {
+            return new UsuarioDto(
+                    usuario.getId(),
+                    usuario.getNombre(),
+                    usuario.getApellido(),
+                    usuario.getEmail(),
+                    usuario.getZonaHoraria(),
+                    roles
+            );
+        }
     }
 
     public record PreferenciasRequest(
