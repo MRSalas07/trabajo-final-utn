@@ -54,13 +54,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Registro y login
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Cada espectador ajusta SU transmisión (piloto, velocidad, pausa); el id es un UUID aleatorio
-                        .requestMatchers(HttpMethod.PUT, "/api/telemetria/transmisiones/*").permitAll()
                         // Administración
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole("ADMIN")
                         // Perfil del usuario logueado
                         .requestMatchers("/api/usuarios/**").authenticated()
                         // El resto de las consultas es público
