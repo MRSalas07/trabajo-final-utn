@@ -17,4 +17,6 @@ public interface CategoriaJPARepository extends JpaRepository<Categoria, Long> {
     List<Categoria> findAllByActivoAndEliminadoFalseOrderByIdAsc(Boolean activo);
 
     Optional<Categoria> findBySiglasIgnoreCase(String siglas);
+
+    boolean existsBySiglasIgnoreCase(String siglas);
 }
