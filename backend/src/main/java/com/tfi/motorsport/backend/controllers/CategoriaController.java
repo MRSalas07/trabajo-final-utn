@@ -21,7 +21,6 @@ import java.util.List;
 @Tag(name = "Categorías")
 @RestController
 @RequestMapping("/api/categorias")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class CategoriaController {
 
@@ -58,4 +57,5 @@ public class CategoriaController {
             @Valid @RequestBody CategoriaUpdateDto dto) {
         return ResponseEntity.ok(categoriaService.modificarCategoria(id, dto));
     }
+
 }
