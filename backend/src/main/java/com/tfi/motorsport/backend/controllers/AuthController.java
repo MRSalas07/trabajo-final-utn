@@ -37,7 +37,7 @@ public class AuthController {
     }
     @Operation(summary = "Datos del usuario autenticado")
     @GetMapping("/api/usuarios/me")
-    public UsuarioDto userMe(@AuthenticationPrincipal Jwt jwt) {
+    public UsuarioDto obtenerUserAuth(@AuthenticationPrincipal Jwt jwt) {
 
         return authService.perfil(ZonaSolicitadaController.usuarioActual(jwt));
     }
