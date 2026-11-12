@@ -11,14 +11,13 @@ import java.time.ZoneId;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Pruebas del Controller de ZonaHoraria : decide en qué zona horaria responder.
  */
-class ZonaSolicitadaControllerTest {
+class ZonaHorariaSolicitadaTest {
 
-    private final ZonaSolicitadaController zonaHoraria = new ZonaSolicitadaController();
+    private final ZonaHorariaSolicitada zonaHoraria = new ZonaHorariaSolicitada();
 
     /** Simula un usuario logueado cuyo token trae el claim "zona". */
     private static void loguearConZona(String zona) {
