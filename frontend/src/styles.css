@@ -1,0 +1,114 @@
+/* =====================================================================
+   Motorsport Analytics - estilos globales
+   Tablero oscuro de deportes de motor (ver interfaz-solicitada/boceto.png).
+   Paleta: fondo #1A1D20, paneles #2A2E33, acento rojo #E50914, texto blanco.
+   Grilla de 12 columnas con 16 px de separación y 20 px de relleno.
+   Mobile-first: en el celular los paneles se apilan y el menú se despliega.
+   ===================================================================== */
+:root {
+  --fondo: #1a1d20;
+  --barra: #141619;
+  --barra-2: #202327;
+  --superficie: #2a2e33;
+  --superficie-2: #33383e;
+  --superficie-3: #3c4249;
+  --borde: #3a3f46;
+  --borde-suave: rgb(255 255 255 / 0.06);
+  --texto: #f5f6f7;
+  --texto-suave: #a7adb5;
+  --acento: #e50914;
+  --acento-claro: #ff2a35;
+  --sobre-acento: #ffffff;
+  --ok: #2ecc71;
+  --vivo: #e50914;
+  --cat-f1: #e50914;
+  --cat-wrc: #f5c518;
+  --cat-tc: #2f7cf6;
+  --oro: #f5c518;
+  --plata: #c9d1d9;
+  --bronce: #d08b4a;
+  --radio: 10px;
+  --radio-chico: 6px;
+  --gap: 16px;
+  --relleno: 20px;
+  --ancho: 1440px;
+  --fuente: 'Titillium Web', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --transicion: 160ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 1.15rem;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.saltar {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--acento);
+  color: var(--sobre-acento);
+  padding: 0.6rem 1rem;
+  z-index: 100;
+  font-weight: 700;
+}
+
+.saltar:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
