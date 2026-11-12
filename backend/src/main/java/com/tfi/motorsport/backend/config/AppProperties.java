@@ -2,6 +2,7 @@ package com.tfi.motorsport.backend.config;
 
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
