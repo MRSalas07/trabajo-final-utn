@@ -35,6 +35,17 @@ public class AuthController {
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
+    @Operation(summary = "Datos del usuario autenticado")
+    @GetMapping("/api/usuarios/me")
+    public UsuarioDto userMe(@AuthenticationPrincipal Jwt jwt) {
 
+        return authService.perfil(ZonaSolicitadaController.usuarioActual(jwt));
+    }
+
+    @Operation(summary = "Guardar la zona horaria preferida (devuelve un token actualizado)")
+    @PutMapping("/api/usuarios/me/preferencias")
+    public TokenResponse preferencias(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody PreferenciasRequest request) {
+        return authService.actualizarPreferencias(ZonaSolicitadaController.usuarioActual(jwt), request);
+    }
 
 }

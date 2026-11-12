@@ -57,4 +57,5 @@ public class CategoriaController {
             @Valid @RequestBody CategoriaUpdateDto dto) {
         return ResponseEntity.ok(categoriaService.modificarCategoria(id, dto));
     }
+
 }
