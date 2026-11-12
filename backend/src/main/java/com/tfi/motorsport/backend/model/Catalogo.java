@@ -58,5 +58,5 @@ public class Catalogo {
     /** Roles en equipo_x_piloto. */
     public static final String ROL_PILOTO = "PILOTO";
     public static final String ROL_COPILOTO = "COPILOTO";
-}
+
 }
