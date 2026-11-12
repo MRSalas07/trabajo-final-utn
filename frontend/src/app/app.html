@@ -1,0 +1,80 @@
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+
+    <header class="cabecera">
+      <div class="cab-fila">
+        <button type="button" class="btn-icono btn-menu" (click)="menuAbierto.set(!menuAbierto())"
+                [attr.aria-expanded]="menuAbierto()" aria-controls="menu-movil"
+                [attr.aria-label]="menuAbierto() ? 'Cerrar menú' : 'Abrir menú'">
+        </button>
+
+        <a routerLink="/" class="logo" aria-label="Motorsport Analytics - inicio">
+          <svg class="logo-marca" viewBox="0 0 30 22" aria-hidden="true">
+            <path d="M7 0h5L5 22H0z" fill="#e50914" />
+            <path d="M16 0h5l-7 22H9z" fill="#e50914" />
+            <path d="M25 0h5l-7 22h-5z" fill="#e50914" />
+          </svg>
+          <span class="logo-texto">Motorsport Analytics</span>
+        </a>
+
+        <nav class="cats" aria-label="Categorías">
+          @for (c of categorias; track c.ruta) {
+            <a [routerLink]="c.ruta" routerLinkActive="activo">{{ c.texto }}</a>
+          }
+        </nav>
+
+        <div class="cab-acciones">
+          <a routerLink="/pilotos" class="btn-icono" routerLinkActive="activo" aria-label="Buscar pilotos" title="Buscar pilotos">
+            
+          </a>
+          <a routerLink="/login" class="btn-icono" routerLinkActive="activo" aria-label="Ingresar" title="Ingresar">
+          </a>
+          
+        </div>
+      </div>
+
+      <div class="subnav">
+        <div class="subnav-fila">
+          <nav aria-label="Secciones" class="fila">
+          </nav>
+          <ng-container *ngTemplateOutlet="selectorZona" />
+        </div>
+      </div>
+
+      @if (menuAbierto()) {
+        <div class="menu-movil" id="menu-movil">
+          <div>
+            <h2>Categorías</h2>
+            <nav aria-label="Categorías (móvil)">
+              @for (c of categorias; track c.ruta) {
+                <a [routerLink]="c.ruta" routerLinkActive="activo">{{ c.texto }}</a>
+              }
+            </nav>
+          </div>
+          <div>
+            <h2>Secciones</h2>
+            <nav aria-label="Secciones (móvil)">
+              
+              
+            </nav>
+          </div>
+          <div>
+            <h2>Zona horaria</h2>
+            <ng-container *ngTemplateOutlet="selectorZona" />
+          </div>
+        </div>
+      }
+    </header>
+
+    <ng-template #selectorZona>
+      <label class="zona" title="Zona horaria para mostrar los horarios">
+        
+      </label>
+    </ng-template>
+
+    <main id="contenido" class="contenido">
+      <router-outlet />
+    </main>
+
+    <footer class="pie">
+      TFI · Tecnicatura Universitaria en Programación · UTN · Grupo 190 — Datos: Jolpica-F1, WRC (API no oficial), OpenF1.
+    </footer>
