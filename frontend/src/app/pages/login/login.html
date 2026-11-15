@@ -1,15 +1,32 @@
     <div class="caja tarjeta">
-      <div class="pestanas">
-        <button type="button" [class.activa]="modo() === 'login'" (click)="modo.set('login')">Ingresar</button>
-        <button type="button" [class.activa]="modo() === 'registro'" (click)="modo.set('registro')">Crear cuenta</button>
+      <div class="pestanas" role="tablist">
+        <button type="button" role="tab" [class.activa]="modo() === 'login'" (click)="cambiarModo('login')">Ingresar</button>
+        <button type="button" role="tab" [class.activa]="modo() === 'registro'" (click)="cambiarModo('registro')">Crear cuenta</button>
       </div>
-      <form class="formulario" (ngSubmit)="enviar()">
+      @if (expirada()) { <p class="aviso">Tu sesión expiró. Volvé a ingresar.</p> }
+
+      <form class="formulario" [formGroup]="form" (ngSubmit)="enviar()" novalidate>
         @if (modo() === 'registro') {
-          <label>Nombre <input name="nombre" [(ngModel)]="nombre" /></label>
+          <label>Nombre <input formControlName="nombre" autocomplete="given-name" /></label>
+          @if (modo() === 'registro' && form.controls.nombre.touched && form.controls.nombre.invalid) {
+          <span class="err">El Nombre es obligatorio.</span>
         }
-        <label>Email <input name="email" type="email" [(ngModel)]="email" /></label>
-        <label>Contraseña <input name="password" type="password" [(ngModel)]="password" /></label>
-        @if (error()) { <p class="err">{{ error() }}</p> }
-        <button type="submit" class="btn-primario">{{ modo() === 'login' ? 'Ingresar' : 'Crear cuenta' }}</button>
+          <label>Apellido <input formControlName="apellido" autocomplete="family-name" /></label>
+        }
+        <label>Email <input type="email" formControlName="email" autocomplete="email" /></label>
+        @if (form.controls.email.touched && form.controls.email.invalid) 
+        { <span class="err">Ingresá un email válido.</span> }
+        <label>Contraseña
+          <input type="password" formControlName="password" [attr.autocomplete]="modo() === 'login' ? 'current-password' : 'new-password'" />
+        </label>
+        @if (modo() === 'registro' && form.controls.password.touched && form.controls.password.invalid) {
+          <span class="err">Mínimo 8 caracteres.</span>
+        }
+        @if (modo() === 'registro') {
+          <p class="suave chico">Tu zona horaria ({{ zonaService.zona() }}) se guardará en tu perfil.</p>
+        }
+        @if (error()) { <p class="err" role="alert">{{ error() }}</p> }
+        <button type="submit" class="btn-primario" [disabled]="enviando()">{{ modo() === 'login' ? 'Ingresar' : 'Crear cuenta' }}</button>
       </form>
     </div>
+
