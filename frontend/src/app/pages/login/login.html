@@ -1,0 +1,15 @@
+    <div class="caja tarjeta">
+      <div class="pestanas">
+        <button type="button" [class.activa]="modo() === 'login'" (click)="modo.set('login')">Ingresar</button>
+        <button type="button" [class.activa]="modo() === 'registro'" (click)="modo.set('registro')">Crear cuenta</button>
+      </div>
+      <form class="formulario" (ngSubmit)="enviar()">
+        @if (modo() === 'registro') {
+          <label>Nombre <input name="nombre" [(ngModel)]="nombre" /></label>
+        }
+        <label>Email <input name="email" type="email" [(ngModel)]="email" /></label>
+        <label>Contraseña <input name="password" type="password" [(ngModel)]="password" /></label>
+        @if (error()) { <p class="err">{{ error() }}</p> }
+        <button type="submit" class="btn-primario">{{ modo() === 'login' ? 'Ingresar' : 'Crear cuenta' }}</button>
+      </form>
+    </div>
