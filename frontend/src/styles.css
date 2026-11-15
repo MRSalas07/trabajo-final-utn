@@ -42,7 +42,6 @@
 *::after {
   box-sizing: border-box;
 }
-
 html,
 body {
   margin: 0;
@@ -111,4 +110,337 @@ h3 {
 :focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- cabecera */
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--barra);
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+.cab-fila {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  height: 64px;
+  padding: 0 var(--relleno);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.logo-marca {
+  display: block;
+  width: 30px;
+  height: 22px;
+  flex: none;
+}
+
+.logo-texto {
+  font-size: 1.3rem;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+
+/* pestañas de categoría (F1 / WRC / TC) */
+.cats {
+  display: none;
+  gap: 0.35rem;
+}
+
+.cats a {
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radio-chico);
+  color: var(--texto);
+  white-space: nowrap;
+  transition:
+    background var(--transicion),
+    transform var(--transicion);
+}
+
+.cats a:hover {
+  background: var(--superficie);
+}
+
+.cats a.activo {
+  background: var(--acento);
+  color: var(--sobre-acento);
+}
+
+.cab-acciones {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.btn-icono {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--texto-suave);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--transicion),
+    color var(--transicion);
+}
+
+.btn-icono:hover,
+.btn-icono.activo {
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+.btn-admin {
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-admin:hover {
+  border-color: var(--acento);
+}
+
+.btn-menu {
+  display: inline-grid;
+}
+
+/* barra de secciones (Inicio, Calendario, Estadísticas…) */
+.subnav {
+  display: none;
+  background: var(--barra-2);
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+.subnav-fila {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: 0 var(--relleno);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.subnav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 46px;
+  padding: 0 0.9rem;
+  text-decoration: none;
+  color: var(--texto-suave);
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition:
+    color var(--transicion),
+    border-color var(--transicion);
+}
+
+.subnav a:hover {
+  color: var(--texto);
+}
+
+.subnav a.activo {
+  color: var(--texto);
+  border-bottom-color: var(--acento);
+}
+
+.subnav a.activo app-icono {
+  color: var(--acento);
+}
+
+.zona {
+  margin-left: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--texto-suave);
+}
+
+.zona select {
+  min-height: 34px;
+  max-width: 230px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.85rem;
+  background: transparent;
+  border-color: var(--borde);
+}
+
+/* menú desplegable del celular */
+.menu-movil {
+  border-top: 1px solid var(--borde-suave);
+  background: var(--barra);
+  padding: 0.75rem var(--relleno) 1.25rem;
+  display: grid;
+  gap: 1rem;
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+}
+
+.menu-movil h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--texto-suave);
+  margin: 0 0 0.35rem;
+}
+
+.menu-movil nav {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.menu-movil a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 46px;
+  padding: 0 0.75rem;
+  border-radius: var(--radio-chico);
+  text-decoration: none;
+  font-weight: 600;
+  border-left: 3px solid transparent;
+}
+
+.menu-movil a.activo {
+  background: var(--superficie);
+  border-left-color: var(--acento);
+}
+
+.menu-movil .zona {
+  margin: 0;
+}
+
+.menu-movil .zona select {
+  max-width: none;
+  flex: 1;
+  min-height: 44px;
+}
+
+.contenido {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: var(--relleno);
+}
+
+.pie {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: 1.5rem var(--relleno) 2rem;
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--borde-suave);
+}
+
+@media (min-width: 1000px) {
+  .cats,
+  .subnav {
+    display: flex;
+  }
+
+  .subnav {
+    display: block;
+  }
+
+  .btn-menu,
+  .menu-movil {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .logo-texto {
+    font-size: 1.1rem;
+  }
+
+  .cab-fila {
+    gap: 0.75rem;
+  }
+}
+
+/* ---------------------------------------------------------------- tablero (grilla de 12 columnas) */
+.tablero {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 760px) {
+  .tablero {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .tablero > * {
+    grid-column: span 12;
+  }
+
+  .tablero > .col-3,
+  .tablero > .col-4 {
+    grid-column: span 6;
+  }
+}
+
+@media (min-width: 1200px) {
+  .tablero > .col-3 {
+    grid-column: span 3;
+  }
+
+  .tablero > .col-4 {
+    grid-column: span 4;
+  }
+
+  .tablero > .col-6 {
+    grid-column: span 6;
+  }
+}
+
+/* ---------------------------------------------------------------- movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .tarjeta-evento:hover,
+  a.fila-evento:hover,
+  button:hover,
+  .btn:hover,
+  .btn-chico:hover {
+    transform: none;
+  }
 }
