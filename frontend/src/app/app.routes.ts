@@ -6,6 +6,7 @@ export const routes: Routes = [
   { path: 'categorias', title: 'Categorías', loadComponent: () => import('./pages/categoria/categorias').then((m) => m.Categorias) },
   { path: 'login', title: 'Ingresar', loadComponent: () => import('./pages/login/login').then((m) => m.Login) },
   { path: 'cuenta', title: 'Mi cuenta', canActivate: [authGuard], loadComponent: () => import('./pages/perfil/perfil').then((m) => m.Perfil) },  
+  { path: 'categorias/:siglas', title: 'Categoría', loadComponent: () => import('./pages/categoria/categoria-indivual/categoria-indivual').then((m) => m.CategoriaIndivual) },
   { path: '**', redirectTo: '' },
 
 ];

@@ -21,6 +21,8 @@ export class Categorias {
   
   protected readonly categorias = signal<Categoria[]>([]);
 
+  
+
   constructor() {
     this.serviceSalud.categorias().subscribe({
       next: (categoriasApi) => {

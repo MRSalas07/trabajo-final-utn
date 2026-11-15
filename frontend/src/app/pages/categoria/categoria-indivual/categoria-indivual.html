@@ -1,0 +1,31 @@
+<div class="encabezado">
+      <span class="chip-cat" [attr.data-cat]="siglas()">{{ siglas() }}</span>
+      <h1>{{ siglas() }}</h1>
+      <label class="temporada">Temporada
+        <select [value]="anio()" (change)="anio.set(+$any($event.target).value)">
+          @for (t of temporadas(); track t.id) {
+            <option [value]="t.anio">{{ t.anio }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <app-estado-carga [cargando]="cargando()" [error]="error()" [vacio]="!cargando() && eventos().length === 0"
+                      mensajeVacio="Todavía no hay fechas cargadas." />
+
+    <div class="tabla-scroll">
+      <table>
+        <thead><tr><th>#</th><th>Evento</th><th>Fecha</th><th>Estado</th></tr></thead>
+        <tbody>
+          @for (evento of eventos(); track evento.id) {
+            <tr>
+              <td class="pos">{{ evento.numeroFecha }}</td>
+              <td><a [routerLink]="['/eventos', evento.id]">{{ evento.nombre }}</a><div class="suave chico">{{ evento.circuito }}</div></td>
+              <td>{{ evento.inicio | hora }}</td>
+              <td><span class="badge" [attr.data-estado]="evento.estado">{{ evento.estado | estado }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+

@@ -797,6 +797,80 @@ label {
   opacity: 1;
 }
 
+/* ---------------------------------------------------------------- tablas */
+.tabla-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--radio-chico);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+th {
+  background: var(--superficie-2);
+  color: var(--texto);
+  font-weight: 700;
+  font-size: 0.8rem;
+  position: sticky;
+  top: 0;
+}
+
+tbody tr {
+  transition: background var(--transicion);
+}
+
+tbody tr:hover {
+  background: rgb(255 255 255 / 0.03);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+td.pos {
+  font-weight: 700;
+  width: 2.5rem;
+  color: var(--texto-suave);
+}
+
+tr.podio-1 td.pos {
+  color: var(--oro);
+}
+
+tr.podio-2 td.pos {
+  color: var(--plata);
+}
+
+tr.podio-3 td.pos {
+  color: var(--bronce);
+}
+
+td a {
+  text-decoration: none;
+}
+
+td a:hover {
+  color: var(--acento-claro);
+}
 
 /* ---------------------------------------------------------------- estados de carga */
 .estado {
