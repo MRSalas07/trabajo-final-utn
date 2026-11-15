@@ -16,6 +16,20 @@
           </svg>
           <span class="logo-texto">Motorsport Analytics</span>
         </a>
+
+        <div class="cab-acciones">
+          @if (authService.auth()) {
+            <a routerLink="/cuenta" class="btn-icono" routerLinkActive="activo"
+              [attr.aria-label]="'Mi cuenta: ' + authService.usuario()?.nombre" [title]="authService.usuario()?.email ?? ''">
+              <app-icono nombre="usuario" [tamanio]="24" />
+            </a>
+          } @else {
+            <a routerLink="/login" class="btn-icono" routerLinkActive="activo" aria-label="Ingresar" title="Ingresar">
+              <app-icono nombre="usuario" [tamanio]="24" />
+            </a>
+          }
+        </div>
+
       </div>
 
       <div class="subnav">
@@ -29,19 +43,6 @@
           </nav>
           <ng-container *ngTemplateOutlet="selectorZona" />
         </div>
-      </div>
-
-      <div class="cab-acciones">
-        @if (auth.autenticado()) {
-          <a routerLink="/cuenta" class="btn-icono" routerLinkActive="activo"
-            [attr.aria-label]="'Mi cuenta: ' + authService.usuario()?.nombre" [title]="authService.usuario()?.email ?? ''">
-            <app-icono nombre="usuario" [tamanio]="24" />
-          </a>
-        } @else {
-          <a routerLink="/login" class="btn-icono" routerLinkActive="activo" aria-label="Ingresar" title="Ingresar">
-            <app-icono nombre="usuario" [tamanio]="24" />
-          </a>
-        }
       </div>
 
 

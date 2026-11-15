@@ -26,7 +26,8 @@ export class AuthService {
 
     readonly usuario = computed<Usuario | null>(() => this.sesion()?.usuario ?? null);
 
-    readonly auth = computed (() => this.usuario()?.roles.includes('ADMIN') ?? false );
+    readonly auth = computed (() => this.sesion() !== null);
+    readonly esAdmin = computed (() => this.usuario()?.roles.includes('ADMIN') ?? false );
 
     private readonly zonas = inject(ZonaHorariaService);
 
@@ -36,6 +37,7 @@ export class AuthService {
     
     
     login( email:string, password: string) : Observable<TokenResponse> {
+        //console.log("llega 3")
         return this.http.post<TokenResponse>(`${this.apiUrl}/auth/login`, {
             email, password}
         ).pipe(tap((response)=> this.guardarStorage(response)));

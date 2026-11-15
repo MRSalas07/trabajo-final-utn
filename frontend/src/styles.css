@@ -644,6 +644,160 @@ app-fila-evento {
     opacity: 0.6;
   }
 }
+
+/* botones y formularios */
+button,
+.btn,
+.btn-chico {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--borde);
+  background: var(--superficie-2);
+  color: var(--texto);
+  border-radius: var(--radio-chico);
+  padding: 0.5rem 0.95rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  transition:
+    background var(--transicion),
+    border-color var(--transicion),
+    transform var(--transicion);
+}
+
+.btn-chico {
+  padding: 0.3rem 0.65rem;
+  min-height: 34px;
+  font-size: 0.85rem;
+}
+
+button:hover,
+.btn:hover,
+.btn-chico:hover {
+  background: var(--superficie-3);
+  border-color: var(--superficie-3);
+  transform: translateY(-1px);
+}
+
+button:active,
+.btn:active,
+.btn-chico:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-primario {
+  background: var(--acento);
+  color: var(--sobre-acento);
+  border-color: var(--acento);
+  font-weight: 700;
+}
+
+.btn-primario:hover {
+  background: var(--acento-claro);
+  border-color: var(--acento-claro);
+}
+
+button:disabled,
+button:disabled:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--texto);
+  background: var(--superficie-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+  padding: 0.45rem 0.6rem;
+  min-height: 40px;
+  max-width: 100%;
+  transition: border-color var(--transicion);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--superficie-3);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--texto-suave);
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.formulario {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 420px;
+}
+
+.filtros {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.pestanas {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--borde);
+  margin-bottom: 1rem;
+  scrollbar-width: none;
+}
+
+.pestanas button {
+  border: none;
+  background: none;
+  border-radius: 0;
+  color: var(--texto-suave);
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  min-height: 44px;
+}
+
+.pestanas button:hover {
+  background: none;
+  color: var(--texto);
+  transform: none;
+}
+
+.pestanas button.activa {
+  color: var(--texto);
+  border-bottom-color: var(--acento);
+}
+
+.toggle-cat {
+  opacity: 0.45;
+  min-height: 34px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.toggle-cat.activo {
+  opacity: 1;
+}
+
+
 /* ---------------------------------------------------------------- estados de carga */
 .estado {
   padding: 1.25rem;

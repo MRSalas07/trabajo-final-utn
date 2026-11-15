@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { mensajeError } from '../../core/errores/error';
 import { ZonaHorariaService } from '../../core/services/zona-horaria.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { email } from '@angular/forms/signals';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -37,11 +38,15 @@ export class Login {
 
 
   protected enviar(): void {
+    console.log("llega")
     const userForm = this.form.getRawValue();
+    console.log(this.form.valid)
     if (this.form.invalid || (this.modo() === 'registro' && !userForm.nombre.trim())) {
       this.form.markAllAsTouched();
+      this.error.set(this.modo() === 'registro' && !userForm.nombre.trim() ? 'El nombre es obligatorio.' : 'Revisá los datos ingresados.');
       return;
     }
+    console.log(this.form.value)
     this.enviando.set(true);
     this.error.set(null);
 

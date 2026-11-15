@@ -19,7 +19,7 @@
         <label>Contraseña
           <input type="password" formControlName="password" [attr.autocomplete]="modo() === 'login' ? 'current-password' : 'new-password'" />
         </label>
-        @if (modo() === 'registro' && form.controls.password.touched && form.controls.password.invalid) {
+        @if (form.controls.password.touched && form.controls.password.invalid) {
           <span class="err">Mínimo 8 caracteres.</span>
         }
         @if (modo() === 'registro') {

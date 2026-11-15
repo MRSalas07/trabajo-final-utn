@@ -1,17 +1,17 @@
 <h1>Mi cuenta</h1>
-    @if (auth.usuario(); as u) {
+    @if (authService.usuario(); as u) {
       <section class="tarjeta formulario">
         <p><strong>{{ u.nombre }} {{ u.apellido }}</strong><br /><span class="suave">{{ u.email }}</span></p>
         <p class="suave chico">Roles: {{ u.roles.join(', ') }}</p>
         <label>Zona horaria preferida
           <select [(ngModel)]="zona">
-            @for (z of zonas.zonasDisponibles(); track z) { <option [value]="z">{{ z }}</option> }
+            @for (z of zonaService.zonasDisponibles(); track z) { <option [value]="z">{{ z }}</option> }
           </select>
         </label>
-        <p class="suave chico">Zona detectada en este dispositivo: {{ zonas.zonaNavegador }}</p>
+        <p class="suave chico">Zona detectada en este dispositivo: {{ zonaService.zonaNavegador }}</p>
         @if (mensaje()) { <p class="chico" role="status">{{ mensaje() }}</p> }
         <div class="fila">
-          <button type="button" class="btn-primario" (click)="guardar()">Guardar</button>
+          <button type="button" class="btn-primario" (click)="guardarCambio()">Guardar</button>
           <button type="button" (click)="salir()">Cerrar sesión</button>
         </div>
       </section>
