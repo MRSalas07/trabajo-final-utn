@@ -3,9 +3,12 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Icono } from './shared/icono';
+import {ZonaHorariaService } from './core/services/zona-horaria.service'
+import { NgTemplateOutlet } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icono],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icono, NgTemplateOutlet, FormsModule],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
@@ -15,6 +18,8 @@ export class App {
   protected readonly menuAbierto = signal(false);
 
   protected readonly secciones = [{ ruta: '/', texto: 'Inicio', icono: 'inicio' }];
+
+  protected readonly zonas = inject(ZonaHorariaService)
 
 
   constructor() {

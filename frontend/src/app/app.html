@@ -20,13 +20,14 @@
 
       <div class="subnav">
         <div class="subnav-fila">
-          <nav aria-label="Secciones" class="fila">
+          <nav aria-label="Secciones" class="fila">            
             @for (s of secciones; track s.ruta) {
               <a [routerLink]="s.ruta" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: s.ruta === '/' }">
                 <app-icono [nombre]="s.icono" [tamanio]="18" />{{ s.texto }}
               </a>
-            }
+            }            
           </nav>
+          <ng-container *ngTemplateOutlet="selectorZona" />
         </div>
       </div>
 
@@ -42,9 +43,26 @@
               }
             </nav>
           </div>
+          <div>
+            <h2>Zona horaria</h2>
+            <ng-container *ngTemplateOutlet="selectorZona" />
+          </div>
         </div>
       }
     </header>
+
+    <ng-template #selectorZona>
+      <label class="zona" title="Zona horaria para mostrar los horarios">
+        <app-icono nombre="reloj" [tamanio]="18" />
+        <span class="sr-only">Zona horaria</span>
+        <select [ngModel]="zonas.zona()" (ngModelChange)="zonas.cambiarZona($event)">
+          @for (z of zonas.zonasDisponibles(); track z) {
+            <option [value]="z">{{ z.replaceAll('_', ' ') }}</option>
+          }
+        </select>
+      </label>
+    </ng-template>
+
 
     <main id="contenido" class="contenido">
       <router-outlet />
