@@ -9,8 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-import static com.tfi.motorsport.backend.repositories.ResultadoSesionJPARepository.SELECT_FILA;
-
 @Repository
 public interface ResultadoEtapaJPARepository extends JpaRepository<ResultadoEtapa, Long> {
 
@@ -33,10 +31,10 @@ public interface ResultadoEtapaJPARepository extends JpaRepository<ResultadoEtap
      * (posición final y puntos) y las victorias de tramo (posición 1).
      * Así se evita traer miles de filas de tiempos de tramo.
      */
-    String SELET_FILA = """
+    String SELECT_FILA = """
             select new com.tfi.motorsport.backend.repositories.unificacion.FilaResultado(
                 e.id, e.numeroFecha, coalesce(e.nombreCorto, e.nombre), e.fechaInicio, t.id, t.anio,
-                p.id,p.nombre, p.apellido, p.codigoPiloto, eq.id, eq.nombre, coalesce(eq.nombreCorto, eq.nombre),
+                p.id,p.nombre, p.apellido, p.codigoPiloto, eq.id, eq.nombre,
                 case when et.idExterno = 'GENERAL' then 'GENERAL' else 'ETAPA' end,
                 r.posicion, r.puntos, r.estado)
                 from ResultadoEtapa r join r.etapa et join et.evento e join e.temporada t join r.tripulacion tr 
@@ -46,13 +44,13 @@ public interface ResultadoEtapaJPARepository extends JpaRepository<ResultadoEtap
     String FILTRO_RELEVANTE = " and r.eliminado = false and et.eliminado = false and e.eliminado = false"
             + " and t.eliminado = false and tr.eliminado = false and (et.idExterno = 'GENERAL' or r.posicion = 1)";
 
-    @Query(SELET_FILA + "where t.id = :temporadaId" + FILTRO_RELEVANTE)
+    @Query(SELECT_FILA + "where t.id = :temporadaId" + FILTRO_RELEVANTE)
     List<FilaResultado> filasDeTemporada(Long temporadaId);
 
-    @Query(SELET_FILA + "where t.categoria.id = :categoriaId" + FILTRO_RELEVANTE)
+    @Query(SELECT_FILA + "where t.categoria.id = :categoriaId" + FILTRO_RELEVANTE)
     List<FilaResultado> filasDeCategoria(Long idCategoria);
 
-    @Query(SELET_FILA + "where p.id= :pilotoId" + FILTRO_RELEVANTE)
+    @Query(SELECT_FILA + "where p.id= :pilotoId" + FILTRO_RELEVANTE)
     List<FilaResultado> filasDePiloto(Long idPiloto);
 
     @Query(SELECT_FILA + " where eq.id = :equipoId" + FILTRO_RELEVANTE)

@@ -26,15 +26,15 @@ public record FilaResultado(
         String pilotoCodigo,
         Long equipoId,
         String equipoNombre,
-        String equipoMarca,
+        /** Marca / fabricante (equipo.nombre_corto: "Toyota", "Ford", "McLaren"...). */
+        //String equipoMarca,
         String tipo,
         Integer posicion,
         BigDecimal puntos,
         String estado
 ) {
     public String nombreCompleto() {
-        return ((pilotoNombre != null ? pilotoNombre + " " : "") + 
-                (pilotoApellido != null ? pilotoApellido : "")).trim();
+        return ((pilotoNombre != null ? pilotoNombre + " " : "") + (pilotoApellido != null ? pilotoApellido : "")).trim();
     }
 }
 
