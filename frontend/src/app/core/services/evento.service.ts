@@ -5,7 +5,7 @@ import { ZonaHorariaService } from './zona-horaria.service';
 import { SaludServices } from './salud.service';
 
 
-import { Evento, Temporada } from '../modelos';
+import { EventoDto, Temporada } from '../modelos';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root'})
@@ -19,8 +19,8 @@ export class EventoService {
         return this.http.get<Temporada[]>(`${this.apiUrl}/categorias/${siglas}/temporadas`);
     }
 
-    eventosDeTemporada(siglas: string, anio: number): Observable<Evento[]> {
-    return this.http.get<Evento[]>(`${this.apiUrl}/categorias/${siglas}/temporadas/${anio}/eventos`, {
+    eventosDeTemporada(siglas: string, anio: number): Observable<EventoDto[]> {
+    return this.http.get<EventoDto[]>(`${this.apiUrl}/categorias/${siglas}/temporadas/${anio}/eventos`, {
         params: this.enviarConZona(),
     });
 

@@ -1,0 +1,79 @@
+    <app-estado-carga [cargando]="!evento() && !error()" [error]="error()" />
+    @if (evento(); as evento) {
+        <div class="encabezado">
+            <span class="chip-cat" [attr.data-cat]="evento.categoria.siglas">{{ evento.categoria.siglas }}</span>
+            <h1>{{ evento.nombre }}</h1>
+            <span class="badge" [attr.data-estado]="evento.estado">{{ evento.estado | estado }}</span>
+        </div>
+        <p class="suave">{{ evento.circuito }} · {{ evento.pais }}</p>
+
+        <div class="kpis seccion">
+            <div class="kpi"><div class="valor">{{ evento.inicio | hora }}</div><div class="etiqueta">Tu horario</div></div>
+            <div class="kpi"><div class="valor">{{ evento.inicioHoraSede | horaSede }}</div><div class="etiqueta">Hora en la sede ({{ evento.zonaHorariaSede }})</div></div>
+        </div>
+
+        @if (evento.sesiones.length) {
+            <h2>Sesiones</h2>
+            <table>
+            <tbody>
+                @for (sesion of evento.sesiones; track sesion.id) {
+                <tr>
+                    <td>{{ sesion.nombre }}</td>
+                    <td>{{ sesion.inicio | hora }}</td>
+                    <td>@if (sesion.cantidadResultados > 0) { <button type="button" class="btn-chico" (click)="verSesion(sesion.id)">Resultados</button> }</td>
+                </tr>
+                }
+            </tbody>
+            </table>
+        }
+
+        @if (evento.etapas.length) {
+            <h2>Tramos cronometrados</h2>
+            <table>
+            <tbody>
+                @for (tramo of evento.etapas; track tramo.id) {
+                <tr>
+                    <td>{{ tramo.nombre }}</td>
+                    <td>{{ tramo.distancia }} km</td>
+                    <td>@if (tramo.cantidadResultados > 0) { <button type="button" class="btn-chico" (click)="verEtapa(tramo.id)">Tiempos</button> }</td>
+                </tr>
+                }
+            </tbody>
+            </table>
+        }
+
+        @if (tablaSesion(); as tablaSesion) {
+            <h2>{{ tablaSesion.sesion.nombre }} — resultados</h2>
+            <table>
+            <thead><tr><th>Pos</th><th>Piloto</th><th>Equipo</th><th class="num">Tiempo</th><th class="num">Dif.</th><th>Estado</th></tr></thead>
+            <tbody>
+                @for (resultado of tablaSesion.resultados; track resultado.pilotoId) {
+                <tr>
+                    <td class="pos">{{ resultado.posicion ?? '—' }}</td>
+                    <td>{{ resultado.piloto }}</td>
+                    <td class="suave">{{ resultado.equipo }}</td>
+                    <td class="num">{{ resultado.tiempo | tiempo }}</td>
+                    <td class="num">{{ resultado.diferencia | tiempo: true }}</td>
+                    <td>{{ resultado.estado | estado }}</td>
+                </tr>
+                }
+            </tbody>
+            </table>
+        }
+
+        @if (tablaEtapa(); as tablaEtapa) {
+            <h2>{{ tablaEtapa.etapa.nombre }} — tiempos</h2>
+            <table>
+            <tbody>
+                @for (resultado of tablaEtapa.resultados; track resultado.pilotoId) {
+                <tr>
+                    <td class="pos">{{ resultado.posicion ?? '—' }}</td>
+                    <td>{{ resultado.piloto }} / {{ resultado.copiloto }}</td>
+                    <td class="num">{{ resultado.tiempo | tiempo }}</td>
+                </tr>
+                }
+            </tbody>
+            </table>
+        }
+    }
+
