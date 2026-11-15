@@ -16,17 +16,14 @@
           <span class="logo-texto">Motorsport Analytics</span>
         </a>
 
-        <nav class="cats" aria-label="Categorías">
-          @for (c of categorias; track c.ruta) {
-            <a [routerLink]="c.ruta" routerLinkActive="activo">{{ c.texto }}</a>
-          }
-        </nav>
+        
 
         <div class="cab-acciones">
           <a routerLink="/pilotos" class="btn-icono" routerLinkActive="activo" aria-label="Buscar pilotos" title="Buscar pilotos">
-            
+            <app-icono nombre="buscar" />
           </a>
           <a routerLink="/login" class="btn-icono" routerLinkActive="activo" aria-label="Ingresar" title="Ingresar">
+            <app-icono nombre="usuario" [tamanio]="24" />
           </a>
           
         </div>
@@ -44,11 +41,7 @@
         <div class="menu-movil" id="menu-movil">
           <div>
             <h2>Categorías</h2>
-            <nav aria-label="Categorías (móvil)">
-              @for (c of categorias; track c.ruta) {
-                <a [routerLink]="c.ruta" routerLinkActive="activo">{{ c.texto }}</a>
-              }
-            </nav>
+            
           </div>
           <div>
             <h2>Secciones</h2>
@@ -59,17 +52,13 @@
           </div>
           <div>
             <h2>Zona horaria</h2>
-            <ng-container *ngTemplateOutlet="selectorZona" />
+            
           </div>
         </div>
       }
     </header>
 
-    <ng-template #selectorZona>
-      <label class="zona" title="Zona horaria para mostrar los horarios">
-        
-      </label>
-    </ng-template>
+
 
     <main id="contenido" class="contenido">
       <router-outlet />

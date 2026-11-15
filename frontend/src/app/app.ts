@@ -2,9 +2,10 @@ import { Component, signal ,inject} from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Icono } from './shared/icono';
 
 @Component({
-  imports: [],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icono],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html'
