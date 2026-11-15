@@ -1,0 +1,8 @@
+@if (cargando()) {
+      <div class="estado" role="status"><span class="spinner" aria-hidden="true"></span> Cargando…</div>
+    } @else if (error()) {
+      <div class="estado error" role="alert">⚠ {{ error() }}</div>
+    } @else if (vacio()) {
+      <div class="estado">{{ mensajeVacio() }}</div>
+    }
+
