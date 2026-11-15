@@ -59,4 +59,4 @@ public class Catalogo {
     public static final String ROL_PILOTO = "PILOTO";
     public static final String ROL_COPILOTO = "COPILOTO";
 }
-}
+

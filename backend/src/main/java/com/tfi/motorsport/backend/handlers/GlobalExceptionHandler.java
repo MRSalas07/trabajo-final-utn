@@ -8,8 +8,10 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -41,12 +43,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorDto> handleNoEncontrado(ResourceNotFoundException ex) {
+    public ResponseEntity<ErrorDto> handleResourceNotFound(ResourceNotFoundException ex) {
         return responder(HttpStatus.NOT_FOUND, "Recurso no encontrado", List.of(ex.getMessage()));
     }
 
     @ExceptionHandler(RuleBusinessException.class)
-    public ResponseEntity<ErrorDto> handleReglaNegocio(RuleBusinessException ex) {
+    public ResponseEntity<ErrorDto> handleRuleBusiness(RuleBusinessException ex) {
         return responder(ex.getEstado(), "Operación no permitida", List.of(ex.getMessage()));
     }
 
@@ -78,10 +80,26 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorDto> handleAccesoDenegado(AccessDeniedException ex) {
+    public ResponseEntity<ErrorDto> handleAccesDenied(AccessDeniedException ex) {
         return responder(HttpStatus.FORBIDDEN, "Acceso denegado",
                 List.of("No tiene permisos para realizar esta operación"));
     }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorDto> handleMissingParam(MissingServletRequestParameterException ex) {
+        return responder(HttpStatus.BAD_REQUEST, "Parámetro faltante",
+                List.of("Falta el parámetro obligatorio '" + ex.getParameterName() + "'"));
+    }
+
+    /** JSON mal formado o tipos incorrectos en el cuerpo. */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorDto> handleNotReadable(HttpMessageNotReadableException ex) {
+        return responder(HttpStatus.BAD_REQUEST, "Cuerpo de la petición inválido",
+                List.of("El JSON enviado no es válido o tiene tipos incorrectos"));
+    }
+
+
+
 
     // Maneja cualquier otro error no controlado
     @ExceptionHandler(Exception.class)
@@ -91,6 +109,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
     }
+
 
     private ResponseEntity<ErrorDto> responder(HttpStatus estado, String error, List<String> detalles) {
         return ResponseEntity.status(estado).body(ErrorDto.of(estado.value(), error, detalles));
