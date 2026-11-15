@@ -3,6 +3,7 @@ package com.tfi.motorsport.backend.services;
 
 import com.tfi.motorsport.backend.dtos.evento.EventoDto;
 import com.tfi.motorsport.backend.dtos.evento.TablaEtapaDto;
+import com.tfi.motorsport.backend.dtos.sesion.TablaSesionDto;
 import com.tfi.motorsport.backend.dtos.temporada.TemporadaDto;
 
 import java.time.ZoneId;
@@ -18,5 +19,8 @@ public interface IEventoService {
     EventoDto detalle(Long eventoId, ZoneId zona);
 
     TablaEtapaDto resultadosDeEtapa(Long etapaId, ZoneId zona);
+
+    TablaSesionDto resultadosDeSesion(Long sesionId, ZoneId zona);
+
 
 }
