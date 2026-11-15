@@ -1,6 +1,8 @@
 package com.tfi.motorsport.backend.controllers;
 
 import com.tfi.motorsport.backend.dtos.evento.EventoDto;
+import com.tfi.motorsport.backend.dtos.evento.TablaEtapaDto;
+import com.tfi.motorsport.backend.dtos.sesion.TablaSesionDto;
 import com.tfi.motorsport.backend.dtos.temporada.TemporadaDto;
 import com.tfi.motorsport.backend.services.IEventoService;
 import com.tfi.motorsport.backend.services.ZonaHoraria;
@@ -43,4 +45,17 @@ public class EventoController {
     public EventoDto evento(@PathVariable Long id, @RequestParam(required = false) String zona) {
         return eventoService.detalle(id, zonaHoraria.resolverZonaHoraria(zona));
     }
+
+    @Operation(summary = "Tabla de posiciones de una sesión (práctica, clasificación, sprint, carrera, serie)")
+    @GetMapping("/api/sesiones/{id}/resultados")
+    public TablaSesionDto resultadosSesion(@PathVariable Long id, @RequestParam(required = false) String zona) {
+        return eventoService.resultadosDeSesion(id, zonaHoraria.resolverZonaHoraria(zona));
+    }
+
+    @Operation(summary = "Tabla de tiempos de una etapa de rally o su clasificación general")
+    @GetMapping("/api/etapas/{id}/resultados")
+    public TablaEtapaDto resultadosEtapa(@PathVariable Long id, @RequestParam(required = false) String zona) {
+        return eventoService.resultadosDeEtapa(id, zonaHoraria.resolverZonaHoraria(zona));
+    }
+
 }

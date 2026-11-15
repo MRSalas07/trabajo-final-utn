@@ -5,6 +5,9 @@ import com.tfi.motorsport.backend.dtos.categoria.CategoriaResumenDto;
 import com.tfi.motorsport.backend.dtos.etapa.EtapaDto;
 
 import com.tfi.motorsport.backend.dtos.evento.EventoResumenDto;
+import com.tfi.motorsport.backend.dtos.resultados.ResultadoEtapaDto;
+import com.tfi.motorsport.backend.dtos.resultados.ResultadoSesionDto;
+import com.tfi.motorsport.backend.dtos.sesion.TablaSesionDto;
 import com.tfi.motorsport.backend.model.Catalogo.*;
 import com.tfi.motorsport.backend.dtos.evento.EventoDto;
 import com.tfi.motorsport.backend.dtos.evento.TablaEtapaDto;
@@ -32,11 +35,15 @@ import static com.tfi.motorsport.backend.model.Catalogo.ETAPA_GENERAL;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EventoServiceImpl implements IEventoService {
+
     private final CategoriaJPARepository categoriaRepo;
     private final TemporadaJPARepository temporadaRepo;
     private final EventoJPARepository eventoRepo;
     private final SesionJPARepository sesionRepo;
     private final EtapaJPARepository etapaRepo;
+    private final ResultadoSesionJPARepository resultadoSesionRepo;
+    private final ResultadoEtapaJPARepository resultadoEtapaRepo;
+
 
 
     @Override
@@ -98,7 +105,31 @@ public class EventoServiceImpl implements IEventoService {
 
     @Override
     public TablaEtapaDto resultadosDeEtapa(Long etapaId, ZoneId zona) {
-        throw new UnsupportedOperationException("No implementado aún");
+        Etapa etapa = etapaRepo.buscarConEvento(etapaId)
+                .orElseThrow(() -> new ResourceNotFoundException("la etapa", etapaId));
+        List<ResultadoEtapaDto> filas = resultadoEtapaRepo.tablaDeEtapa(etapaId).stream()
+                .map(r -> new ResultadoEtapaDto(r.getPosicion(), r.getTripulacion().getNumero(),
+                        r.getTripulacion().getPiloto().getId(), nombre(r.getTripulacion().getPiloto()),
+                        r.getTripulacion().getCopiloto().getId(), nombre(r.getTripulacion().getCopiloto()),
+                        r.getTripulacion().getEquipo().getId(), r.getTripulacion().getEquipo().getNombre(),
+                        r.getTiempo(), r.getDiferencia(), r.getPuntos(), r.getEstado(), r.getMotivoAbandono()))
+                .toList();
+        return new TablaEtapaDto(eventoResumen(etapa.getEvento()), etapaDto(etapa, zona, filas.size()), filas);
+    }
+
+
+
+    @Override
+    public TablaSesionDto resultadosDeSesion(Long sesionId, ZoneId zona) {
+        Sesion sesion = sesionRepo.buscarConEvento(sesionId)
+                .orElseThrow(() -> new ResourceNotFoundException("la sesión", sesionId));
+        List<ResultadoSesionDto> filas = resultadoSesionRepo.tablaDeSesion(sesionId).stream()
+                .map(r -> new ResultadoSesionDto(r.getPosicion(), r.getNumero(), r.getPiloto().getId(),
+                        nombre(r.getPiloto()), r.getPiloto().getCodigoPiloto(), r.getEquipo().getId(),
+                        r.getEquipo().getNombre(), r.getPuntos(), r.getTiempo(), r.getDiferencia(), r.getVueltas(),
+                        r.getMejorVuelta(), r.getEstado(), r.getMotivoAbandono()))
+                .toList();
+        return new TablaSesionDto(eventoResumen(sesion.getEvento()), sesionDto(sesion, zona, filas.size()), filas);
     }
 
 
