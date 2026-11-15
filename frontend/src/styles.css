@@ -298,6 +298,16 @@ h3 {
   border-color: var(--borde);
 }
 
+.zona select {
+  color-scheme: dark;   /* hace que el popup nativo use tema oscuro */
+  /* ...lo que ya tenías */
+}
+
+.zona select option {
+  background: var(--barra);   /* o el fondo oscuro que uses */
+  color: var(--texto);        /* usá tu variable de texto claro */
+}
+
 /* menú desplegable del celular */
 .menu-movil {
   border-top: 1px solid var(--borde-suave);
@@ -444,3 +454,224 @@ h3 {
     transform: none;
   }
 }
+/* ---------------------------------------------------------------- componentes base */
+.tarjeta,
+.panel {
+  background: var(--superficie);
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--radio);
+  padding: var(--relleno);
+  min-width: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0 0 0.9rem;
+}
+
+.panel-titulo h2,
+h2.panel-titulo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.panel-titulo a {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.panel-titulo a:hover {
+  color: var(--texto);
+}
+
+.seccion {
+  margin-bottom: 1.75rem;
+}
+
+.seccion-titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.seccion-titulo a {
+  color: var(--texto-suave);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.seccion-titulo a:hover {
+  color: var(--texto);
+}
+
+.grilla {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+}
+
+.grilla > *,
+.grilla-2 > * {
+  /* Sin esto, un texto largo sin cortes ensancha la columna y provoca scroll horizontal en el celular */
+  min-width: 0;
+}
+
+app-tarjeta-evento,
+app-fila-evento {
+  display: block;
+}
+
+.grilla-2 {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .grilla-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.suave {
+  color: var(--texto-suave);
+}
+
+.chico {
+  font-size: 0.82rem;
+}
+
+.fila {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* chips de categoría */
+.chip-cat {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  background: var(--superficie-2);
+  color: #fff;
+}
+
+.chip-cat[data-cat='F1'] {
+  background: var(--cat-f1);
+}
+
+.chip-cat[data-cat='WRC'] {
+  background: var(--cat-wrc);
+  color: #1a1d20;
+}
+
+.chip-cat[data-cat='TC'] {
+  background: var(--cat-tc);
+}
+
+/* texto de la categoría con su color (ej: "Fórmula 1" sobre la tarjeta) */
+.txt-cat {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+}
+
+.txt-cat[data-cat='F1'] {
+  color: #ff4b54;
+}
+
+.txt-cat[data-cat='WRC'] {
+  color: var(--cat-wrc);
+}
+
+.txt-cat[data-cat='TC'] {
+  color: #5b9bff;
+}
+
+/* badges de estado */
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--superficie-2);
+  color: var(--texto-suave);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge[data-estado='EN_CURSO'] {
+  background: var(--vivo);
+  color: #fff;
+  animation: latido 1.6s infinite;
+}
+
+.badge[data-estado='FINALIZADO'] {
+  color: var(--ok);
+}
+
+.badge[data-estado='CANCELADO'],
+.badge[data-estado='ABANDONO'],
+.badge[data-estado='DESCALIFICADO'] {
+  color: #ff6b72;
+}
+
+@keyframes latido {
+  50% {
+    opacity: 0.6;
+  }
+}
+/* ---------------------------------------------------------------- estados de carga */
+.estado {
+  padding: 1.25rem;
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+.estado.error {
+  color: #ffb4b8;
+  background: rgb(229 9 20 / 0.1);
+  border: 1px solid rgb(229 9 20 / 0.35);
+  border-radius: var(--radio-chico);
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--borde);
+  border-top-color: var(--acento);
+  border-radius: 50%;
+  animation: girar 0.8s linear infinite;
+  vertical-align: -2px;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
