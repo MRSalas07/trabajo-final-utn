@@ -6,6 +6,7 @@ import { Icono } from './shared/icono';
 import {ZonaHorariaService } from './core/services/zona-horaria.service'
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   imports: [RouterOutlet, RouterLink, RouterLinkActive, Icono, NgTemplateOutlet, FormsModule],
@@ -20,6 +21,8 @@ export class App {
   protected readonly secciones = [{ ruta: '/', texto: 'Inicio', icono: 'inicio' }];
 
   protected readonly zonas = inject(ZonaHorariaService)
+
+  protected readonly authService = inject(AuthService)
 
 
   constructor() {
