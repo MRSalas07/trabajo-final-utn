@@ -1,0 +1,22 @@
+.cat { 
+    text-decoration: none; 
+    display: grid; 
+    gap: 0.4rem; 
+    border-top: 4px solid var(--borde); 
+}
+.cat[data-cat='F1'] { 
+    border-top-color: var(--cat-f1); 
+}
+.cat[data-cat='WRC'] {
+    border-top-color: var(--cat-wrc); 
+    }
+.cat[data-cat='TC'] { 
+    border-top-color: var(--cat-tc); 
+}
+.cat:hover { 
+    border-color: var(--acento); 
+}
+.cat p, 
+.cat h2 { 
+    margin: 0; 
+}
