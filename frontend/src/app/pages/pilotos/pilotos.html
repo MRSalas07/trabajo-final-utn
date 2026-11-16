@@ -1,0 +1,8 @@
+<h1>Pilotos</h1>
+<label>Buscar <input type="search" [ngModel]="buscadorTexto()" (ngModelChange)="buscadorTexto.set($event)" /></label>
+<app-estado-carga [cargando]="cargando()" [error]="errorMensaje()" />
+<div class="grilla">
+    @for (piloto of resultado()?.contenido ?? []; track piloto.id) {
+        <a class="tarjeta" [routerLink]="['/pilotos', piloto.id]">{{ piloto.nombre }} {{ piloto.apellido }}</a>
+    }
+</div>

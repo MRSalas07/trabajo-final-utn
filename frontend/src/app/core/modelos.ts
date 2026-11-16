@@ -195,3 +195,42 @@ export interface ResultadoReciente {
     equipo: string; 
     piloto: string; 
 }
+
+export interface Piloto {
+    id: number;
+    nombre: string | null;
+    apellido: string;
+    codigo: string | null;
+    numero: number | null;
+    nacionalidad: string | null;
+    pais: string | null;
+    fechaNacimiento: string | null;
+    edad: number | null;
+    fotoUrl: string | null;
+}
+
+
+export interface PerfilPiloto {
+    piloto: Piloto;
+    palmares: Palmares[];
+    trayectoria: Participacion[];
+    ultimosResultados: ResultadoReciente[];
+}
+
+export interface EquipoResumen {
+    id: number;
+    nombre: string;
+    nombreCorto: string | null;
+    nacionalidad: string | null;
+    logoUrl: string | null;
+}
+
+export interface PerfilEquipo {
+    equipo: EquipoResumen;
+    sede: string | null;
+    fechaFundacion: string | null;
+    categorias: string[];
+    plantel: Participacion[];
+    estadisticas: { eventos: number; victorias: number; podios: number; puntos: number };
+    ultimosResultados: ResultadoReciente[];
+}
