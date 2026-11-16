@@ -145,3 +145,53 @@ export interface TablaEtapa {
     ResultadoEtapa[]; }
 
 
+export interface Pagina<T> {            // respuesta paginada genérica del backend
+    contenido: T[]; 
+    pagina: number; 
+    tamanio: number; 
+    totalElementos: number; 
+    totalPaginas: number;
+}
+export interface PilotoResumen { 
+    id: number; 
+    nombre: string | null; 
+    apellido: string; 
+    codigo: string | null; 
+    numero: number | null;
+    nacionalidad: string | null;
+    pais: string | null; 
+    fotoUrl: string | null; 
+    equipoId: number | null; 
+    equipoActual: string | null; 
+}
+export interface Palmares { 
+    categoria: string; 
+    carreras: number; 
+    victorias: number; 
+    podios: number; 
+    poles: number;
+    campeonatos: number; 
+    puntosTotales: number; 
+    abandonos: number; 
+}
+export interface Participacion { 
+    anio: number; categoria: 
+    string; equipoId: number; 
+    equipo: string; 
+    pilotoId: number;
+    piloto: string | null; 
+    numero: number | null; 
+    rol: string; 
+}
+export interface ResultadoReciente { 
+    eventoId: number; 
+    evento: string; 
+    categoria: string; 
+    anio: number; 
+    fecha: string;
+    posicion: number | null; 
+    estado: string | null; 
+    puntos: number | null; 
+    equipo: string; 
+    piloto: string; 
+}
