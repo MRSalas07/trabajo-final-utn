@@ -26,7 +26,8 @@ public class CategoriaServiceImpl implements ICategoriaService {
 
     @Override
     public List<CategoriaDto> obtenerCategorias() {
-        List<Categoria> categorias = categoriaJPARepository.findAll();
+        // Solo las vigentes: findAll() también devolvía las dadas de baja (baja lógica)
+        List<Categoria> categorias = categoriaJPARepository.findAllByEliminadoFalseOrderByIdAsc();
         return categorias.stream()
                 .map(CategoriaDto::fromEntity)
                 .toList();
@@ -59,8 +60,8 @@ public class CategoriaServiceImpl implements ICategoriaService {
         }
         // Si existía dada de baja (baja lógica) con esas siglas, se reactiva en lugar de duplicarla
         categoria.setEliminado(false);
-        categoria.setNombre(dto.nombre());
-        categoria.setSiglas(dto.siglas());
+        categoria.setNombre(dto.nombre().trim());
+        categoria.setSiglas(siglas); // se guardan normalizadas (sin espacios y en mayúsculas)
         categoria.setDescripcion(dto.descripcion());
         categoria.setPaisOrigen(dto.paisOrigen());
         categoria.setLogoUrl(dto.logoUrl());
@@ -69,6 +70,7 @@ public class CategoriaServiceImpl implements ICategoriaService {
     }
 
     @Override
+    @Transactional // la clase es readOnly: sin esto la modificación no se escribe en la base
     public CategoriaDto modificarCategoria(Long id, CategoriaUpdateDto dto) {
         Categoria categoria = buscarCategoria(id);
         String siglas = dto.siglas().trim().toUpperCase();
@@ -77,8 +79,8 @@ public class CategoriaServiceImpl implements ICategoriaService {
                 .ifPresent(otra -> {
                     throw new RuleBusinessException("Las siglas '" + siglas + "' ya están en uso", HttpStatus.CONFLICT);
                 });
-        categoria.setNombre(dto.nombre());
-        categoria.setSiglas(dto.siglas());
+        categoria.setNombre(dto.nombre().trim());
+        categoria.setSiglas(siglas);
         categoria.setDescripcion(dto.descripcion());
         categoria.setPaisOrigen(dto.paisOrigen());
         categoria.setLogoUrl(dto.logoUrl());
