@@ -20,7 +20,7 @@
           @for (evento of eventos(); track evento.id) {
             <tr>
               <td class="pos">{{ evento.numeroFecha }}</td>
-              <td><a [routerLink]="['/eventos', evento.id]">{{ evento.nombre }}</a><div class="suave chico">{{ evento.circuito }}</div></td>
+              <td><a [routerLink]="['/eventos/', evento.id]">{{ evento.nombre }}</a><div class="suave chico">{{ evento.circuito }}</div></td>
               <td>{{ evento.inicio | hora }}</td>
               <td><span class="badge" [attr.data-estado]="evento.estado">{{ evento.estado | estado }}</span></td>
             </tr>

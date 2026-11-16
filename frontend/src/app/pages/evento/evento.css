@@ -1,0 +1,7 @@
+.titulo { flex: 1; min-width: 0; }
+    .titulo h1, .titulo p { margin: 0; }
+    .valor.chica { font-size: 1.05rem; }
+    .dif { color: var(--acento); margin-top: 0.2rem; }
+    tr.sel { background: var(--superficie-2); box-shadow: inset 3px 0 0 var(--acento); }
+    tr.general td { font-weight: 700; }
+    .tramos { max-height: 420px; overflow-y: auto; }

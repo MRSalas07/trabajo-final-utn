@@ -2,78 +2,114 @@
     @if (evento(); as evento) {
         <div class="encabezado">
             <span class="chip-cat" [attr.data-cat]="evento.categoria.siglas">{{ evento.categoria.siglas }}</span>
+            <div class="titulo">
             <h1>{{ evento.nombre }}</h1>
+            <p class="suave chico">
+                <a [routerLink]="['/categorias', evento.categoria.siglas]">{{ evento.categoria.nombre }} {{ evento.anio }}</a> · Fecha {{ evento.numeroFecha }}
+                · {{ evento.circuito }}@if (evento.ciudad && evento.ciudad !== evento.circuito) { , {{ evento.ciudad }} } · {{ evento.pais }}
+            </p>
+            </div>
             <span class="badge" [attr.data-estado]="evento.estado">{{ evento.estado | estado }}</span>
         </div>
-        <p class="suave">{{ evento.circuito }} · {{ evento.pais }}</p>
 
         <div class="kpis seccion">
-            <div class="kpi"><div class="valor">{{ evento.inicio | hora }}</div><div class="etiqueta">Tu horario</div></div>
-            <div class="kpi"><div class="valor">{{ evento.inicioHoraSede | horaSede }}</div><div class="etiqueta">Hora en la sede ({{ evento.zonaHorariaSede }})</div></div>
+            <div class="kpi"><div class="valor chica">{{ evento.inicio | hora: 'dia' }}</div><div class="etiqueta">Inicio (tu hora: {{ evento.inicio | hora: 'hora' }} h)</div></div>
+            <div class="kpi"><div class="valor chica">{{ evento.inicioHoraSede | horaSede }}</div><div class="etiqueta">Hora en la sede ({{ evento.zonaHorariaSede }})</div>
+            @if (evento.diferenciaSedeTexto) { <div class="etiqueta dif">🕒 {{ evento.diferenciaSedeTexto }}</div> }</div>
+            <div class="kpi"><a class="btn btn-primario" [href]="eventoService.urlIcsEvento(evento.id)" download>📅 Agregar al calendario</a></div>
         </div>
 
         @if (evento.sesiones.length) {
             <h2>Sesiones</h2>
+            <div class="tabla-scroll seccion">
             <table>
-            <tbody>
+                <thead><tr><th>Sesión</th><th>Tu horario</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
                 @for (sesion of evento.sesiones; track sesion.id) {
-                <tr>
+                    <tr [class.sel]="seleccion()?.tipo === 'sesion' && seleccion()?.id === sesion.id">
                     <td>{{ sesion.nombre }}</td>
-                    <td>{{ sesion.inicio | hora }}</td>
+                    <td>{{ sesion.inicio | hora: 'corta' }}</td>
+                    <td><span class="badge" [attr.data-estado]="sesion.estado">{{ sesion.estado | estado }}</span></td>
                     <td>@if (sesion.cantidadResultados > 0) { <button type="button" class="btn-chico" (click)="verSesion(sesion.id)">Resultados</button> }</td>
-                </tr>
+                    </tr>
                 }
-            </tbody>
+                </tbody>
             </table>
+            </div>
         }
 
         @if (evento.etapas.length) {
             <h2>Tramos cronometrados</h2>
+            <div class="tabla-scroll seccion tramos">
             <table>
-            <tbody>
-                @for (tramo of evento.etapas; track tramo.id) {
-                <tr>
-                    <td>{{ tramo.nombre }}</td>
-                    <td>{{ tramo.distancia }} km</td>
-                    <td>@if (tramo.cantidadResultados > 0) { <button type="button" class="btn-chico" (click)="verEtapa(tramo.id)">Tiempos</button> }</td>
-                </tr>
+                <thead><tr><th>Tramo</th><th>Día</th><th class="num">Km</th><th>Largada</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
+                @for (etapa of evento.etapas; track etapa.id) {
+                    <tr [class.general]="etapa.clasificacionGeneral" [class.sel]="seleccion()?.tipo === 'etapa' && seleccion()?.id === etapa.id">
+                    <td>{{ etapa.nombre }}</td>
+                    <td>{{ etapa.dia ?? '' }}</td>
+                    <td class="num">{{ etapa.distancia ?? '' }}</td>
+                    <td>{{ etapa.clasificacionGeneral ? '' : (etapa.inicio | hora: 'corta') }}</td>
+                    <td><span class="badge" [attr.data-estado]="etapa.estado">{{ etapa.estado | estado }}</span></td>
+                    <td>@if (etapa.cantidadResultados > 0) { <button type="button" class="btn-chico" (click)="verEtapa(etapa.id)">Tiempos</button> }</td>
+                    </tr>
                 }
-            </tbody>
+                </tbody>
             </table>
+            </div>
         }
 
-        @if (tablaSesion(); as tablaSesion) {
+        <section id="resultados" class="seccion">
+            <app-estado-carga [cargando]="cargandoTabla()" [error]="errorTabla()" />
+            @if (tablaSesion(); as tablaSesion) {
             <h2>{{ tablaSesion.sesion.nombre }} — resultados</h2>
-            <table>
-            <thead><tr><th>Pos</th><th>Piloto</th><th>Equipo</th><th class="num">Tiempo</th><th class="num">Dif.</th><th>Estado</th></tr></thead>
-            <tbody>
-                @for (resultado of tablaSesion.resultados; track resultado.pilotoId) {
-                <tr>
-                    <td class="pos">{{ resultado.posicion ?? '—' }}</td>
-                    <td>{{ resultado.piloto }}</td>
-                    <td class="suave">{{ resultado.equipo }}</td>
-                    <td class="num">{{ resultado.tiempo | tiempo }}</td>
-                    <td class="num">{{ resultado.diferencia | tiempo: true }}</td>
-                    <td>{{ resultado.estado | estado }}</td>
-                </tr>
-                }
-            </tbody>
-            </table>
-        }
-
-        @if (tablaEtapa(); as tablaEtapa) {
+            <div class="tabla-scroll">
+                <table>
+                <thead>
+                    <tr><th>Pos</th><th>#</th><th>Piloto</th><th>Equipo</th>
+                    <th class="num">{{ tablaSesion.sesion.tipo === 'CLASIFICACION' ? 'Mejor vuelta' : 'Tiempo' }}</th><th class="num">Dif.</th>
+                    @if (conPuntos()) { <th class="num">Pts</th> }
+                    <th>Estado</th></tr>
+                </thead>
+                <tbody>
+                    @for (resultado of tablaSesion.resultados; track resultado.pilotoId) {
+                    <tr [class]="'podio-' + resultado.posicion">
+                        <td class="pos">{{ resultado.posicion ?? '—' }}</td>
+                        <td class="suave">{{ resultado.numero }}</td>
+                        <td><a [routerLink]="['/pilotos', resultado.pilotoId]">{{ resultado.piloto }}</a></td>
+                        <td class="suave">{{ resultado.equipo }}</td>
+                        <td class="num">{{ resultado.tiempo | tiempo }}</td>
+                        <td class="num">{{ resultado.diferencia | tiempo: true }}</td>
+                        @if (conPuntos()) { <td class="num">{{ resultado.puntos || '' }}</td> }
+                        <td>@if (resultado.estado !== 'FINALIZADO') { <span class="badge" [attr.data-estado]="resultado.estado" [title]="resultado.motivoAbandono ?? ''">{{ resultado.estado | estado }}</span> }</td>
+                    </tr>
+                    }
+                </tbody>
+                </table>
+            </div>
+            }
+            @if (tablaEtapa(); as tablaEtapa) {
             <h2>{{ tablaEtapa.etapa.nombre }} — tiempos</h2>
-            <table>
-            <tbody>
-                @for (resultado of tablaEtapa.resultados; track resultado.pilotoId) {
-                <tr>
-                    <td class="pos">{{ resultado.posicion ?? '—' }}</td>
-                    <td>{{ resultado.piloto }} / {{ resultado.copiloto }}</td>
-                    <td class="num">{{ resultado.tiempo | tiempo }}</td>
-                </tr>
-                }
-            </tbody>
-            </table>
-        }
+            <div class="tabla-scroll">
+                <table>
+                <thead><tr><th>Pos</th><th>#</th><th>Piloto / Copiloto</th><th>Equipo</th><th class="num">Tiempo</th><th class="num">Dif.</th>
+                    @if (tablaEtapa.etapa.clasificacionGeneral) { <th class="num">Pts</th> }<th>Estado</th></tr></thead>
+                <tbody>
+                    @for (resultado of tablaEtapa.resultados; track resultado.pilotoId + '-' + resultado.copilotoId) {
+                    <tr [class]="'podio-' + resultado.posicion">
+                        <td class="pos">{{ resultado.posicion ?? '—' }}</td>
+                        <td class="suave">{{ resultado.numero }}</td>
+                        <td><a [routerLink]="['/pilotos', resultado.pilotoId]">{{ resultado.piloto }}</a><div class="suave chico">{{ resultado.copiloto }}</div></td>
+                        <td class="suave">{{ resultado.equipo }}</td>
+                        <td class="num">{{ resultado.tiempo | tiempo }}</td>
+                        <td class="num">{{ resultado.diferencia | tiempo: true }}</td>
+                        @if (tablaEtapa.etapa.clasificacionGeneral) { <td class="num">{{ resultado.puntos || '' }}</td> }
+                        <td>@if (resultado.estado !== 'FINALIZADO') { <span class="badge" [attr.data-estado]="resultado.estado" [title]="resultado.motivoAbandono ?? ''">{{ resultado.estado | estado }}</span> }</td>
+                    </tr>
+                    }
+                </tbody>
+                </table>
+            </div>
+            }
+        </section>
     }
-

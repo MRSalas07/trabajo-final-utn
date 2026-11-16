@@ -86,6 +86,9 @@ export interface EventoDto {
     inicio: Horario | null; 
     fin: Horario | null; 
     inicioHoraSede: string | null;
+    /** Diferencia sede - usuario en minutos (positiva = la sede va adelantada). */
+    diferenciaSedeMinutos: number | null;
+    diferenciaSedeTexto: string | null;
     estado: EstadoEvento; 
     sesiones: Sesion[]; 
     etapas: Etapa[];

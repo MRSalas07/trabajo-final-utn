@@ -1,7 +1,7 @@
 import { Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { EstadoCarga } from '../../../shared/estado-carga/estado-carga';
-import {Categoria, Evento, Temporada } from '../../../core/modelos';
+import {Categoria, EventoDto, Temporada } from '../../../core/modelos';
 import { SaludServices } from '../../../core/services/salud.service';
 import {  mensajeError } from '../../../core/errores/error';
 import { EstadoPipe, HoraPipe } from '../../../shared/pipe/formato';
@@ -33,7 +33,7 @@ export class CategoriaIndivual {
 
   protected readonly temporadas = signal<Temporada[]>([]);
   protected readonly anio = signal<number>(new Date().getFullYear());
-  protected readonly eventos = signal<Evento[]>([]);
+  protected readonly eventos = signal<EventoDto[]>([]);
 
 
   
