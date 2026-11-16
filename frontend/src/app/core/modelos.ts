@@ -71,7 +71,7 @@ export interface Etapa {
     clasificacionGeneral: boolean;
 }
 
-export interface Evento {
+export interface EventoDto {
     id: number; 
     categoria: CategoriaResumen; 
     temporadaId: number; 
@@ -86,8 +86,62 @@ export interface Evento {
     inicio: Horario | null; 
     fin: Horario | null; 
     inicioHoraSede: string | null;
+    /** Diferencia sede - usuario en minutos (positiva = la sede va adelantada). */
+    diferenciaSedeMinutos: number | null;
+    diferenciaSedeTexto: string | null;
     estado: EstadoEvento; 
     sesiones: Sesion[]; 
     etapas: Etapa[];
 }
+
+export interface EventoResumen { 
+    id: number; 
+    nombre: string; 
+    anio: number; 
+    categoria: CategoriaResumen; 
+}
+
+export interface ResultadoSesion {
+    posicion: number | null; 
+    numero: number | null; 
+    pilotoId: number; 
+    piloto: string; 
+    codigo: string | null;
+    equipoId: number; 
+    equipo: string; 
+    puntos: number | null; 
+    tiempo: number | null; 
+    diferencia: number | null;
+    vueltas: number | null; 
+    mejorVuelta: number | null; 
+    estado: string; 
+    motivoAbandono: string | null;
+}
+
+export interface TablaSesion { 
+    evento: EventoResumen; 
+    sesion: Sesion; 
+    resultados: ResultadoSesion[]; 
+}
+
+export interface ResultadoEtapa {
+    posicion: number | null;
+     numero: number | null; 
+     pilotoId: number; 
+     piloto: string;
+    copilotoId: number; 
+    copiloto: string; 
+    equipoId: number; 
+    equipo: string;
+    tiempo: number | null; 
+    diferencia: number | null; 
+    puntos: number | null; 
+    estado: string; 
+    motivoAbandono: string | null;
+}
+export interface TablaEtapa { 
+    evento: EventoResumen; 
+    etapa: Etapa; resultados: 
+    ResultadoEtapa[]; }
+
 

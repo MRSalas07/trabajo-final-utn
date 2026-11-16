@@ -17,6 +17,13 @@
           <span class="logo-texto">Motorsport Analytics</span>
         </a>
 
+        <nav class="cats" aria-label="Categorías">
+          @for (categoria of categorias; track categoria.ruta) {
+            <a [routerLink]="categoria.ruta" routerLinkActive="activo">{{ categoria.texto }}</a>
+          }
+        </nav>
+
+
         <div class="cab-acciones">
           @if (authService.auth()) {
             <a routerLink="/cuenta" class="btn-icono" routerLinkActive="activo"

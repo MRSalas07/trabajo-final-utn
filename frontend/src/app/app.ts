@@ -24,6 +24,13 @@ export class App {
 
   protected readonly authService = inject(AuthService)
 
+  protected readonly categorias = [
+  { ruta: '/categorias/F1', texto: 'Fórmula 1' },
+  { ruta: '/categorias/WRC', texto: 'WRC (Rally)' },
+  { ruta: '/categorias/TC', texto: 'TC (Turismo Carretera)' },
+];
+
+
 
   constructor() {
     // Al navegar, el menú del celular se cierra solo
