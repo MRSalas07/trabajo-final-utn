@@ -137,7 +137,7 @@ public class EventoServiceImpl implements IEventoService {
                                 Map<Long, Long> resultadosPorSesion, Map<Long, Long> resultadosPorEtapa) {
         Temporada t = e.getTemporada();
         Categoria c = t.getCategoria();
-        Integer diferencia = diferenciaMinutos(e.getFechaInicio(), e.getZonaHoraria(), zona);
+        Integer diferencia = ZonaHoraria.diferenciaMinutos(e.getFechaInicio(), e.getZonaHoraria(), zona);
         return new EventoDto(
                 e.getId(),
                 new CategoriaResumenDto(c.getId(), c.getSiglas(), c.getNombre()),
@@ -154,7 +154,7 @@ public class EventoServiceImpl implements IEventoService {
                 ZonaHoraria.horario(e.getFechaFin(), zona),
                 ZonaHoraria.horaSede(e.getFechaInicio(), e.getZonaHoraria()),
                 diferencia,
-                textoDiferencia(diferencia),
+                ZonaHoraria.textoDiferencia(diferencia),
                 estadoEfectivo(e.getEstado(), e.getFechaInicio(), e.getFechaFin()),
                 sesiones.stream().map(s -> sesionDto(s, zona, resultadosPorSesion.getOrDefault(s.getId(), 0L))).toList(),
                 etapas.stream().map(et -> etapaDto(et, zona, resultadosPorEtapa.getOrDefault(et.getId(), 0L))).toList());
@@ -215,41 +215,5 @@ public class EventoServiceImpl implements IEventoService {
 
     static String nombre(Piloto p) {
         return ((p.getNombre() != null ? p.getNombre() + " " : "") + p.getApellido()).trim();
-    }
-
-    /**
-     * Diferencia horaria sede - usuario en minutos (positiva = la sede va adelantada).
-     * Se calcula en la fecha del evento: el horario de verano cambia la diferencia según la época del año.
-     */
-    private static Integer diferenciaMinutos(Instant instante, String zonaSede, ZoneId zonaUsuario) {
-        if (instante == null) {
-            return null;
-        }
-        ZoneId sede = ZonaHoraria.esValida(zonaSede) ? ZoneId.of(zonaSede) : ZoneId.of("UTC");
-        int segundos = sede.getRules().getOffset(instante).getTotalSeconds()
-                - zonaUsuario.getRules().getOffset(instante).getTotalSeconds();
-        return segundos / 60;
-    }
-
-    /** 840 -> "La sede está 14 h adelantada respecto de tu hora"; -210 -> "... 3 h 30 min atrasada ...". */
-    private static String textoDiferencia(Integer minutos) {
-        if (minutos == null) {
-            return null;
-        }
-        if (minutos == 0) {
-            return "La sede tiene la misma hora que vos";
-        }
-        int total = Math.abs(minutos);
-        int horas = total / 60;
-        int resto = total % 60;
-        String cantidad;
-        if (horas > 0 && resto > 0) {
-            cantidad = horas + " h ";
-        } else if (horas > 0) {
-            cantidad = horas + " h";
-        } else {
-            cantidad = resto + " min";
-        }
-        return "La sede está " + cantidad + (minutos > 0 ? " adelantada" : " atrasada") + " respecto de tu hora";
     }
 }

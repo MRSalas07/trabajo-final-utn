@@ -22,7 +22,8 @@ export class AuthService {
 
     private readonly apiUrl = environment.apiUrl;
 
-    private readonly sesion = signal<TokenResponse | null>(null);
+    // Al cargar la app se recupera la sesión guardada (si el token no venció)
+    private readonly sesion = signal<TokenResponse | null>(this.restaurar());
 
     readonly usuario = computed<Usuario | null>(() => this.sesion()?.usuario ?? null);
 
@@ -37,7 +38,6 @@ export class AuthService {
     
     
     login( email:string, password: string) : Observable<TokenResponse> {
-        //console.log("llega 3")
         return this.http.post<TokenResponse>(`${this.apiUrl}/auth/login`, {
             email, password}
         ).pipe(tap((response)=> this.guardarStorage(response)));
@@ -50,6 +50,11 @@ export class AuthService {
 
     cerrarSesion() : void {
         this.sesion.set(null)
+        try {
+            localStorage.removeItem(CLAVE_SESION);
+        } catch {
+            /* sin almacenamiento: no hay nada que borrar */
+        }
     }
     guardarZona(zonaHoraria: string) {
         return this.http
