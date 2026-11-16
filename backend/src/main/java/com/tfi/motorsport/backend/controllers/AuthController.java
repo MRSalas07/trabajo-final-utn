@@ -1,9 +1,7 @@
 package com.tfi.motorsport.backend.controllers;
 
-import com.tfi.motorsport.backend.dtos.auth.AuthDto;
 import com.tfi.motorsport.backend.dtos.auth.RegisterDto;
 import com.tfi.motorsport.backend.services.IAuthService;
-import com.tfi.motorsport.backend.services.ZonaHoraria;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,7 +12,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import com.tfi.motorsport.backend.dtos.auth.AuthDto.*;
-import com.tfi.motorsport.backend.dtos.auth.RegisterDto;
 
 /** Registro, login y preferencias del usuario. */
 @Tag(name = "Usuarios")
@@ -39,13 +36,13 @@ public class AuthController {
     @GetMapping("/api/usuarios/me")
     public UsuarioDto obtenerUserAuth(@AuthenticationPrincipal Jwt jwt) {
 
-        return authService.perfil(ZonaSolicitadaController.usuarioActual(jwt));
+        return authService.perfil(ZonaHorariaSolicitada.usuarioActual(jwt));
     }
 
     @Operation(summary = "Guardar la zona horaria preferida (devuelve un token actualizado)")
     @PutMapping("/api/usuarios/me/preferencias")
     public TokenResponse preferencias(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody PreferenciasRequest request) {
-        return authService.actualizarPreferencias(ZonaSolicitadaController.usuarioActual(jwt), request);
+        return authService.actualizarPreferencias(ZonaHorariaSolicitada.usuarioActual(jwt), request);
     }
 
 }

@@ -1,0 +1,16 @@
+<h1>Categorías</h1>
+<app-estado-carga
+  [cargando]="cargando()"
+  [error]="error()" />
+<div class="grilla">
+    @for (categoria of categorias(); track categoria.id) {
+        <a class="tarjeta cat" [routerLink]="['/categoria', categoria.id]" routerLinkActive="activo"
+        [attr.data-cat]="categoria.siglas">
+            <span class="chip-cat" [attr.data-cat]="categoria.siglas">{{ categoria.siglas }}</span>
+            <h2>{{ categoria.nombre }}</h2>
+            <p class="suave chico">{{ categoria.descripcion }}</p>
+            <p class="chico">{{ categoria.paisOrigen }}</p>
+        </a>
+    }
+    
+</div>

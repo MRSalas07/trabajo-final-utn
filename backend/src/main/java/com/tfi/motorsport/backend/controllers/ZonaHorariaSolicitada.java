@@ -15,7 +15,7 @@ import java.time.ZoneId;
  *  3) UTC.
  */
 @Component
-public class ZonaSolicitadaController {
+public class ZonaHorariaSolicitada {
     public ZoneId resolverZonaHoraria(String zonaParametro) {
         if (zonaParametro != null && !zonaParametro.isBlank()) {
             return ZonaHoraria.resolverZonaHoraria(zonaParametro);

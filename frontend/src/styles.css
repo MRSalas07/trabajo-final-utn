@@ -1,0 +1,905 @@
+/* =====================================================================
+   Motorsport Analytics - estilos globales
+   Tablero oscuro de deportes de motor (ver interfaz-solicitada/boceto.png).
+   Paleta: fondo #1A1D20, paneles #2A2E33, acento rojo #E50914, texto blanco.
+   Grilla de 12 columnas con 16 px de separación y 20 px de relleno.
+   Mobile-first: en el celular los paneles se apilan y el menú se despliega.
+   ===================================================================== */
+:root {
+  --fondo: #1a1d20;
+  --barra: #141619;
+  --barra-2: #202327;
+  --superficie: #2a2e33;
+  --superficie-2: #33383e;
+  --superficie-3: #3c4249;
+  --borde: #3a3f46;
+  --borde-suave: rgb(255 255 255 / 0.06);
+  --texto: #f5f6f7;
+  --texto-suave: #a7adb5;
+  --acento: #e50914;
+  --acento-claro: #ff2a35;
+  --sobre-acento: #ffffff;
+  --ok: #2ecc71;
+  --vivo: #e50914;
+  --cat-f1: #e50914;
+  --cat-wrc: #f5c518;
+  --cat-tc: #2f7cf6;
+  --oro: #f5c518;
+  --plata: #c9d1d9;
+  --bronce: #d08b4a;
+  --radio: 10px;
+  --radio-chico: 6px;
+  --gap: 16px;
+  --relleno: 20px;
+  --ancho: 1440px;
+  --fuente: 'Titillium Web', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --transicion: 160ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 1.15rem;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.saltar {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--acento);
+  color: var(--sobre-acento);
+  padding: 0.6rem 1rem;
+  z-index: 100;
+  font-weight: 700;
+}
+
+.saltar:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- cabecera */
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--barra);
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+.cab-fila {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  height: 64px;
+  padding: 0 var(--relleno);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.logo-marca {
+  display: block;
+  width: 30px;
+  height: 22px;
+  flex: none;
+}
+
+.logo-texto {
+  font-size: 1.3rem;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+
+/* pestañas de categoría (F1 / WRC / TC) */
+.cats {
+  display: none;
+  gap: 0.35rem;
+}
+
+.cats a {
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radio-chico);
+  color: var(--texto);
+  white-space: nowrap;
+  transition:
+    background var(--transicion),
+    transform var(--transicion);
+}
+
+.cats a:hover {
+  background: var(--superficie);
+}
+
+.cats a.activo {
+  background: var(--acento);
+  color: var(--sobre-acento);
+}
+
+.cab-acciones {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.btn-icono {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--texto-suave);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--transicion),
+    color var(--transicion);
+}
+
+.btn-icono:hover,
+.btn-icono.activo {
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+.btn-admin {
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-admin:hover {
+  border-color: var(--acento);
+}
+
+.btn-menu {
+  display: inline-grid;
+}
+
+/* barra de secciones (Inicio, Calendario, Estadísticas…) */
+.subnav {
+  display: none;
+  background: var(--barra-2);
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+.subnav-fila {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: 0 var(--relleno);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.subnav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 46px;
+  padding: 0 0.9rem;
+  text-decoration: none;
+  color: var(--texto-suave);
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition:
+    color var(--transicion),
+    border-color var(--transicion);
+}
+
+.subnav a:hover {
+  color: var(--texto);
+}
+
+.subnav a.activo {
+  color: var(--texto);
+  border-bottom-color: var(--acento);
+}
+
+.subnav a.activo app-icono {
+  color: var(--acento);
+}
+
+.zona {
+  margin-left: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--texto-suave);
+}
+
+.zona select {
+  min-height: 34px;
+  max-width: 230px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.85rem;
+  background: transparent;
+  border-color: var(--borde);
+}
+
+.zona select {
+  color-scheme: dark;   /* hace que el popup nativo use tema oscuro */
+  /* ...lo que ya tenías */
+}
+
+.zona select option {
+  background: var(--barra);   /* o el fondo oscuro que uses */
+  color: var(--texto);        /* usá tu variable de texto claro */
+}
+
+/* menú desplegable del celular */
+.menu-movil {
+  border-top: 1px solid var(--borde-suave);
+  background: var(--barra);
+  padding: 0.75rem var(--relleno) 1.25rem;
+  display: grid;
+  gap: 1rem;
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+}
+
+.menu-movil h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--texto-suave);
+  margin: 0 0 0.35rem;
+}
+
+.menu-movil nav {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.menu-movil a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 46px;
+  padding: 0 0.75rem;
+  border-radius: var(--radio-chico);
+  text-decoration: none;
+  font-weight: 600;
+  border-left: 3px solid transparent;
+}
+
+.menu-movil a.activo {
+  background: var(--superficie);
+  border-left-color: var(--acento);
+}
+
+.menu-movil .zona {
+  margin: 0;
+}
+
+.menu-movil .zona select {
+  max-width: none;
+  flex: 1;
+  min-height: 44px;
+}
+
+.contenido {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: var(--relleno);
+}
+
+.pie {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: 1.5rem var(--relleno) 2rem;
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--borde-suave);
+}
+
+@media (min-width: 1000px) {
+  .cats,
+  .subnav {
+    display: flex;
+  }
+
+  .subnav {
+    display: block;
+  }
+
+  .btn-menu,
+  .menu-movil {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .logo-texto {
+    font-size: 1.1rem;
+  }
+
+  .cab-fila {
+    gap: 0.75rem;
+  }
+}
+
+/* ---------------------------------------------------------------- tablero (grilla de 12 columnas) */
+.tablero {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 760px) {
+  .tablero {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .tablero > * {
+    grid-column: span 12;
+  }
+
+  .tablero > .col-3,
+  .tablero > .col-4 {
+    grid-column: span 6;
+  }
+}
+
+@media (min-width: 1200px) {
+  .tablero > .col-3 {
+    grid-column: span 3;
+  }
+
+  .tablero > .col-4 {
+    grid-column: span 4;
+  }
+
+  .tablero > .col-6 {
+    grid-column: span 6;
+  }
+}
+
+/* ---------------------------------------------------------------- movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .tarjeta-evento:hover,
+  a.fila-evento:hover,
+  button:hover,
+  .btn:hover,
+  .btn-chico:hover {
+    transform: none;
+  }
+}
+/* ---------------------------------------------------------------- componentes base */
+.tarjeta,
+.panel {
+  background: var(--superficie);
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--radio);
+  padding: var(--relleno);
+  min-width: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0 0 0.9rem;
+}
+
+.panel-titulo h2,
+h2.panel-titulo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.panel-titulo a {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.panel-titulo a:hover {
+  color: var(--texto);
+}
+
+.seccion {
+  margin-bottom: 1.75rem;
+}
+
+.seccion-titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.seccion-titulo a {
+  color: var(--texto-suave);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.seccion-titulo a:hover {
+  color: var(--texto);
+}
+
+.grilla {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+}
+
+.grilla > *,
+.grilla-2 > * {
+  /* Sin esto, un texto largo sin cortes ensancha la columna y provoca scroll horizontal en el celular */
+  min-width: 0;
+}
+
+app-tarjeta-evento,
+app-fila-evento {
+  display: block;
+}
+
+.grilla-2 {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .grilla-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.suave {
+  color: var(--texto-suave);
+}
+
+.chico {
+  font-size: 0.82rem;
+}
+
+.fila {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* chips de categoría */
+.chip-cat {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  background: var(--superficie-2);
+  color: #fff;
+}
+
+.chip-cat[data-cat='F1'] {
+  background: var(--cat-f1);
+}
+
+.chip-cat[data-cat='WRC'] {
+  background: var(--cat-wrc);
+  color: #1a1d20;
+}
+
+.chip-cat[data-cat='TC'] {
+  background: var(--cat-tc);
+}
+
+/* texto de la categoría con su color (ej: "Fórmula 1" sobre la tarjeta) */
+.txt-cat {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+}
+
+.txt-cat[data-cat='F1'] {
+  color: #ff4b54;
+}
+
+.txt-cat[data-cat='WRC'] {
+  color: var(--cat-wrc);
+}
+
+.txt-cat[data-cat='TC'] {
+  color: #5b9bff;
+}
+
+/* badges de estado */
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--superficie-2);
+  color: var(--texto-suave);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge[data-estado='EN_CURSO'] {
+  background: var(--vivo);
+  color: #fff;
+  animation: latido 1.6s infinite;
+}
+
+.badge[data-estado='FINALIZADO'] {
+  color: var(--ok);
+}
+
+.badge[data-estado='CANCELADO'],
+.badge[data-estado='ABANDONO'],
+.badge[data-estado='DESCALIFICADO'] {
+  color: #ff6b72;
+}
+
+@keyframes latido {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* botones y formularios */
+button,
+.btn,
+.btn-chico {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--borde);
+  background: var(--superficie-2);
+  color: var(--texto);
+  border-radius: var(--radio-chico);
+  padding: 0.5rem 0.95rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  transition:
+    background var(--transicion),
+    border-color var(--transicion),
+    transform var(--transicion);
+}
+
+.btn-chico {
+  padding: 0.3rem 0.65rem;
+  min-height: 34px;
+  font-size: 0.85rem;
+}
+
+button:hover,
+.btn:hover,
+.btn-chico:hover {
+  background: var(--superficie-3);
+  border-color: var(--superficie-3);
+  transform: translateY(-1px);
+}
+
+button:active,
+.btn:active,
+.btn-chico:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-primario {
+  background: var(--acento);
+  color: var(--sobre-acento);
+  border-color: var(--acento);
+  font-weight: 700;
+}
+
+.btn-primario:hover {
+  background: var(--acento-claro);
+  border-color: var(--acento-claro);
+}
+
+button:disabled,
+button:disabled:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--texto);
+  background: var(--superficie-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+  padding: 0.45rem 0.6rem;
+  min-height: 40px;
+  max-width: 100%;
+  transition: border-color var(--transicion);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--superficie-3);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--texto-suave);
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.formulario {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 420px;
+}
+
+.filtros {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.pestanas {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--borde);
+  margin-bottom: 1rem;
+  scrollbar-width: none;
+}
+
+.pestanas button {
+  border: none;
+  background: none;
+  border-radius: 0;
+  color: var(--texto-suave);
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  min-height: 44px;
+}
+
+.pestanas button:hover {
+  background: none;
+  color: var(--texto);
+  transform: none;
+}
+
+.pestanas button.activa {
+  color: var(--texto);
+  border-bottom-color: var(--acento);
+}
+
+.toggle-cat {
+  opacity: 0.45;
+  min-height: 34px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.toggle-cat.activo {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------- tablas */
+.tabla-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--radio-chico);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+th {
+  background: var(--superficie-2);
+  color: var(--texto);
+  font-weight: 700;
+  font-size: 0.8rem;
+  position: sticky;
+  top: 0;
+}
+
+tbody tr {
+  transition: background var(--transicion);
+}
+
+tbody tr:hover {
+  background: rgb(255 255 255 / 0.03);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+td.pos {
+  font-weight: 700;
+  width: 2.5rem;
+  color: var(--texto-suave);
+}
+
+tr.podio-1 td.pos {
+  color: var(--oro);
+}
+
+tr.podio-2 td.pos {
+  color: var(--plata);
+}
+
+tr.podio-3 td.pos {
+  color: var(--bronce);
+}
+
+td a {
+  text-decoration: none;
+}
+
+td a:hover {
+  color: var(--acento-claro);
+}
+
+/* ---------------------------------------------------------------- estados de carga */
+.estado {
+  padding: 1.25rem;
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+.estado.error {
+  color: #ffb4b8;
+  background: rgb(229 9 20 / 0.1);
+  border: 1px solid rgb(229 9 20 / 0.35);
+  border-radius: var(--radio-chico);
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--borde);
+  border-top-color: var(--acento);
+  border-radius: 50%;
+  animation: girar 0.8s linear infinite;
+  vertical-align: -2px;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
