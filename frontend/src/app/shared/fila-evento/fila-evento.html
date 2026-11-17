@@ -1,0 +1,24 @@
+@let evento = eventoEntrada();
+<a class="fila-evento" [routerLink]="['/eventos', evento.id]" [attr.data-cat]="evento.categoria.siglas">
+    <div class="fe-dia">
+    <strong>{{ dia().numero }}</strong>
+    <span>{{ dia().mes }}</span>
+    </div>
+    <div class="fe-info">
+    <p class="txt-cat" [attr.data-cat]="evento.categoria.siglas">{{ categoria() }}</p>
+    <p class="fe-nombre">{{ evento.nombreCorto ?? evento.nombre }}</p>
+    <p class="fe-lugar">{{ evento.circuito ?? evento.ciudad ?? evento.pais }}</p>
+    </div>
+    <div class="fe-extra">
+    @if (modo() === 'proximo') {
+        @if (calculaHorarioFaltante(); as horarioFaltante) {
+        <strong>{{ horarioFaltante }}</strong><span>faltan</span>
+        } @else {
+        <span class="badge" data-estado="EN_CURSO">En vivo</span>
+        }
+    } @else if (evento.numeroFecha) {
+        <strong>{{ evento.numeroFecha }}</strong><span>fecha</span>
+    }
+    </div>
+</a>
+

@@ -1,0 +1,31 @@
+<div class="cm-cabecera">
+    <strong class="cm-mes">{{ nombreMes() }}</strong>
+    <div class="cm-flechas">
+    <button type="button" class="btn-icono" (click)="mover.emit(-1)" aria-label="Mes anterior">
+        <app-icono nombre="izquierda" [tamanio]="18" />
+    </button>
+    <button type="button" class="btn-icono" (click)="mover.emit(1)" aria-label="Mes siguiente">
+        <app-icono nombre="derecha" [tamanio]="18" />
+    </button>
+    </div>
+</div>
+<div class="cm-grilla">
+    @for (dia of diasSemana; track dia) {
+    <span class="cm-semana" aria-hidden="true">{{ dia }}</span>
+    }
+    @for (vacio of huecos(); track $index) {
+    <span></span>
+    }
+    @for (dia of dias(); track dia.clave) {
+    @if (dia.eventos.length) {
+        <a class="cm-dia con-evento" [class.hoy]="dia.hoy" [routerLink]="['/eventos', dia.eventos[0]?.id]"
+            [attr.data-cat]="dia.eventos[0]?.categoria.siglas" [title]="titulo(dia)" [attr.aria-label]="dia.numero + ': ' + titulo(dia)">
+        {{ dia.numero }}
+        @if (dia.eventos.length > 1) { <small>+{{ dia.eventos.length - 1 }}</small> }
+        </a>
+    } @else {
+        <span class="cm-dia" [class.hoy]="dia.hoy">{{ dia.numero }}</span>
+    }
+    }
+</div>
+

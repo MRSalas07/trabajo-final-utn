@@ -18,7 +18,12 @@ import { AuthService } from './core/services/auth.service';
 export class App {
   protected readonly menuAbierto = signal(false);
 
-  protected readonly secciones = [{ ruta: '/', texto: 'Inicio', icono: 'inicio' }];
+  protected readonly secciones = [
+    { ruta: '/', texto: 'Inicio', icono: 'inicio' },
+    { ruta: '/pilotos', texto: 'Pilotos', icono: 'pilotos' },
+    { ruta: '/equipos', texto: 'Equipos', icono: 'equipos' },
+  ];
+
 
   protected readonly zonas = inject(ZonaHorariaService)
 
@@ -29,6 +34,8 @@ export class App {
   { ruta: '/categorias/WRC', texto: 'WRC (Rally)' },
   { ruta: '/categorias/TC', texto: 'TC (Turismo Carretera)' },
 ];
+
+
 
 
 

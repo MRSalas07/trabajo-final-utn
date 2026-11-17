@@ -145,3 +145,92 @@ export interface TablaEtapa {
     ResultadoEtapa[]; }
 
 
+export interface Pagina<T> {            // respuesta paginada genérica del backend
+    contenido: T[]; 
+    pagina: number; 
+    tamanio: number; 
+    totalElementos: number; 
+    totalPaginas: number;
+}
+export interface PilotoResumen { 
+    id: number; 
+    nombre: string | null; 
+    apellido: string; 
+    codigo: string | null; 
+    numero: number | null;
+    nacionalidad: string | null;
+    pais: string | null; 
+    fotoUrl: string | null; 
+    equipoId: number | null; 
+    equipoActual: string | null; 
+}
+export interface Palmares { 
+    categoria: string; 
+    carreras: number; 
+    victorias: number; 
+    podios: number; 
+    poles: number;
+    campeonatos: number; 
+    puntosTotales: number; 
+    abandonos: number; 
+}
+export interface Participacion { 
+    anio: number; categoria: 
+    string; equipoId: number; 
+    equipo: string; 
+    pilotoId: number;
+    piloto: string | null; 
+    numero: number | null; 
+    rol: string; 
+}
+export interface ResultadoReciente { 
+    eventoId: number; 
+    evento: string; 
+    categoria: string; 
+    anio: number; 
+    fecha: string;
+    posicion: number | null; 
+    estado: string | null; 
+    puntos: number | null; 
+    equipo: string; 
+    piloto: string; 
+}
+
+export interface Piloto {
+    id: number;
+    nombre: string | null;
+    apellido: string;
+    codigo: string | null;
+    numero: number | null;
+    nacionalidad: string | null;
+    pais: string | null;
+    fechaNacimiento: string | null;
+    edad: number | null;
+    fotoUrl: string | null;
+}
+
+
+export interface PerfilPiloto {
+    piloto: Piloto;
+    palmares: Palmares[];
+    trayectoria: Participacion[];
+    ultimosResultados: ResultadoReciente[];
+}
+
+export interface EquipoResumen {
+    id: number;
+    nombre: string;
+    nombreCorto: string | null;
+    nacionalidad: string | null;
+    logoUrl: string | null;
+}
+
+export interface PerfilEquipo {
+    equipo: EquipoResumen;
+    sede: string | null;
+    fechaFundacion: string | null;
+    categorias: string[];
+    plantel: Participacion[];
+    estadisticas: { eventos: number; victorias: number; podios: number; puntos: number };
+    ultimosResultados: ResultadoReciente[];
+}
