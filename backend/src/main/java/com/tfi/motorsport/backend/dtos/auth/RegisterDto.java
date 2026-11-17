@@ -9,7 +9,7 @@ public record RegisterDto (
             @NotBlank(message = "El nombre es obligatorio") @Size(max = 80) String nombre,
             @Size(max = 80) String apellido,
             @NotBlank(message = "El email es obligatorio") @Email(message = "El email no es válido") String email,
-            @NotBlank @Size(min = 8, message = "La contraseña debe tener minimo 8 caracteres")
+            @NotBlank @Size(min = 8, max = 72, message = "La contraseña debe tener entre 8 y 72 caracteres") // 72: límite de BCrypt
             String password,
             /** Zona IANA, ej: "America/Argentina/Buenos_Aires". Si no se envía se usa UTC. */
             @Size(max = 64) String zonaHoraria
