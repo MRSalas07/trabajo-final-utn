@@ -6,6 +6,7 @@ import com.tfi.motorsport.backend.dtos.evento.TablaEtapaDto;
 import com.tfi.motorsport.backend.dtos.sesion.TablaSesionDto;
 import com.tfi.motorsport.backend.dtos.temporada.TemporadaDto;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -21,6 +22,18 @@ public interface IEventoService {
     TablaEtapaDto resultadosDeEtapa(Long etapaId, ZoneId zona);
 
     TablaSesionDto resultadosDeSesion(Long sesionId, ZoneId zona);
+
+    /**
+     * Calendario unificado: eventos que se superponen con el rango de días [desde, hasta]
+     * en la zona del usuario. Sin siglas incluye todas las categorías activas.
+     */
+    List<EventoDto> calendario(LocalDate desde, LocalDate hasta, List<String> siglas, ZoneId zona);
+
+    /** Eventos en curso o por venir, del más cercano al más lejano. */
+    List<EventoDto> proximos(int limite, ZoneId zona);
+
+    /** Últimos eventos finalizados, del más reciente al más antiguo. */
+    List<EventoDto> recientes(int limite, ZoneId zona);
 
 
 }
