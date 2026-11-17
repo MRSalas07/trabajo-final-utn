@@ -8,13 +8,21 @@ import { SaludServices } from './salud.service';
 import { EventoDto, Pagina, PerfilPiloto, PilotoResumen, Temporada } from '../modelos';
 import { Observable } from 'rxjs';
 
+export interface Filtros{ 
+    filPiloto : string | undefined,
+    filtroCategoria:string | undefined,
+    filtroAnio : number | null,
+    paginado : number | undefined,
+    cantidad : number | undefined
+
+}
 @Injectable({ providedIn: 'root'})
 export class PilotoService {
     private readonly http = inject(HttpClient);
     private readonly apiUrl = environment.apiUrl;
     private readonly zonaService = inject(ZonaHorariaService);
 
-    buscarPilotos(filtros: { q?: string; categoria?: string; anio?: number | null; pagina?: number; tamanio?: number }) {
+    buscarPilotos(filtros: Filtros) {
         let params = new HttpParams();
         for (const [k, v] of Object.entries(filtros)) {
             if (v !== undefined && v !== null && v !== '') 
@@ -27,6 +35,6 @@ export class PilotoService {
         return this.http.get<PerfilPiloto>(`${this.apiUrl}/pilotos/${pilotoId}`);
     }
 
-    
+
 
 }

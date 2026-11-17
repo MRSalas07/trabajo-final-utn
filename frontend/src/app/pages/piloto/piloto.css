@@ -1,0 +1,15 @@
+.dorsal { 
+    font-size: 2.4rem; 
+    font-weight: 900; 
+    color: var(--acento); 
+    min-width: 3.5rem; 
+    text-align: center; 
+}
+.encabezado h1, .encabezado p { 
+    margin: 0; 
+}
+h2 .chip-cat { 
+    vertical-align: middle; 
+    margin-right: 0.3rem; 
+}
+
