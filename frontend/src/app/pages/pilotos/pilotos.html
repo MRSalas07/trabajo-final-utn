@@ -9,7 +9,7 @@
     </select>
     </label>
     <label>Año
-    <input type="number" min="1950" max="2100" placeholder="Todos" [ngModel]="anio()" (ngModelChange)="filtroAnio.set($event || null); pagina.set(0)" />
+    <input type="number" min="1950" max="2100" placeholder="Todos" [ngModel]="filtroAnio()" (ngModelChange)="filtroAnio.set($event || null); pagina.set(0)" />
     </label>
 </div>
 

@@ -2,20 +2,12 @@ import { Component, effect, inject, input, signal, untracked } from '@angular/co
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { EstadoCarga } from '../../shared/estado-carga/estado-carga';
-import { PilotoService } from '../../core/services/piloto.service';
+import { Filtros, PilotoService } from '../../core/services/piloto.service';
 import { Pagina, PilotoResumen } from '../../core/modelos';
 import { mensajeError } from '../../core/errores/error';
 import { debounceTime, Subject } from 'rxjs';
-import { NumberSymbol } from '@angular/common';
 
-export interface Filtros{ 
-  filPiloto : string | undefined,
-  filtroCategoria:string | undefined,
-  filtroAnio : number | null,
-  paginado : number | undefined,
-  cantidad : number | undefined
 
-}
 @Component({
   imports: [FormsModule, RouterLink,EstadoCarga],
   selector: 'app-pilotos',
@@ -55,7 +47,7 @@ export class Pilotos {
     effect (() => {
       const filtros : Filtros = { 
         filPiloto: this.buscadorPiloto(), 
-        filtroCategoria: this.categoria(), 
+        filtroCategoria: this.filtroCategoria(), 
         filtroAnio: this.filtroAnio(), 
         paginado: this.pagina(), 
         cantidad: 24 };
