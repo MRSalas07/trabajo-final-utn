@@ -33,11 +33,11 @@ public interface ResultadoEtapaJPARepository extends JpaRepository<ResultadoEtap
      */
     String SELECT_FILA = """
             select new com.tfi.motorsport.backend.repositories.unificacion.FilaResultado(
-                e.id, e.numeroFecha, coalesce(e.nombreCorto, e.nombre), e.fechaInicio, t.id, t.anio,
+                e.id, e.numeroFecha, coalesce(e.nombreCorto, e.nombre), e.fechaInicio, t.id, t.anio, c.siglas,
                 p.id,p.nombre, p.apellido, p.codigoPiloto, eq.id, eq.nombre,
                 case when et.idExterno = 'GENERAL' then 'GENERAL' else 'ETAPA' end,
                 r.posicion, r.puntos, r.estado)
-                from ResultadoEtapa r join r.etapa et join et.evento e join e.temporada t join r.tripulacion tr 
+                from ResultadoEtapa r join r.etapa et join et.evento e join e.temporada t join t.categoria c join r.tripulacion tr 
                 join tr.piloto p join tr.equipo eq
             """;
 

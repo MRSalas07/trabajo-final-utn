@@ -20,6 +20,8 @@ public record FilaResultado(
         Instant eventoInicio,
         Long temporadaId,
         Integer anio,
+        /** Siglas de la categoría (F1, WRC, TC). */
+        String categoria,
         Long pilotoId,
         String pilotoNombre,
         String pilotoApellido,
