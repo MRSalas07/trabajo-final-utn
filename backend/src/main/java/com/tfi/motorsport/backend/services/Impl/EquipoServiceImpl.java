@@ -1,0 +1,104 @@
+package com.tfi.motorsport.backend.services.Impl;
+
+import com.tfi.motorsport.backend.dtos.equipo.EquipoResumenDto;
+import com.tfi.motorsport.backend.dtos.equipo.EstadisticasEquipoDto;
+import com.tfi.motorsport.backend.dtos.equipo.PerfilEquipoDto;
+import com.tfi.motorsport.backend.dtos.perfil.ParticipacionDto;
+import com.tfi.motorsport.backend.handlers.exceptions.ResourceNotFoundException;
+import com.tfi.motorsport.backend.model.Catalogo;
+import com.tfi.motorsport.backend.model.Categoria;
+import com.tfi.motorsport.backend.model.Equipo;
+import com.tfi.motorsport.backend.model.EquipoPiloto;
+import com.tfi.motorsport.backend.repositories.CategoriaJPARepository;
+import com.tfi.motorsport.backend.repositories.EquipoJPARepository;
+import com.tfi.motorsport.backend.repositories.EquipoPilotoJPARepository;
+import com.tfi.motorsport.backend.repositories.ResultadoEtapaJPARepository;
+import com.tfi.motorsport.backend.repositories.ResultadoSesionJPARepository;
+import com.tfi.motorsport.backend.repositories.unificacion.FilaResultado;
+import com.tfi.motorsport.backend.services.IEquipoService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class EquipoServiceImpl implements IEquipoService {
+
+    private final CategoriaJPARepository categoriaRepo;
+    private final EquipoJPARepository equipoRepo;
+    private final EquipoPilotoJPARepository equipoPilotoRepo;
+    private final ResultadoSesionJPARepository resultadoSesionRepo;
+    private final ResultadoEtapaJPARepository resultadoEtapaRepo;
+
+    @Override
+    public List<EquipoResumenDto> equiposDeCategoria(String siglas, Integer anio) {
+        Categoria categoria = buscarCategoria(siglas);
+        return equipoRepo.deCategoria(categoria.getId(), anio).stream()
+                .map(EquipoServiceImpl::resumen)
+                .toList();
+    }
+
+    @Override
+    public PerfilEquipoDto perfil(Long equipoId) {
+        Equipo equipo = equipoRepo.findById(equipoId)
+                .filter(e -> !e.isEliminado())
+                .orElseThrow(() -> new ResourceNotFoundException("el equipo", equipoId));
+
+        List<EquipoPiloto> plantel = equipoPilotoRepo.plantelDeEquipo(equipoId);
+
+        List<String> categorias = plantel.stream()
+                .map(EquipoPiloto::getCategoria)
+                .sorted(Comparator.comparing(Categoria::getId))
+                .map(Categoria::getSiglas)
+                .distinct()
+                .toList();
+
+        List<ParticipacionDto> integrantes = plantel.stream()
+                .map(Participaciones::de)
+                .toList();
+
+        List<FilaResultado> filas = new ArrayList<>(resultadoSesionRepo.filasDeEquipo(equipoId));
+        filas.addAll(resultadoEtapaRepo.filasDeEquipo(equipoId));
+
+        return new PerfilEquipoDto(resumen(equipo), equipo.getSede(), equipo.getFechaFundacion(), categorias,
+                integrantes, estadisticas(filas), ResultadosRecientes.de(filas, false));
+    }
+
+    /**
+     * Estadísticas calculadas con los resultados cargados (no con un palmarés guardado).
+     * Victorias y podios cuentan solo resultados finales de evento; los puntos suman también los sprints.
+     */
+    static EstadisticasEquipoDto estadisticas(List<FilaResultado> filas) {
+        List<FilaResultado> finales = filas.stream().filter(ResultadosRecientes::esResultadoDeEvento).toList();
+
+        int eventos = (int) finales.stream().map(FilaResultado::eventoId).distinct().count();
+        int victorias = (int) finales.stream().filter(f -> Objects.equals(f.posicion(), 1)).count();
+        int podios = (int) finales.stream()
+                .filter(f -> f.posicion() != null && f.posicion() >= 1 && f.posicion() <= 3)
+                .count();
+        BigDecimal puntos = filas.stream()
+                .filter(f -> ResultadosRecientes.esResultadoDeEvento(f) || Catalogo.TipoSesion.SPRINT.equals(f.tipo()))
+                .map(FilaResultado::puntos)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new EstadisticasEquipoDto(eventos, victorias, podios, puntos);
+    }
+
+    private static EquipoResumenDto resumen(Equipo e) {
+        return new EquipoResumenDto(e.getId(), e.getNombre(), e.getNombreCorto(), e.getNacionalidad(), e.getLogoUrl());
+    }
+
+    private Categoria buscarCategoria(String siglas) {
+        return categoriaRepo.findBySiglasIgnoreCase(siglas.trim())
+                .filter(c -> !c.isEliminado())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe la categoría '" + siglas + "'"));
+    }
+}
