@@ -22,13 +22,13 @@ export class FilaEvento {
   readonly ahora = input<number>(Date.now());
   
   protected readonly categoria = computed(() => {
-    const c = this.evento().categoria;
+    const c = this.eventoEntrada().categoria;
     return NOMBRE_CATEGORIA[c.siglas] ?? c.nombre;
   });
 
   /** Día y mes en la zona horaria con la que el backend convirtió el horario. */
   protected readonly dia = computed(() => {
-    const horario = this.evento().inicio;
+    const horario = this.eventoEntrada().inicio;
     if (!horario) return { numero: '—', mes: '' };
     const fecha = new Date(horario.utc);
     const fmt = (o: Intl.DateTimeFormatOptions) => {
@@ -42,7 +42,7 @@ export class FilaEvento {
   });
 
   protected readonly calculaHorarioFaltante = computed(() => {
-    const horario = this.evento().inicio;
+    const horario = this.eventoEntrada().inicio;
     if (!horario) return '—';
     const ms = new Date(horario.utc).getTime() - this.ahora();
     if (ms <= 0) return null;

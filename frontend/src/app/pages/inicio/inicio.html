@@ -1,2 +1,40 @@
-   <h1 class="sr-only">Motorsport Analytics: calendario, resultados y estadísticas de F1, WRC y TC</h1>
-   <p>Calendario, resultados y estadísticas de F1, WRC y Turismo Carretera.</p>
+<h1 class="sr-only">Motorsport Analytics: calendario, resultados y estadísticas de F1, WRC y TC</h1>
+<div class="tablero">
+<section class="panel col-3" aria-labelledby="t-proximos">
+   <div class="panel-titulo"><h2 id="t-proximos">Próximos eventos</h2></div>
+   <app-estado-carga [cargando]="cargando()" [error]="error()" [vacio]="!cargando() && proximosEventos().length === 0"
+                     mensajeVacio="No hay eventos próximos cargados." />
+   <div class="lista-eventos">
+      @for (evento of proximosEventos(); track evento.id) { 
+         <app-fila-evento [eventoEntrada]="evento" modo="proximo" [ahora]="ahora()" /> 
+      }
+   </div>
+</section>
+
+<section class="panel col-6" aria-labelledby="t-tiempos">
+   <div class="panel-titulo"><h2 id="t-tiempos">Tiempos de la última carrera</h2></div>
+   @if (ultimo(); as ultimo) { <p class="chico"><strong>{{ ultimo.nombre }}</strong> · {{ ultimo.inicio | hora: 'dia' }}</p> }
+   <table>
+      <tbody>
+      @for (resultado of tiempos(); track resultado.pilotoId) {
+         <tr>
+            <td class="pos num">{{ resultado.posicion ?? '—' }}</td>
+            <td>{{ resultado.piloto }}</td>
+            <td class="suave">{{ resultado.equipo }}</td>
+            <td class="num">{{ resultado.posicion === 1 ? (resultado.tiempo | tiempo) : (resultado.diferencia | tiempo: true) }}</td>
+         </tr>
+      }
+      </tbody>
+   </table>
+</section>
+
+<section class="panel col-3" aria-labelledby="t-recientes">
+   <div class="panel-titulo"><h2 id="t-recientes">Últimos eventos</h2></div>
+   <div class="lista-eventos">
+      @for (evento of recientesEventos(); track evento.id) { 
+         <app-fila-evento [eventoEntrada]="evento" modo="reciente" /> 
+      }
+   </div>
+</section>
+</div>
+
