@@ -70,7 +70,11 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     @Transactional
     public TokenResponse actualizarPreferencias(Long usuarioId, PreferenciasRequest req) {
-        throw new UnsupportedOperationException("No implementado aún");
+        Usuario u = buscar(usuarioId);
+        // Valida que sea una zona IANA existente (responde 400 si no lo es) y guarda su id normalizado
+        u.setZonaHoraria(ZonaHoraria.resolverZonaHoraria(req.zonaHoraria()).getId());
+        // Se devuelve un token nuevo: el anterior lleva la zona vieja en el claim "zona"
+        return respuesta(usuarioRepo.save(u));
     }
 
     private Usuario buscar(Long id) {
