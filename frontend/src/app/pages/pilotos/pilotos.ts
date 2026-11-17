@@ -22,7 +22,7 @@ export interface Filtros{
   styleUrl: './pilotos.css',
   templateUrl: './pilotos.html',
 })
-export class Piloto {
+export class Pilotos {
   private readonly pilotoService = inject(PilotoService);
   protected readonly buscadorPiloto = signal('');
   

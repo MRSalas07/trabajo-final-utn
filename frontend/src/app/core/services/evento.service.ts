@@ -39,4 +39,20 @@ export class EventoService {
         return `${this.apiUrl}/calendario/eventos/${id}.ics`;
     }
 
+    proximos(limite = 6): Observable<EventoDto[]> {
+        return this.http.get<EventoDto[]>(
+            `${this.apiUrl}/calendario/proximos`, { 
+                params: this.enviarConZona({ limite }) 
+            });
+    }
+    
+    recientes(limite = 6): Observable<EventoDto[]> {
+        return this.http.get<EventoDto[]>(
+            `${this.apiUrl}/calendario/recientes`, { 
+                params: this.enviarConZona({ limite }) 
+            });
+    }
+
+    
+
 }
