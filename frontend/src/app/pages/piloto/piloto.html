@@ -1,1 +1,77 @@
-<p>piloto works!</p>
+<app-estado-carga [cargando]="!perfil() && !errorMensaje()" [error]="errorMensaje()" />
+@if (perfil(); as perfil) {
+    <div class="encabezado">
+    <span class="dorsal">{{ perfil.piloto.numero ?? '' }}</span>
+    <div>
+        <h1>{{ perfil.piloto.nombre }} {{ perfil.piloto.apellido }}</h1>
+        <p class="suave">
+        {{ perfil.piloto.nacionalidad ?? perfil.piloto.pais }}
+        @if (perfil.piloto.codigo) { · {{ perfil.piloto.codigo }} }
+        @if (perfil.piloto.edad) { · {{ perfil.piloto.edad }} años }
+        </p>
+    </div>
+    </div>
+
+    @for (palmar of perfil.palmares; track palmar.categoria) {
+    <section class="seccion">
+        <h2><span class="chip-cat" [attr.data-cat]="palmar.categoria">{{ palmar.categoria }}</span> Palmarés</h2>
+        <div class="kpis">
+        <div class="kpi"><div class="valor">{{ palmar.campeonatos }}</div><div class="etiqueta">Campeonatos</div></div>
+        <div class="kpi"><div class="valor">{{ palmar.victorias }}</div><div class="etiqueta">Victorias</div></div>
+        <div class="kpi"><div class="valor">{{ palmar.podios }}</div><div class="etiqueta">Podios</div></div>
+        <div class="kpi"><div class="valor">{{ palmar.poles }}</div><div class="etiqueta">Poles</div></div>
+        <div class="kpi"><div class="valor">{{ palmar.carreras }}</div><div class="etiqueta">Eventos</div></div>
+        <div class="kpi"><div class="valor">{{ palmar.puntosTotales }}</div><div class="etiqueta">Puntos</div></div>
+        </div>
+    </section>
+    }
+    @if (!perfil.palmares.length) {
+        <p class="suave">Sin palmarés calculado (el piloto puede ser copiloto de rally o no tener resultados cargados).</p>
+    }
+
+    <div class="grilla-2">
+    <section class="tarjeta">
+        <h2>Últimos resultados</h2>
+        <ul class="lista-plana">
+            @for (resultado of perfil.ultimosResultados; track resultado.eventoId) {
+            <li>
+                <span><span class="chip-cat" [attr.data-cat]="resultado.categoria">{{ resultado.categoria }}</span>
+                <a [routerLink]="['/eventos', resultado.eventoId]">{{ resultado.evento }}</a> <span class="suave chico">{{ resultado.fecha | hora: 'dia' }}</span></span>
+                <strong>@if (resultado.estado === 'FINALIZADO') { P{{ resultado.posicion }} } @else { {{ resultado.estado | estado }} }</strong>
+            </li>
+            } @empty {
+            <li class="suave">Sin resultados.</li>
+            }
+        </ul>
+    </section>
+    <section class="tarjeta">
+        <h2>Trayectoria</h2>
+        <div class="tabla-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Año</th>
+                    <th>Cat.</th>
+                    <th>Equipo</th>
+                    <th>#</th>
+                    <th>Rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (trayectoria of perfil.trayectoria; track $index) {
+                <tr>
+                    <td>{{ trayectoria.anio }}</td>
+                    <td><span class="chip-cat" [attr.data-cat]="trayectoria.categoria">{{ trayectoria.categoria }}</span></td>
+                    <td><a [routerLink]="['/equipos', trayectoria.equipoId]">{{ trayectoria.equipo }}</a></td>
+                    <td>{{ trayectoria.numero }}</td>
+                    <td class="suave chico">{{ trayectoria.rol }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        </div>
+        </section>
+    </div>
+    }
+
+

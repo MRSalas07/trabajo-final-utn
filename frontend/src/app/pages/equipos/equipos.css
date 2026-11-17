@@ -1,0 +1,18 @@
+.equipo { 
+    text-decoration: none; 
+    display: grid; 
+    gap: 0.2rem; 
+    border-left: 4px solid var(--borde); 
+}
+.equipo[data-cat='F1'] { 
+    border-left-color: var(--cat-f1); 
+}
+.equipo[data-cat='WRC'] { 
+    border-left-color: var(--cat-wrc); 
+}
+.equipo[data-cat='TC'] { 
+    border-left-color: var(--cat-tc); 
+}
+.equipo:hover { 
+    border-color: var(--acento); 
+}

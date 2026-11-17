@@ -1,0 +1,23 @@
+<h1>Equipos</h1>
+<div class="filtros">
+    <label>Categoría
+    <select [ngModel]="categoria()" (ngModelChange)="categoria.set($event)">
+        <option value="F1">F1</option><option value="WRC">WRC</option><option value="TC">TC</option>
+    </select>
+    </label>
+    <label>Año
+    <input type="number" min="1950" max="2100" placeholder="Todos" [ngModel]="anio()" (ngModelChange)="anio.set($event || null)" />
+    </label>
+</div>
+<app-estado-carga [cargando]="cargando()" [error]="errorMensaje()" [vacio]="!cargando() && equipos().length === 0" />
+<div class="grilla">
+    @for (equipo of equipos(); track equipo.id) {
+    <a class="tarjeta equipo" [routerLink]="['/equipos', equipo.id]" [attr.data-cat]="categoria()">
+        <strong>{{ equipo.nombre }}</strong>
+        <span class="suave chico">
+            {{ equipo.nombreCorto }}@if (equipo.nacionalidad) { · {{ equipo.nacionalidad }} }
+        </span>
+    </a>
+    }
+</div>
+
