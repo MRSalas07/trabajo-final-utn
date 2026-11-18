@@ -1,0 +1,72 @@
+<div class="encabezado">
+    <h1>Calendario</h1>
+    <div class="fila mes">
+    <button type="button" class="btn-chico" (click)="moverMes(-1)" aria-label="Mes anterior">‹</button>
+    <strong class="mes-nombre">{{ nombreMes() }}</strong>
+    <button type="button" class="btn-chico" (click)="moverMes(1)" aria-label="Mes siguiente">›</button>
+    <button type="button" class="btn-chico" (click)="irAHoy()">Hoy</button>
+    </div>
+</div>
+
+<div class="filtros">
+    @for (categoria of categorias; track categoria) {
+    <button type="button" class="chip-cat toggle-cat" [class.activo]="seleccionCategoria().includes(categoria)" [attr.data-cat]="categoria"
+            [attr.aria-pressed]="seleccionCategoria().includes(categoria)" (click)="alternar(categoria)">{{ categoria }}</button>
+    }
+    <span class="suave chico">Horarios en {{ zonaService.zona().replaceAll('_', ' ') }}</span>
+</div>
+
+<div class="cal-layout">
+<aside class="cal-lateral">
+    <section class="panel">
+    <h2 class="panel-titulo">Mes</h2>
+    <app-calendario-mes [anio]="mes().anio" [mes]="mes().mes" [eventos]="eventos()" [hoy]="hoy()" (mover)="moverMes($event)" />
+    </section>
+    <section class="panel">
+    <h2 class="panel-titulo">Agendar una temporada</h2>
+    <p class="suave chico">Descarga un archivo .ics: en Android se abre con Google Calendar y en iPhone con Calendario.</p>
+    <div class="fila">
+        @for (categoria of categorias; track categoria) {
+        <a class="btn-chico" [href]="calendarioService.urlIcsTemporada(categoria, anio())" download>{{ categoria }} {{ anio() }}</a>
+        }
+    </div>
+    </section>
+</aside>
+
+<div class="cal-lista">
+<app-estado-carga [cargando]="cargando()" [error]="error()" [vacio]="!cargando() && !error() && dias().length === 0"
+                    mensajeVacio="No hay eventos en este mes para las categorías seleccionadas." />
+
+@for (dia of dias(); track dia.clave) {
+    <section class="dia">
+    <h2 class="dia-titulo">{{ dia.titulo }}</h2>
+    @for (evento of dia.eventos; track evento.id) {
+        <article class="tarjeta evento" [attr.data-cat]="evento.categoria.siglas">
+        <div class="fila">
+            <span class="chip-cat" [attr.data-cat]="evento.categoria.siglas">{{ evento.categoria.siglas }}</span>
+            <a [routerLink]="['/eventos', evento.id]" class="ev-nombre">{{ evento.nombre }}</a>
+            <span class="badge" [attr.data-estado]="evento.estado">{{ evento.estado | estado }}</span>
+        </div>
+        <p class="suave chico">Fecha {{ evento.numeroFecha }} · {{ evento.circuito }}@if (evento.pais) { · {{ evento.pais }} }
+            @if (evento.diferenciaSedeMinutos) { · <span class="dif" [title]="evento.diferenciaSedeTexto ?? ''">sede {{ difCorta(evento.diferenciaSedeMinutos) }}</span> }</p>
+        @if (evento.sesiones.length) {
+            <ul class="lista-plana sesiones">
+            @for (sesion of evento.sesiones; track sesion.id) {
+                <li>
+                <span>{{ sesion.nombre }}</span>
+                <span class="suave">{{ sesion.inicio | hora: 'corta' }}</span>
+                </li>
+            }
+            </ul>
+        } @else {
+            <p class="chico">{{ evento.inicio | hora: 'dia' }} al {{ evento.fin | hora: 'dia' }}
+            @if (evento.etapas.length) { · {{ tramos(evento) }} tramos cronometrados }</p>
+        }
+        <a class="btn-chico" [href]="calendarioService.urlIcsEvento(evento.id)" download>📅 Agregar al calendario</a>
+        </article>
+    }
+    </section>
+}
+</div>
+</div>
+

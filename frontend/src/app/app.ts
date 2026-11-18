@@ -20,6 +20,7 @@ export class App {
 
   protected readonly secciones = [
     { ruta: '/', texto: 'Inicio', icono: 'inicio' },
+    { ruta: '/calendario', texto: 'Calendario', icono: 'calendario' },
     { ruta: '/pilotos', texto: 'Pilotos', icono: 'pilotos' },
     { ruta: '/equipos', texto: 'Equipos', icono: 'equipos' },
   ];

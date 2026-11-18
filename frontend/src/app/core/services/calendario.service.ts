@@ -9,7 +9,7 @@ import { EventoDto, Temporada } from '../modelos';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root'})
-export class Calendario {
+export class CalendarioService {
     
     private readonly http = inject(HttpClient);
     private readonly apiUrl = environment.apiUrl;

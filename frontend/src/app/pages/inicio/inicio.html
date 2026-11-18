@@ -11,6 +11,15 @@
    </div>
 </section>
 
+<section class="panel col-3" aria-labelledby="t-calendario">
+   <div class="panel-titulo">
+      <h2 id="t-calendario">Calendario</h2>
+      <a routerLink="/calendario">Abrir</a>
+   </div>
+   <app-calendario-mes [anio]="mes().anio" [mes]="mes().mes" [eventos]="eventosMes()" [hoy]="hoy()" (mover)="moverMes($event)" />
+</section>
+
+
 <section class="panel col-6" aria-labelledby="t-tiempos">
    <div class="panel-titulo"><h2 id="t-tiempos">Tiempos de la última carrera</h2></div>
    @if (ultimo(); as ultimo) { <p class="chico"><strong>{{ ultimo.nombre }}</strong> · {{ ultimo.inicio | hora: 'dia' }}</p> }
