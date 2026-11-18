@@ -5,6 +5,9 @@ export const routes: Routes = [
   { path: '', title: 'Motorsport Analytics', loadComponent: () => 
     import('./pages/inicio/inicio').then((m) => m.Inicio) 
   },
+  { path: 'calendario', title: 'Calendario', loadComponent: () => 
+    import('./pages/calendario/calendario').then((m) => m.Calendario) 
+  },
   { path: 'categorias', title: 'Categorías', loadComponent: () => 
     import('./pages/categoria/categorias').then((m) => m.Categorias) 
   },
