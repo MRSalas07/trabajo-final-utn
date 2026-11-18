@@ -6,14 +6,18 @@ import com.tfi.motorsport.backend.handlers.exceptions.ResourceNotFoundException;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
@@ -98,16 +102,55 @@ public class GlobalExceptionHandler {
                 List.of("El JSON enviado no es válido o tiene tipos incorrectos"));
     }
 
+    /**
+     * Restricciones (@Min, @Max, @Size...) sobre parámetros de la URL o de la query.
+     * Ej: GET /api/categorias/F1/temporadas/1800/eventos (año fuera de rango).
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorDto> handleMethodValidation(HandlerMethodValidationException ex) {
+        List<String> detalles = ex.getParameterValidationResults().stream()
+                .flatMap(resultado -> resultado.getResolvableErrors().stream()
+                        .map(error -> resultado.getMethodParameter().getParameterName()
+                                + ": " + error.getDefaultMessage()))
+                .toList();
+        return responder(HttpStatus.BAD_REQUEST, "Error de validación", detalles);
+    }
 
+    /** Parámetro con un tipo que no se puede convertir. Ej: GET /api/eventos/abc */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorDto> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return responder(HttpStatus.BAD_REQUEST, "Parámetro inválido",
+                List.of("El parámetro '" + ex.getName() + "' tiene un valor inválido: '" + ex.getValue() + "'"));
+    }
 
+    /** Método HTTP no soportado por la ruta. Ej: POST /api/salud */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorDto> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        return responder(HttpStatus.METHOD_NOT_ALLOWED, "Método no permitido",
+                List.of("La ruta no admite el método " + ex.getMethod()));
+    }
 
-    // Maneja cualquier otro error no controlado
+    /**
+     * Violación de una restricción de la base (índice único, clave foránea, NOT NULL).
+     * Normalmente la valida el servicio antes; esto cubre los casos concurrentes.
+     * No se devuelve el mensaje de la base porque expone nombres de tablas y columnas.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorDto> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Violación de integridad de datos: {}", ex.getMostSpecificCause().getMessage());
+        return responder(HttpStatus.CONFLICT, "Conflicto con datos existentes",
+                List.of("La operación entra en conflicto con datos ya registrados"));
+    }
+
+    /**
+     * Cualquier otro error no controlado. El detalle queda en el log del servidor
+     * y el cliente recibe un mensaje fijo: el mensaje real puede exponer detalles internos.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDto> handleGeneric(Exception ex) {
-        ErrorDto errorDTO = ErrorDto.simple(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Error interno del servidor", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
+        log.error("Error no controlado", ex);
+        return responder(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor",
+                List.of("Ocurrió un error inesperado. Intente nuevamente más tarde."));
     }
 
 

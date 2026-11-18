@@ -1,0 +1,29 @@
+.piloto { 
+    display: flex; 
+    gap: 0.8rem; 
+    align-items: center; 
+    text-decoration: none; 
+}
+.piloto:hover { 
+    border-color: var(--acento); 
+}
+.dorsal { 
+    font-size: 1.4rem; 
+    font-weight: 800; 
+    min-width: 2.6rem; 
+    text-align: center; 
+    color: var(--acento); 
+}
+.datos { 
+    display: grid; 
+    min-width: 0; 
+}
+.datos > * { 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    white-space: nowrap; 
+}
+.paginas { 
+    justify-content: center; 
+    margin-top: 1rem; 
+}

@@ -903,3 +903,161 @@ td a:hover {
   }
 }
 
+.fila-evento {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--superficie-2);
+  border-left: 4px solid var(--borde);
+  border-radius: var(--radio-chico);
+  text-decoration: none;
+  transition:
+    transform var(--transicion),
+    background var(--transicion);
+}
+
+a.fila-evento:hover {
+  transform: translateY(-2px);
+  background: var(--superficie-3);
+}
+
+.fila-evento[data-cat='F1'] {
+  border-left-color: var(--cat-f1);
+}
+
+.fila-evento[data-cat='WRC'] {
+  border-left-color: var(--cat-wrc);
+}
+
+.fila-evento[data-cat='TC'] {
+  border-left-color: var(--cat-tc);
+}
+
+.fe-dia {
+  text-align: center;
+  line-height: 1;
+}
+
+.fe-dia strong {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.fe-dia span {
+  font-size: 0.72rem;
+  color: var(--texto-suave);
+  text-transform: capitalize;
+}
+
+.fe-info {
+  min-width: 0;
+}
+
+.fe-info p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fe-nombre {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.fe-lugar {
+  font-size: 0.78rem;
+  color: var(--texto-suave);
+}
+
+.fe-extra {
+  text-align: right;
+  line-height: 1.1;
+}
+
+.fe-extra strong {
+  display: block;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fe-extra span {
+  font-size: 0.72rem;
+  color: var(--texto-suave);
+}
+
+.lista-eventos {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.kpis {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+}
+
+.kpi {
+  background: var(--superficie-2);
+  border-radius: var(--radio-chico);
+  padding: 0.75rem 0.85rem;
+}
+
+.kpi .valor {
+  font-size: 1.55rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi .etiqueta {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.encabezado {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+}
+
+.encabezado h1 {
+  margin: 0;
+}
+
+.encabezado .chip-cat {
+  font-size: 1rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.aviso {
+  background: rgb(245 197 24 / 0.1);
+  border: 1px solid rgb(245 197 24 / 0.35);
+  color: #ffe08a;
+  border-radius: var(--radio-chico);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.lista-plana {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lista-plana li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--borde-suave);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.lista-plana li:last-child {
+  border-bottom: none;
+}

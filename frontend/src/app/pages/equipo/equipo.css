@@ -1,0 +1,6 @@
+.encabezado h1, .encabezado p { 
+    margin: 0; 
+} 
+.encabezado .chip-cat { 
+    margin-right: 0.3rem; 
+}

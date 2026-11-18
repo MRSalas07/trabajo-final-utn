@@ -6,7 +6,7 @@ Plataforma web dedicada a la integración, consulta y análisis de información 
 > **Universidad Tecnológica Nacional (UTN)**  
 > **Grupo:** 190  
 > **Integrantes:** Salas Mateo Roman · Luna Genaro Nahuel  
-> **Estado actual:** MVP 1 implementado — consulta de eventos y resultados (backend + frontend)
+> **Estado actual:** MVP 2 — perfiles, portada y calendario (backend completo; falta la pantalla del calendario mensual)
 
 ## Repositorio
 
@@ -61,14 +61,16 @@ El desarrollo se organiza en MVPs: cada uno termina con algo que se puede probar
 | MVP | Alcance | Estado |
 |---|---|---|
 | **1 — Consulta de eventos y resultados** | Registro e inicio de sesión, zona horaria, categorías, temporadas, fechas y resultados de cada evento. | Implementado |
-| **2 — Perfiles, portada y calendario** | Fichas de pilotos y equipos, portada con próximos y últimos eventos, calendario unificado con descarga `.ics`. | Pendiente |
+| **2 — Perfiles, portada y calendario** | Fichas de pilotos y equipos, portada con próximos y últimos eventos, calendario unificado con descarga `.ics`. | Implementado, salvo la pantalla del calendario mensual |
 | **3 — Datos automáticos** | Panel de administración para sincronizar datos desde APIs externas e importar archivos. | Pendiente |
 | **4 — Estadísticas y gráficos** | Campeonatos, evolución de puntos, tendencias y comparativas entre pilotos. | Pendiente |
 | **5 — Administración (ABM)** | Alta, baja lógica y modificación de todas las entidades. | Pendiente |
 | **6 — Análisis avanzado** | Estadísticas por equipo y marca, histórico de temporadas. | Pendiente |
 | **7 — Telemetría (funcionalidad plus)** | Telemetría de F1, sujeta a la disponibilidad del proveedor. | Pendiente |
 
-## Funcionalidades del MVP 1
+## Funcionalidades implementadas
+
+### MVP 1 — Consulta de eventos y resultados
 
 - **Cuentas:** registro, inicio de sesión y pantalla "Mi cuenta" para guardar la zona horaria preferida.
 - **Zona horaria:** todos los horarios se muestran en la zona elegida por el usuario; al cambiarla, las pantallas se actualizan sin recargar.
@@ -76,7 +78,15 @@ El desarrollo se organiza en MVPs: cada uno termina con algo que se puede probar
 - **Temporadas y fechas:** selección de temporada y tabla de eventos con fecha, circuito y estado.
 - **Detalle de evento:** hora local y hora en la sede, diferencia horaria, sesiones o etapas, y tabla de resultados.
 
-Los datos de temporadas, eventos y resultados todavía se cargan manualmente en la base: `database/datos_iniciales.sql` solo crea las tres categorías. La carga automática corresponde al MVP 3.
+### MVP 2 — Perfiles, portada y calendario
+
+- **Pilotos:** listado paginado con búsqueda por nombre, apellido o código y filtros de categoría y año; ficha con datos personales, palmarés por categoría, trayectoria y últimos resultados.
+- **Equipos:** listado por categoría y año; ficha con plantel, categorías, estadísticas calculadas con los resultados cargados y últimos resultados.
+- **Portada:** próximos eventos, últimos eventos finalizados y tabla de tiempos de la última carrera.
+- **Agregar al calendario:** el detalle de cada evento descarga un archivo `.ics` que el celular o la computadora ofrecen agregar a su calendario (una entrada por sesión; una sola para todo el rally en WRC).
+- **Calendario unificado (API):** eventos de todas o algunas categorías entre dos fechas y descarga `.ics` de una temporada completa. La pantalla del calendario mensual todavía no está en el frontend.
+
+Los datos todavía se cargan con scripts: `database/datos_iniciales.sql` crea las tres categorías y `database/datos_ejemplo/seed_temporada_2025.sql` agrega la temporada 2025 de las tres para probar. La carga automática corresponde al MVP 3.
 
 ## Stack tecnológico
 
@@ -137,6 +147,15 @@ Categoria → Temporada → Evento ─┬─ Sesion → ResultadoSesion (piloto 
 | GET | `/api/eventos/{id}` | Público | Detalle de un evento. |
 | GET | `/api/sesiones/{id}/resultados` | Público | Tabla de posiciones de una sesión. |
 | GET | `/api/etapas/{id}/resultados` | Público | Tabla de tiempos de una etapa de rally. |
+| GET | `/api/pilotos` | Público | Listado paginado de pilotos. Filtros: `filPiloto`, `filtroCategoria`, `filtroAnio`; paginado: `paginado` (desde 0) y `cantidad` (1 a 100, 24 por defecto). |
+| GET | `/api/pilotos/{id}` | Público | Ficha de un piloto: datos, palmarés, trayectoria y últimos resultados. |
+| GET | `/api/equipos` | Público | Equipos de una categoría (`categoria` obligatoria, `anio` opcional). |
+| GET | `/api/equipos/{id}` | Público | Ficha de un equipo: plantel, estadísticas y últimos resultados. |
+| GET | `/api/calendario` | Público | Eventos entre `desde` y `hasta` (`yyyy-MM-dd`, en la zona del usuario; hasta 366 días), filtro opcional `categorias` separadas por coma. |
+| GET | `/api/calendario/proximos` | Público | Próximos eventos, incluidos los que están en curso (`limite` de 1 a 20). |
+| GET | `/api/calendario/recientes` | Público | Últimos eventos finalizados (`limite` de 1 a 20). |
+| GET | `/api/calendario/eventos/{id}.ics` | Público | Archivo `.ics` de un evento. |
+| GET | `/api/calendario/{siglas}/{anio}.ics` | Público | Archivo `.ics` de una temporada completa. |
 
 La documentación interactiva queda disponible en `/swagger-ui.html` con el backend levantado.
 
@@ -149,10 +168,14 @@ La documentación interactiva queda disponible en `/swagger-ui.html` con el back
 ```sh
 createdb motorsport_test
 psql -d motorsport_test -f database/schema.sql
+psql -d motorsport_test -f database/migraciones/001_indices_unicos.sql
 psql -d motorsport_test -f database/datos_iniciales.sql
+psql -d motorsport_test -f database/datos_ejemplo/seed_temporada_2025.sql   # opcional: datos de prueba
 ```
 
-El backend valida el esquema al iniciar (`ddl-auto=validate`), por lo que las tablas deben existir antes de levantarlo.
+El backend valida el esquema al iniciar (`ddl-auto=validate`), por lo que las tablas deben existir antes de levantarlo. Los scripts se ejecutan en ese orden y en una base nueva: el seed usa los índices únicos de la migración y se puede volver a ejecutar sin duplicar datos.
+
+Si `psql` corre como otro usuario del sistema (por ejemplo con `sudo -u postgres`) y no puede leer los archivos, pasalos por entrada estándar: `psql -d motorsport_test < database/schema.sql`.
 
 ### 2. Backend
 
@@ -194,7 +217,9 @@ cd backend
 ```text
 database/
 	schema.sql                 esquema relacional (DDL)
+	migraciones/               cambios al esquema posteriores (índices únicos, columnas nuevas)
 	datos_iniciales.sql        categorías F1, WRC y TC
+	datos_ejemplo/             temporada 2025 de las tres categorías para probar
 docs/
 	arquitectura.md
 	diagramaUML.md
@@ -230,12 +255,17 @@ README.md
 - `develop`: rama de integración.
 - `feature/<tema>`: funcionalidades nuevas; se integran a `develop` mediante pull request.
 - `fix/<tema>`: correcciones sobre código ya integrado; también salen de `develop` y vuelven por pull request.
+- `docs/<tema>`: cambios solo de documentación, con el mismo circuito.
+
+Las ramas de trabajo son cortas: se crean desde `develop` actualizado, se integran por pull request y se borran después del merge.
 
 ## Pendientes conocidos
 
-- Datos de ejemplo de temporadas, eventos y resultados para probar el MVP 1 sin carga manual.
-- Botón "Agregar al calendario" del detalle de evento: se habilita con el módulo de calendario (MVP 2).
-- Tests de eventos y resultados en el backend; el frontend aún no tiene tests.
+- **Pantalla del calendario mensual (MVP 2):** el backend y el componente `calendario-mes` existen, pero falta la ruta y la página que los usen.
+- **Datos de ejemplo incompletos:** los resultados de F1 cargan solo el podio, los de TC y WRC mayormente el ganador, y los rallies no tienen la clasificación general (etapa `GENERAL`), por lo que los perfiles de WRC no muestran resultados. Tampoco hay eventos futuros, así que "Próximos eventos" aparece vacío.
+- **Búsqueda sin acentos:** buscar "rovanpera" no encuentra "Rovanperä".
+- **Marca de los autos en TC:** sin definir dónde se guarda (un mismo equipo puede correr con más de una marca); se resuelve en el MVP 6.
+- El frontend aún no tiene tests.
 - Definición del servicio de despliegue.
 
 ## Historial de entregas
@@ -254,8 +284,15 @@ En esta etapa se avanzó desde la propuesta hacia el diseño de la solución y l
 - Se especificó la integración de datos mediante consumo de APIs externas y se incorporó como funcionalidad plus la telemetría en vivo, limitada a F1 y sujeta a la disponibilidad del proveedor.
 - Se organizaron los documentos en `docs/`, el esquema y los datos iniciales en `database/`, y se crearon las estructuras iniciales de `backend/` y `frontend/`.
 
-### **Avance actual:** MVP 1 — Consulta de eventos y resultados
+### **Hito:** MVP 1 — Consulta de eventos y resultados
 
 - **Backend:** API REST con registro e inicio de sesión mediante JWT, preferencias de zona horaria, categorías, temporadas, eventos y tablas de resultados de sesiones y etapas; manejo global de errores, configuración de CORS y documentación Swagger.
 - **Frontend:** aplicación Angular con las pantallas de inicio, categorías, temporadas y fechas, detalle de evento con resultados, ingreso y registro, y "Mi cuenta"; selector de zona horaria en la cabecera.
 - **Pruebas:** tests de backend para categorías, autenticación, seguridad y zona horaria.
+
+### **Avance actual:** MVP 2 — Perfiles, portada y calendario
+
+- **Base de datos:** migración con índices únicos y la zona horaria de cada evento; datos de ejemplo de la temporada 2025 de F1, WRC y TC.
+- **Backend:** listado y fichas de pilotos y equipos; calendario por rango de fechas, próximos y recientes; generación de archivos `.ics` por evento y por temporada. Además, errores de validación y de tipo de parámetro responden 400 (antes 500), el error genérico ya no expone detalles internos y se desactivó `open-in-view`.
+- **Frontend:** pantallas de pilotos y equipos con sus fichas, portada con próximos y últimos eventos, y botón "Agregar al calendario" en el detalle de evento.
+- **Pruebas:** 89 tests de backend; se sumaron los de perfiles, calendario, generación de `.ics`, manejo de errores y del servicio de eventos.

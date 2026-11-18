@@ -1,0 +1,73 @@
+:host { 
+    display: block; 
+}
+.cm-cabecera { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin-bottom: 0.5rem; 
+}
+.cm-mes { 
+    display: inline-block; 
+    font-size: 0.95rem; 
+}
+.cm-mes::first-letter { 
+    text-transform: uppercase; 
+}
+.cm-flechas { 
+    display: flex; 
+    gap: 0.15rem; 
+}
+.cm-grilla { 
+    display: grid; 
+    grid-template-columns: repeat(7, minmax(0, 1fr)); 
+    gap: 6px; 
+}
+.cm-semana { 
+    font-size: 0.75rem; 
+    color: var(--texto-suave); 
+    text-align: center; 
+    padding-bottom: 0.25rem; 
+}
+.cm-dia {
+    position: relative; 
+    display: grid; 
+    place-items: center; 
+    aspect-ratio: 1; 
+    min-height: 34px;
+    border-radius: var(--radio-chico); 
+    font-size: 0.85rem; 
+    font-variant-numeric: tabular-nums;
+    text-decoration: none; 
+    color: var(--texto);
+}
+.cm-dia.hoy { 
+    outline: 1px solid var(--texto); 
+    outline-offset: -1px; 
+}
+.con-evento { 
+    font-weight: 700; 
+    transition: transform var(--transicion), filter var(--transicion); 
+}
+.con-evento:hover { 
+    transform: translateY(-2px); 
+    filter: brightness(1.2); 
+}
+.con-evento[data-cat='F1'] { 
+    background: rgb(229 9 20 / 0.45); 
+    box-shadow: inset 0 0 0 1px rgb(229 9 20 / 0.8); 
+}
+.con-evento[data-cat='WRC'] { 
+    background: rgb(245 197 24 / 0.35); 
+    box-shadow: inset 0 0 0 1px rgb(245 197 24 / 0.8); 
+}
+.con-evento[data-cat='TC'] { 
+    background: rgb(47 124 246 / 0.4); 
+    box-shadow: inset 0 0 0 1px rgb(47 124 246 / 0.85); 
+}
+small { 
+    position: absolute; 
+    right: 3px; top: 1px; 
+    font-size: 0.6rem; 
+    font-weight: 700; 
+}

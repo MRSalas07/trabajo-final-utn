@@ -14,16 +14,20 @@ import com.tfi.motorsport.backend.dtos.evento.TablaEtapaDto;
 import com.tfi.motorsport.backend.dtos.sesion.SesionDto;
 import com.tfi.motorsport.backend.dtos.temporada.TemporadaDto;
 import com.tfi.motorsport.backend.handlers.exceptions.ResourceNotFoundException;
+import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.*;
 import com.tfi.motorsport.backend.repositories.*;
 import com.tfi.motorsport.backend.services.IEventoService;
 import com.tfi.motorsport.backend.services.ZonaHoraria;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +48,8 @@ public class EventoServiceImpl implements IEventoService {
     private final ResultadoSesionJPARepository resultadoSesionRepo;
     private final ResultadoEtapaJPARepository resultadoEtapaRepo;
 
+    /** Rango máximo del calendario: un año, para cubrir una temporada completa. */
+    static final int MAX_DIAS_CALENDARIO = 366;
 
 
     @Override
@@ -61,12 +67,47 @@ public class EventoServiceImpl implements IEventoService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No hay datos de la temporada " + anio + " de " + siglas.toUpperCase()));
 
-        List<Evento> eventos = eventoRepo.listarPorTemporada(temporada.getId());
+        return armarEventos(eventoRepo.listarPorTemporada(temporada.getId()), zona);
+    }
+
+    @Override
+    public List<EventoDto> calendario(LocalDate desde, LocalDate hasta, List<String> siglas, ZoneId zona) {
+        if (hasta.isBefore(desde)) {
+            throw new RuleBusinessException("La fecha 'hasta' no puede ser anterior a 'desde'");
+        }
+        if (ChronoUnit.DAYS.between(desde, hasta) > MAX_DIAS_CALENDARIO) {
+            throw new RuleBusinessException("El rango del calendario no puede superar los " + MAX_DIAS_CALENDARIO + " días");
+        }
+        List<Long> categoriaIds = categoriasDelCalendario(siglas);
+        if (categoriaIds.isEmpty()) {
+            return List.of();
+        }
+        // Las fechas son días del usuario: el rango va desde las 00:00 de 'desde' hasta el final de 'hasta' en su zona
+        Instant inicio = desde.atStartOfDay(zona).toInstant();
+        Instant fin = hasta.plusDays(1).atStartOfDay(zona).toInstant().minusNanos(1);
+        return armarEventos(eventoRepo.calendario(inicio, fin, categoriaIds), zona);
+    }
+
+    @Override
+    public List<EventoDto> proximos(int limite, ZoneId zona) {
+        return armarEventos(eventoRepo.proximos(Instant.now(), PageRequest.of(0, limite)), zona);
+    }
+
+    @Override
+    public List<EventoDto> recientes(int limite, ZoneId zona) {
+        return armarEventos(eventoRepo.recientes(PageRequest.of(0, limite)), zona);
+    }
+
+    /**
+     * Arma los EventoDto de una lista de eventos (con temporada y categoría ya cargadas),
+     * respetando el orden recibido. Sesiones, etapas y conteos de resultados se traen
+     * en una consulta cada uno para todos los eventos (evita N+1).
+     */
+    private List<EventoDto> armarEventos(List<Evento> eventos, ZoneId zona) {
         if (eventos.isEmpty()) {
             return List.of();
         }
 
-        // Sesiones y etapas de TODOS los eventos en una sola consulta cada una (evita N+1)
         List<Long> idsEventos = eventos.stream().map(Evento::getId).toList();
         Map<Long, List<Sesion>> sesionesPorEvento = sesionRepo.listarPorEventos(idsEventos).stream()
                 .collect(Collectors.groupingBy(s -> s.getEvento().getId()));
@@ -206,6 +247,23 @@ public class EventoServiceImpl implements IEventoService {
             mapa.put((Long) f[0], (Long) f[1]);
         }
         return mapa;
+    }
+
+    /** Sin siglas: todas las categorías activas. Con siglas: esas categorías (404 si alguna no existe). */
+    private List<Long> categoriasDelCalendario(List<String> siglas) {
+        List<String> pedidas = siglas == null ? List.of()
+                : siglas.stream().filter(s -> s != null && !s.isBlank()).map(String::trim).toList();
+        if (pedidas.isEmpty()) {
+            return categoriaRepo.findAllByActivoAndEliminadoFalseOrderByIdAsc(true).stream()
+                    .map(Categoria::getId).toList();
+        }
+        return pedidas.stream()
+                .map(s -> categoriaRepo.findBySiglasIgnoreCase(s)
+                        .filter(c -> !c.isEliminado())
+                        .orElseThrow(() -> new ResourceNotFoundException("No existe la categoría '" + s + "'")))
+                .map(Categoria::getId)
+                .distinct()
+                .toList();
     }
 
     private Categoria buscarCategoria(String siglas) {

@@ -1,0 +1,67 @@
+.cal-layout { 
+    display: grid; 
+    gap: var(--gap); 
+    grid-template-columns: minmax(0, 1fr); 
+    align-items: start; 
+}
+.cal-lateral { 
+    display: grid; 
+    gap: var(--gap); 
+}
+.cal-lateral .fila { 
+    margin-top: 0.5rem; 
+}
+@media (min-width: 1000px) {
+    .cal-layout { 
+        grid-template-columns: minmax(300px, 3fr) minmax(0, 9fr); 
+    }
+    .cal-lateral { 
+        position: sticky; 
+        top: 130px; 
+    }
+}
+.mes-nombre { 
+    min-width: 9.5rem; 
+    text-align: center; 
+}
+.mes-nombre::first-letter, .dia-titulo::first-letter { 
+    text-transform: uppercase; 
+}
+.dia { 
+    margin-bottom: 1.25rem; 
+}
+.dia-titulo { 
+    font-size: 0.95rem; 
+    color: var(--texto-suave); 
+    border-bottom: 1px solid var(--borde); 
+    padding-bottom: 0.3rem; 
+}
+.evento { 
+    margin-bottom: 0.6rem; 
+    border-left: 4px solid var(--borde); 
+}
+.evento[data-cat='F1'] { 
+    border-left-color: var(--cat-f1); 
+}
+.evento[data-cat='WRC'] { 
+    border-left-color: var(--cat-wrc); 
+}
+.evento[data-cat='TC'] { 
+    border-left-color: var(--cat-tc); 
+}
+.ev-nombre { 
+    font-weight: 700; 
+    text-decoration: none; 
+    flex: 1; 
+    min-width: 0; 
+}
+.evento p { 
+    margin: 0.3rem 0; 
+}
+.sesiones { 
+    margin: 0.4rem 0 0.6rem; 
+    font-size: 0.88rem; 
+}
+.dif { 
+    color: var(--cat-wrc); 
+}

@@ -1,0 +1,39 @@
+<h1>Pilotos</h1>
+<div class="filtros">
+    <label>Buscar
+    <input type="search" placeholder="Nombre, apellido o código" [ngModel]="buscadorPiloto()" (ngModelChange)="buscador.next($event)" />
+    </label>
+    <label>Categoría
+    <select [ngModel]="filtroCategoria()" (ngModelChange)="filtroCategoria.set($event); pagina.set(0)">
+        <option value="">Todas</option><option value="F1">F1</option><option value="WRC">WRC</option><option value="TC">TC</option>
+    </select>
+    </label>
+    <label>Año
+    <input type="number" min="1950" max="2100" placeholder="Todos" [ngModel]="filtroAnio()" (ngModelChange)="filtroAnio.set($event || null); pagina.set(0)" />
+    </label>
+</div>
+
+<app-estado-carga [cargando]="cargando()" [error]="errorMensaje()" [vacio]="!cargando() && resultado()?.contenido?.length === 0"
+                    mensajeVacio="No se encontraron pilotos con esos filtros." />
+
+@if (resultado(); as resultado) {
+    <div class="grilla">
+    @for (p of resultado.contenido; track p.id) {
+        <a class="tarjeta piloto" [routerLink]="['/pilotos', p.id]">
+        <span class="dorsal">{{ p.numero ?? '·' }}</span>
+        <div class="datos">
+            <strong>{{ p.nombre }} {{ p.apellido }}</strong>
+            <span class="suave chico">{{ p.equipoActual ?? 'Sin equipo' }}</span>
+            <span class="suave chico">{{ p.nacionalidad ?? p.pais }}@if (p.codigo) { · {{ p.codigo }} }</span>
+        </div>
+        </a>
+    }
+    </div>
+    @if (resultado.totalPaginas > 1) {
+    <div class="fila paginas">
+        <button type="button" [disabled]="resultado.pagina === 0" (click)="pagina.set(resultado.pagina - 1)">‹ Anterior</button>
+        <span class="suave">Página {{ resultado.pagina + 1 }} de {{ resultado.totalPaginas }} · {{ resultado.totalElementos }} pilotos</span>
+        <button type="button" [disabled]="resultado.pagina + 1 >= resultado.totalPaginas" (click)="pagina.set(resultado.pagina + 1)">Siguiente ›</button>
+    </div>
+    }
+}

@@ -25,6 +25,10 @@
 
 
         <div class="cab-acciones">
+          <a routerLink="/pilotos" class="btn-icono" routerLinkActive="activo" aria-label="Buscar pilotos" title="Buscar pilotos">
+            <app-icono nombre="buscar" />
+          </a>
+
           @if (authService.auth()) {
             <a routerLink="/cuenta" class="btn-icono" routerLinkActive="activo"
               [attr.aria-label]="'Mi cuenta: ' + authService.usuario()?.nombre" [title]="authService.usuario()?.email ?? ''">

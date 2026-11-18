@@ -18,7 +18,8 @@ import { compatForm } from '@angular/forms/signals/compat';
 export class Evento {
 
   private readonly resultadoService = inject(ResultadoService);
-  private readonly eventoService = inject(EventoService);
+  // protected: la plantilla lo usa para armar el enlace de descarga del .ics
+  protected readonly eventoService = inject(EventoService);
   private readonly zonaService = inject(ZonaHorariaService);
 
   readonly id = input.required<string>();

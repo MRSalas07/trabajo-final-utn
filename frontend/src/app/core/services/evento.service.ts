@@ -34,9 +34,22 @@ export class EventoService {
         }
         return param;
     }
-    /** URL directa del .ics (el navegador lo descarga y el celular ofrece agregarlo al calendario). */
-    urlIcsEvento(id: number): string {
-        return `${this.apiUrl}/calendario/eventos/${id}.ics`;
+    
+
+    proximos(limite = 6): Observable<EventoDto[]> {
+        return this.http.get<EventoDto[]>(
+            `${this.apiUrl}/calendario/proximos`, { 
+                params: this.enviarConZona({ limite }) 
+            });
     }
+
+    recientes(limite = 6): Observable<EventoDto[]> {
+        return this.http.get<EventoDto[]>(
+            `${this.apiUrl}/calendario/recientes`, { 
+                params: this.enviarConZona({ limite }) 
+            });
+    }
+
+    
 
 }

@@ -1,10 +1,93 @@
-import { Component } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { EventoService } from '../../core/services/evento.service';
+import { ZonaHorariaService } from '../../core/services/zona-horaria.service';
+import { EventoDto, ResultadoSesion } from '../../core/modelos';
+import { ResultadoService } from '../../core/services/resultados.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { interval } from 'rxjs';
+import { mensajeError } from '../../core/errores/error';
+import { EstadoCarga } from '../../shared/estado-carga/estado-carga';
+import { FilaEvento } from '../../shared/fila-evento/fila-evento';
+import { EstadoPipe, HoraPipe, TiempoPipe } from '../../shared/pipe/formato';
+import { Calendario } from '../calendario/calendario';
+import { CalendarioMes } from '../../shared/calendario-mes/calendario-mes';
 
 @Component({
-  imports: [],
+  imports: [RouterLink,EstadoCarga, FilaEvento, HoraPipe, TiempoPipe, CalendarioMes],
   selector: 'app-inicio',
   styleUrl: './inicio.css',
   templateUrl: './inicio.html',
 })
-export class Inicio {}
+export class Inicio {
+
+  private readonly resultadoService = inject(ResultadoService);
+  private readonly eventoService = inject(EventoService);
+  private readonly zonaService = inject(ZonaHorariaService);
+
+  protected readonly proximosEventos = signal<EventoDto[]>([]);
+  protected readonly recientesEventos = signal<EventoDto[]>([]);
+  protected readonly cargando = signal(true);
+  protected readonly error = signal<string | null>(null);
+  protected readonly ahora = signal(Date.now());
+
+  protected readonly ultimo = computed(() => this.recientesEventos()[0] ?? null);
+  protected readonly tiempos = signal<ResultadoSesion[]>([]);
+
+  protected readonly mes = signal(this.mesActual());
+  protected readonly eventosMes = signal<EventoDto[]>([]);
+  protected readonly hoy = computed(() =>
+    new Intl.DateTimeFormat('en-CA', { timeZone: this.zonaService.zona(), year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+      new Date(this.ahora()),
+    ),
+  );
+
+  constructor() {
+
+    effect(() => {
+      this.zonaService.zona();
+      untracked(() => this.cargar())
+    })
+
+    effect(() => {
+      const ultimo= this.ultimo();
+      untracked(() => {
+        const carrera = ultimo?.sesiones.find((s) => s.tipo === 'CARRERA' && s.cantidadResultados > 0);
+        if (carrera) this.resultadoService.resultadosSesion(carrera.id).subscribe((t) => {
+          this.tiempos.set(t.resultados.slice(0, 8));
+        });
+      });
+    });
+    interval(60_000).pipe(takeUntilDestroyed()).subscribe(() => {
+      this.ahora.set(Date.now())
+    });
+  }
+
+    private cargar(): void {
+    this.cargando.set(true);
+    this.error.set(null);
+    this.eventoService.proximos(4).subscribe({
+      next: (response) => { 
+        this.proximosEventos.set(response); this.cargando.set(false); 
+      },
+      error: (error) => { 
+        this.error.set(mensajeError(error)); this.cargando.set(false); 
+      },
+    });
+    this.eventoService.recientes(4).subscribe((response) => {
+      this.recientesEventos.set(response)
+    });
+  }
+
+    protected moverMes(delta: number): void {
+    const { anio, mes } = this.mes();
+    const dia = new Date(anio, mes + delta, 1);
+    this.mes.set({ anio: dia.getFullYear(), mes: dia.getMonth() });
+  }
+
+    private mesActual() {
+    const hoy = new Date();
+    return { anio: hoy.getFullYear(), mes: hoy.getMonth() };
+  }
+
+}

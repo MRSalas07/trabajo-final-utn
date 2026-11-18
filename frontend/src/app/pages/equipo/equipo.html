@@ -1,0 +1,48 @@
+<app-estado-carga [cargando]="!perfil() && !error()" [error]="error()" />
+@if (perfil(); as perfil) {
+    <div class="encabezado">
+    <div>
+        <h1>{{ perfil.equipo.nombre }}</h1>
+        <p class="suave">
+        @for (categoria of perfil.categorias; track categoria) { <span class="chip-cat" [attr.data-cat]="categoria">{{ categoria }}</span> }
+        {{ perfil.equipo.nacionalidad }} @if (perfil.sede) { · {{ perfil.sede }} }
+        </p>
+    </div>
+    </div>
+
+    <div class="kpis seccion">
+    <div class="kpi"><div class="valor">{{ perfil.estadisticas.eventos }}</div><div class="etiqueta">Eventos con datos</div></div>
+    <div class="kpi"><div class="valor">{{ perfil.estadisticas.victorias }}</div><div class="etiqueta">Victorias</div></div>
+    <div class="kpi"><div class="valor">{{ perfil.estadisticas.podios }}</div><div class="etiqueta">Podios</div></div>
+    <div class="kpi"><div class="valor">{{ perfil.estadisticas.puntos }}</div><div class="etiqueta">Puntos</div></div>
+    </div>
+
+    <div class="grilla-2">
+    <section class="tarjeta">
+        <h2>Plantel</h2>
+        @for (equipo of equipoPorAnio(); track equipo.anio) {
+        <h3 class="suave">{{ equipo.anio }}</h3>
+        <ul class="lista-plana">
+            @for (marca of equipo.miembros; track $index) {
+            <li><a [routerLink]="['/pilotos', marca.pilotoId]">{{ marca.numero ? '#' + marca.numero + ' ' : '' }}{{ marca.piloto }}</a>
+                <span class="suave chico"> {{ marca.categoria }} · {{ marca.rol }}</span></li>
+            }
+        </ul>
+        }
+    </section>
+    <section class="tarjeta">
+        <h2>Últimos resultados</h2>
+        <ul class="lista-plana">
+        @for (resultado of perfil.ultimosResultados; track $index) {
+            <li>
+            <span><a [routerLink]="['/eventos', resultado.eventoId]">{{ resultado.evento }}</a>
+                <span class="suave chico"> · {{ resultado.piloto }} · {{ resultado.fecha | hora: 'dia' }}</span></span>
+            <strong>@if (resultado.estado === 'FINALIZADO') { P{{ resultado.posicion }} } @else { {{ resultado.estado | estado }} }</strong>
+            </li>
+        } @empty {
+            <li class="suave">Sin resultados.</li>
+        }
+        </ul>
+    </section>
+    </div>
+}

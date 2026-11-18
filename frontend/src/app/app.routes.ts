@@ -5,6 +5,9 @@ export const routes: Routes = [
   { path: '', title: 'Motorsport Analytics', loadComponent: () => 
     import('./pages/inicio/inicio').then((m) => m.Inicio) 
   },
+  { path: 'calendario', title: 'Calendario', loadComponent: () => 
+    import('./pages/calendario/calendario').then((m) => m.Calendario) 
+  },
   { path: 'categorias', title: 'Categorías', loadComponent: () => 
     import('./pages/categoria/categorias').then((m) => m.Categorias) 
   },
@@ -20,6 +23,19 @@ export const routes: Routes = [
   { path: 'eventos/:id', title: 'Evento', loadComponent: () => 
     import('./pages/evento/evento').then((m) => m.Evento) 
   },
+  { path: 'pilotos', title: 'Pilotos', loadComponent: () => 
+    import('./pages/pilotos/pilotos').then((m) => m.Pilotos) 
+  },
+  { path: 'pilotos/:id', title: 'Piloto', loadComponent: () => 
+    import('./pages/piloto/piloto').then((m) => m.Piloto) 
+  },
+  { path: 'equipos', title: 'Equipos', loadComponent: () => 
+    import('./pages/equipos/equipos').then((m) => m.Equipos) 
+  },
+  { path: 'equipos/:id', title: 'Equipo', loadComponent: () => 
+    import('./pages/equipo/equipo').then((m) => m.Equipo) 
+  },
+
   { path: '**', redirectTo: '' },
 
 ];

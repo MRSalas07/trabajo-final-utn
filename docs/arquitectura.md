@@ -14,7 +14,7 @@ Esta decisión arquitectónica garantiza la separación de responsabilidades (Se
 
 ## Tecnologías Definitivas
 
-*   **Backend:** Java 21 + Spring Boot 3.x. Justificación: Tipado estático fuerte, excelente manejo transaccional y robustez en la exposición de APIs.
+*   **Backend:** Java 21 + Spring Boot 4.1.2. Justificación: Tipado estático fuerte, excelente manejo transaccional y robustez en la exposición de APIs.
 *   **Base de Datos:** PostgreSQL. Justificación: Motor relacional open-source de nivel empresarial. Ideal para mantener la integridad ACID, manejo nativo de fechas/timestamps complejos (crucial para los calendarios internacionales del automovilismo) y excelente integración con Hibernate.
 *   **Frontend:** Angular + TypeScript. Justificación: Arquitectura basada en componentes que facilita la creación de dashboards interactivos, gráficos estadísticos y tablas dinámicas.
 *   **Despliegue (Cloud):** PaaS (Render / Railway / Vercel). Justificación: Integración continua (CI/CD) nativa con repositorios de GitHub.
