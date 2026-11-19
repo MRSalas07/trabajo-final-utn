@@ -250,7 +250,7 @@ export interface ResumenSincronizacion {
     duracionMs: number;
 }
 
-export interface TrabajoSincronizacion {  
+export interface CargaSincronizacion {  
     id: string; categoria: 
     string; anio: number;
     estado: 'EN_COLA' | 'EN_PROCESO' | 'COMPLETADO' | 'FALLIDO';
