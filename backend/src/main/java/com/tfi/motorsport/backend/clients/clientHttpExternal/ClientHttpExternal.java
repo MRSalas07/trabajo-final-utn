@@ -72,13 +72,13 @@ public class ClientHttpExternal {
                 }
                 long espera = calcularEspera(intento, ex);
                 log.warn("[{}] HTTP {} en '{}'. Reintento {}/{} en {} ms", proveedor, estado.value(), ruta, intento, reintentos, espera);
-                dormir(espera);
+                interrumpir(espera);
             } catch (ResourceAccessException ex) {
                 if (intento > reintentos) {
                     throw new IntegrationExternalException(proveedor, IntegrationExternalException.Tipo.TIMEOUT,
                             "Sin respuesta del proveedor (timeout o error de red) en '" + ruta + "'", ex);
                 }
-                dormir(calcularEspera(intento, null));
+                interrumpir(calcularEspera(intento, null));
             }
         }
     }
@@ -88,7 +88,7 @@ public class ClientHttpExternal {
         long ahora = System.currentTimeMillis();
         long faltante = ultimaLlamadaMs + intervaloMinimoMs - ahora;
         if (faltante > 0) {
-            dormir(faltante);
+            interrumpir(faltante);
         }
         ultimaLlamadaMs = System.currentTimeMillis();
     }
@@ -139,7 +139,7 @@ public class ClientHttpExternal {
                 "El proveedor rechazó la consulta '" + ruta + "' (HTTP " + codigo + ")", ex);
     }
 
-    private static void dormir(long ms) {
+    private static void interrumpir(long ms) {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * metodos utils para leer JSON de forma TOLERANTE.
+ * Funciones Helpers para leer JSON de forma TOLERANTE.
  *
  * Las APIs externas pueden omitir campos, enviar números como texto ("25") o valores vacíos.
  * Estos métodos devuelven null en lugar de lanzar excepciones, y la capa de normalización
@@ -23,80 +23,80 @@ public class FormatJson {
     public FormatJson() {   }
 
     /** Navega una ruta de campos: Json.at(nodo, "Driver", "givenName"). */
-    public static JsonNode at(JsonNode node, String... fields) {
-        JsonNode current = node;
-        for (String field : fields) {
-            if (current == null || current.isNull() || current.isMissingNode()) {
+    public static JsonNode at(JsonNode nodo, String... campos) {
+        JsonNode valor = nodo;
+        for (String campo : campos) {
+            if (valor == null || valor.isNull() || valor.isMissingNode()) {
                 return null;
             }
-            current = current.get(field);
+            valor = valor.get(campo);
         }
-        return (current == null || current.isNull() || current.isMissingNode()) ? null : current;
+        return (valor == null || valor.isNull() || valor.isMissingNode()) ? null : valor;
     }
 
-    public static String getString(JsonNode node, String... fields) {
-        JsonNode value = at(node, fields);
-        if (value == null) {
+    public static String aString(JsonNode node, String... string) {
+        JsonNode campo = at(node, string);
+        if (campo == null) {
             return null;
         }
-        String text = value.isString() ? value.asString() : value.toString();
-        return text.isBlank() ? null : text.trim();
+        String str = campo.isString() ? campo.asString() : campo.toString();
+        return str.isBlank() ? null : str.trim();
     }
 
-    public static Integer getInt(JsonNode node, String... fields) {
-        JsonNode value = at(node, fields);
-        if (value == null) {
+    public static Integer aInt(JsonNode node, String... string) {
+        JsonNode valor = at(node, string);
+        if (valor == null) {
             return null;
         }
-        if (value.isNumber()) {
-            return value.asInt();
+        if (valor.isNumber()) {
+            return valor.asInt();
         }
         try {
-            return Integer.parseInt(value.asString().trim());
+            return Integer.parseInt(valor.asString().trim());
         } catch (NumberFormatException e) {
             return null;
         }
     }
 
-    public static Long getLong(JsonNode node, String... fields) {
-        JsonNode value = at(node, fields);
-        if (value == null) {
+    public static Long aLong(JsonNode node, String... string) {
+        JsonNode valor = at(node, string);
+        if (valor == null) {
             return null;
         }
-        if (value.isNumber()) {
-            return value.asLong();
+        if (valor.isNumber()) {
+            return valor.asLong();
         }
         try {
-            return Long.parseLong(value.asString().trim());
+            return Long.parseLong(valor.asString().trim());
         } catch (NumberFormatException e) {
             return null;
         }
     }
 
-    public static BigDecimal getDecimal(JsonNode node, String... fields) {
-        JsonNode value = at(node, fields);
-        if (value == null) {
+    public static BigDecimal aDecimal(JsonNode node, String... string) {
+        JsonNode valor = at(node, string);
+        if (valor == null) {
             return null;
         }
         try {
-            return value.isNumber() ? value.decimalValue() : new BigDecimal(value.asString().trim());
+            return valor.isNumber() ? valor.decimalValue() : new BigDecimal(valor.asString().trim());
         } catch (NumberFormatException e) {
             return null;
         }
     }
 
-    public static boolean getBoolean(JsonNode node, String... fields) {
-        JsonNode value = at(node, fields);
-        return value != null && (value.isBoolean() ? value.asBoolean() : "true".equalsIgnoreCase(value.asString()));
+    public static boolean booleano(JsonNode node, String... string) {
+        JsonNode valor = at(node, string);
+        return valor != null && (valor.isBoolean() ? valor.asBoolean() : "true".equalsIgnoreCase(valor.asString()));
     }
 
-    public static LocalDate getDate(JsonNode node, String... fields) {
-        String text = getString(node, fields);
-        if (text == null) {
+    public static LocalDate aDate(JsonNode node, String... string) {
+        String str = aString(node, string);
+        if (str == null) {
             return null;
         }
         try {
-            return LocalDate.parse(text.length() > 10 ? text.substring(0, 10) : text);
+            return LocalDate.parse(str.length() > 10 ? str.substring(0, 10) : str);
         } catch (DateTimeParseException e) {
             return null;
         }
@@ -106,15 +106,15 @@ public class FormatJson {
      * Interpreta una fecha-hora. Si el texto no trae zona (ej: "2025-01-23T17:05:00")
      * se asume UTC, que es lo que usan los proveedores integrados.
      */
-    public static Instant parseInstantUtc(String text) {
-        if (text == null || text.isBlank()) {
+    public static Instant instantUtc(String texto) {
+        if (texto == null || texto.isBlank()) {
             return null;
         }
         try {
-            return Instant.parse(text);
+            return Instant.parse(texto);
         } catch (DateTimeParseException e) {
             try {
-                return LocalDateTime.parse(text).toInstant(ZoneOffset.UTC);
+                return LocalDateTime.parse(texto).toInstant(ZoneOffset.UTC);
             } catch (DateTimeParseException e2) {
                 return null;
             }
@@ -122,12 +122,12 @@ public class FormatJson {
     }
 
     /** Recorre un arreglo de forma segura (lista vacía si el nodo no es arreglo). */
-    public static List<JsonNode> list(JsonNode node, String... fields) {
-        JsonNode array = fields.length == 0 ? node : at(node, fields);
-        List<JsonNode> result = new ArrayList<>();
+    public static List<JsonNode> lista(JsonNode nodo, String... campos) {
+        JsonNode array = campos.length == 0 ? nodo : at(nodo, campos);
+        List<JsonNode> lista = new ArrayList<>();
         if (array != null && array.isArray()) {
-            array.forEach(result::add);
+            array.forEach(lista::add);
         }
-        return result;
+        return lista;
     }
 }
