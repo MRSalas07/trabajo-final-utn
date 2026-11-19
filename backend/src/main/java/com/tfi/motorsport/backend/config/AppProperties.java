@@ -47,7 +47,7 @@ public record AppProperties(
             int timeoutConexionMs,
             int timeoutLecturaMs,
             int reintentos,
-            Proveedor jolpica,
+            Proveedor f1,
             ProveedorWrc wrc,
             boolean syncAutomatica,
             String syncCron

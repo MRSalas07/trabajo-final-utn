@@ -20,8 +20,8 @@ public class F1Adapter implements FuenteDatosCategoria{
 
     public F1Adapter(AppProperties props, JsonMapper jsonMapper) {
         AppProperties.Integracion cfg = props.integracion();
-        this.cliente = new ClientHttpExternal(PROVEEDOR, cfg.jolpica().urlBase(), jsonMapper,
-                cfg.timeoutConexionMs(), cfg.timeoutLecturaMs(), cfg.reintentos(), cfg.jolpica().intervaloMinimoMs());
+        this.cliente = new ClientHttpExternal(cfg.f1().urlBase(), jsonMapper,PROVEEDOR,
+                cfg.timeoutConexionMs(), cfg.timeoutLecturaMs(), cfg.reintentos(), cfg.f1().intervaloMinimoMs());
     }
 
     @Override
