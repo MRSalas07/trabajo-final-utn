@@ -1,0 +1,38 @@
+<h1>Administración</h1>
+
+<section class="tarjeta seccion">
+    <h2>Sincronizar desde APIs externas</h2>
+    <div class="fila">
+    <label>Categoría
+        <select [(ngModel)]="categoria"><option value="F1">F1</option><option value="WRC">WRC</option></select>
+    </label>
+    <label>Año <input type="number" [(ngModel)]="anio" min="1950" [max]="anioMaximo" /></label>
+    <button type="button" class="btn-primario" (click)="sincronizar()">Sincronizar</button>
+    </div>
+    @if (mensaje()) { <p class="chico">{{ mensaje() }}</p> }
+
+    <table>
+    <thead>
+        <tr>
+            <th>Categoría</th>
+            <th>Año</th>
+            <th>Estado</th>
+            <th>Creado</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (carga of cargaDatos(); track carga.id) {
+        <tr><td>{{ carga.categoria }}</td><td>{{ carga.anio }}</td><td>{{ carga.estado }}</td><td>{{ carga.creado | hora }}</td></tr>
+        }
+    </tbody>
+    </table>
+</section>
+
+<section class="tarjeta seccion">
+    <h2>Importar JSON (TC y otras fuentes manuales)</h2>
+    <input type="file" accept=".json,application/json" (change)="importarDatos($event)" />
+    @if (errorImportacion()) { <p class="err">{{ errorImportacion() }}</p> }
+    @if (importacion(); as resultado) {
+    <p>{{ resultado.eventosProcesados }} eventos · {{ resultado.resultadosProcesados }} resultados · {{ resultado.pilotosNuevos }} pilotos nuevos</p>
+    }
+</section>

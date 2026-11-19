@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/guards';
+import { adminGuard, authGuard } from './core/guards/guards';
 
 export const routes: Routes = [
   { path: '', title: 'Motorsport Analytics', loadComponent: () => 
@@ -35,6 +35,8 @@ export const routes: Routes = [
   { path: 'equipos/:id', title: 'Equipo', loadComponent: () => 
     import('./pages/equipo/equipo').then((m) => m.Equipo) 
   },
+  { path: 'admin', title: 'Administración', canActivate: [adminGuard], loadComponent: () => 
+    import('./pages/admin/admin/admin').then((m) => m.Admin) },
 
   { path: '**', redirectTo: '' },
 

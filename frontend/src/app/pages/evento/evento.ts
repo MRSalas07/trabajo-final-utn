@@ -8,6 +8,7 @@ import { EstadoPipe, HoraPipe, HoraSedePipe, TiempoPipe } from '../../shared/pip
 import { ResultadoService } from '../../core/services/resultados.service';
 import { mensajeError } from '../../core/errores/error';
 import { compatForm } from '@angular/forms/signals/compat';
+import { CalendarioService } from '../../core/services/calendario.service';
 
 @Component({
   imports: [RouterLink,EstadoCarga,HoraPipe,HoraSedePipe,EstadoPipe,TiempoPipe],
@@ -21,6 +22,7 @@ export class Evento {
   // protected: la plantilla lo usa para armar el enlace de descarga del .ics
   protected readonly eventoService = inject(EventoService);
   private readonly zonaService = inject(ZonaHorariaService);
+  private readonly calendarioService = inject(CalendarioService);
 
   readonly id = input.required<string>();
 

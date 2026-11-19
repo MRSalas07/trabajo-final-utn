@@ -234,3 +234,35 @@ export interface PerfilEquipo {
     estadisticas: { eventos: number; victorias: number; podios: number; puntos: number };
     ultimosResultados: ResultadoReciente[];
 }
+
+export interface ResumenSincronizacion {
+    categoria: string; 
+    anio: number; 
+    fuente: string;
+    eventosProcesados: number; 
+    eventosOmitidos: number; 
+    sesionesProcesadas: number; 
+    etapasProcesadas: number;
+    resultadosProcesados: number; 
+    pilotosNuevos: number; 
+    equiposNuevos: number; 
+    avisos: string[]; 
+    duracionMs: number;
+}
+
+export interface CargaSincronizacion {  
+    id: string; categoria: 
+    string; anio: number;
+    estado: 'EN_COLA' | 'EN_PROCESO' | 'COMPLETADO' | 'FALLIDO';
+    creado: string; 
+    finalizado: string | null; 
+    resumen: ResumenSincronizacion | null; 
+    error: string | null;
+}
+export interface FuenteDisponible { 
+    categoria: string; 
+    proveedor: string; 
+    habilitada: boolean; 
+}
+
+
