@@ -25,6 +25,10 @@
 
 
         <div class="cab-acciones">
+          @if (authService.esAdmin()) {
+            <a routerLink="/admin" class="btn-admin">Admin</a>
+          }
+
           <a routerLink="/pilotos" class="btn-icono" routerLinkActive="activo" aria-label="Buscar pilotos" title="Buscar pilotos">
             <app-icono nombre="buscar" />
           </a>
