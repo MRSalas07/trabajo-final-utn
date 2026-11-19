@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EquipoPilotoJPARepository extends JpaRepository<EquipoPiloto, Long> {
@@ -40,4 +41,7 @@ public interface EquipoPilotoJPARepository extends JpaRepository<EquipoPiloto, L
             order by ep.temporada desc, ep.fechaDesde desc nulls last
             """)
     List<EquipoPiloto> participacionesDePilotos(Collection<Long> pilotoIds, Long categoriaId, Integer anio);
+
+    Optional<EquipoPiloto> findByEquipoIdAndPilotoIdAndCategoriaIdAndTemporadaAndRol(
+            Long equipoId, Long pilotoId, Long categoriaId, Integer temporada, String rol);
 }

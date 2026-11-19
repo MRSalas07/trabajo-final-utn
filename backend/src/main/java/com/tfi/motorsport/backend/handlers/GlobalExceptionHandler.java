@@ -2,6 +2,7 @@ package com.tfi.motorsport.backend.handlers;
 
 
 import com.tfi.motorsport.backend.dtos.error.ErrorDto;
+import com.tfi.motorsport.backend.handlers.exceptions.IntegrationExternalException;
 import com.tfi.motorsport.backend.handlers.exceptions.ResourceNotFoundException;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import jakarta.validation.ConstraintViolationException;
@@ -153,6 +154,14 @@ public class GlobalExceptionHandler {
                 List.of("Ocurrió un error inesperado. Intente nuevamente más tarde."));
     }
 
+
+    /** Errores de las APIs externas: se informa el proveedor pero no detalles internos. */
+    @ExceptionHandler(IntegrationExternalException.class)
+    public ResponseEntity<ErrorDto> handleIntegracion(IntegrationExternalException ex) {
+        log.warn("Fallo de integración externa: {}", ex.getMessage());
+        return responder(ex.getTipo().getEstadoHttp(), "Error en proveedor externo de datos",
+                List.of(ex.getMessage()));
+    }
 
     private ResponseEntity<ErrorDto> responder(HttpStatus estado, String error, List<String> detalles) {
         return ResponseEntity.status(estado).body(ErrorDto.of(estado.value(), error, detalles));
