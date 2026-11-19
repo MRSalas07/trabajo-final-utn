@@ -3,10 +3,7 @@ package com.tfi.motorsport.backend.clients.normalization;
 import com.tfi.motorsport.backend.clients.normalization.ModeloNormalizado.EquipoNorm;
 import com.tfi.motorsport.backend.clients.normalization.ModeloNormalizado.PilotoNorm;
 import com.tfi.motorsport.backend.clients.normalization.ModeloNormalizado.ResultadoEtapaNorm;
-import com.tfi.motorsport.backend.model.Equipo;
-import com.tfi.motorsport.backend.model.EquipoPiloto;
-import com.tfi.motorsport.backend.model.Piloto;
-import com.tfi.motorsport.backend.model.Tripulacion;
+import com.tfi.motorsport.backend.model.*;
 import com.tfi.motorsport.backend.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -93,8 +90,8 @@ class ParticipantesPersistidor {
         tr.setNumero(r.numero());
         Long id = tripulacionRepo.save(tr).getId();
         // Ambos integrantes quedan registrados en equipo_x_piloto (perfiles y listados unificados)
-        registrarParticipacion(equipoId, pilotoId, r.numero(), Catalogos.ROL_PILOTO, ctx);
-        registrarParticipacion(equipoId, copilotoId, r.numero(), Catalogos.ROL_COPILOTO, ctx);
+        registrarParticipacion(equipoId, pilotoId, r.numero(), Catalogo.ROL_PILOTO, ctx);
+        registrarParticipacion(equipoId, copilotoId, r.numero(), Catalogo.ROL_COPILOTO, ctx);
         return id;
     }
 

@@ -13,7 +13,7 @@ public class IntegrationExternalException extends RuntimeException {
         RESPUESTA_VACIA(HttpStatus.BAD_GATEWAY),
         FORMATO_INVALIDO(HttpStatus.BAD_GATEWAY),
         ERROR_PROVEEDOR(HttpStatus.BAD_GATEWAY),
-        NO_DISPONIBLE(HttpStatus.SERVICE_UNAVAILABLE):
+        NO_DISPONIBLE(HttpStatus.SERVICE_UNAVAILABLE);
 
         private final HttpStatus estadoHttp;
 
