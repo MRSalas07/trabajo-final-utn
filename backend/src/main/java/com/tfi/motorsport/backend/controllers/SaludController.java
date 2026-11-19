@@ -21,12 +21,13 @@ public class SaludController {
 
     private final AppProperties props;
 
-    public record Salud(String estado, Instant hora) {
+    public record Salud(String estado, Instant hora, boolean wrcSyncAutomatico) {
     }
 
     @Operation(summary = "Estado del servicio y módulos habilitados")
     @GetMapping("/api/salud")
     public Salud salud() {
-        return new Salud("OK", Instant.now());
+
+        return new Salud("OK", Instant.now(),props.integracion().wrc().habilitado());
     }
 }
