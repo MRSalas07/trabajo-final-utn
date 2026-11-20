@@ -86,7 +86,7 @@ El desarrollo se organiza en MVPs: cada uno termina con algo que se puede probar
 - **Agregar al calendario:** el detalle de cada evento descarga un archivo `.ics` que el celular o la computadora ofrecen agregar a su calendario (una entrada por sesión; una sola para todo el rally en WRC).
 - **Calendario unificado (API):** eventos de todas o algunas categorías entre dos fechas y descarga `.ics` de una temporada completa. La pantalla del calendario mensual todavía no está en el frontend.
 
-Los datos todavía se cargan con scripts: `database/datos_iniciales.sql` crea las tres categorías y `database/datos_ejemplo/seed_temporada_2025.sql` agrega la temporada 2025 de las tres para probar. La carga automática corresponde al MVP 3.
+Desde el MVP 3, F1 y WRC se cargan desde sus APIs con el panel `/admin` y se respaldan en JSON; TC se carga a mano con la importación JSON (ver [`database/README.md`](database/README.md)).
 
 ## Stack tecnológico
 
@@ -167,15 +167,14 @@ La documentación interactiva queda disponible en `/swagger-ui.html` con el back
 
 ```sh
 createdb motorsport_test
-psql -d motorsport_test -f database/schema.sql
-psql -d motorsport_test -f database/migraciones/001_indices_unicos.sql
-psql -d motorsport_test -f database/datos_iniciales.sql
-psql -d motorsport_test -f database/datos_ejemplo/seed_temporada_2025.sql   # opcional: datos de prueba
+psql -d motorsport_test < database/schema.sql
+psql -d motorsport_test < database/datos_iniciales.sql
+psql -d motorsport_test < database/datos_ejemplo/seed_tc_2025.sql   # opcional: TC 2025
 ```
 
-El backend valida el esquema al iniciar (`ddl-auto=validate`), por lo que las tablas deben existir antes de levantarlo. Los scripts se ejecutan en ese orden y en una base nueva: el seed usa los índices únicos de la migración y se puede volver a ejecutar sin duplicar datos.
+El backend valida el esquema al iniciar (`ddl-auto=validate`), por lo que las tablas deben existir antes de levantarlo. `schema.sql` se ejecuta una vez sobre una base vacía; los otros dos se pueden repetir sin duplicar datos. F1 y WRC se cargan después desde `/admin` (sincronización o respaldo JSON): el paso a paso, el usuario administrador local y el formato de importación están en [`database/README.md`](database/README.md).
 
-Si `psql` corre como otro usuario del sistema (por ejemplo con `sudo -u postgres`) y no puede leer los archivos, pasalos por entrada estándar: `psql -d motorsport_test < database/schema.sql`.
+Los archivos se pasan con `<` para que los lea tu usuario: así funciona también cuando `psql` corre como otro usuario (por ejemplo `sudo -u postgres psql -d motorsport_test < database/schema.sql`).
 
 ### 2. Backend
 
@@ -216,10 +215,12 @@ cd backend
 
 ```text
 database/
-	schema.sql                 esquema relacional (DDL)
-	migraciones/               cambios al esquema posteriores (índices únicos, columnas nuevas)
-	datos_iniciales.sql        categorías F1, WRC y TC
-	datos_ejemplo/             temporada 2025 de las tres categorías para probar
+	README.md                  cómo crear la base, cargar datos y respaldarlos
+	schema.sql                 esquema relacional completo (DDL + índices únicos)
+	migraciones/               solo para actualizar bases creadas con un esquema anterior
+	datos_iniciales.sql        categorías F1, WRC y TC + administrador local
+	datos_ejemplo/             temporada 2025 de TC (opcional)
+	respaldos/                 exportación a JSON y temporadas respaldadas
 docs/
 	arquitectura.md
 	diagramaUML.md

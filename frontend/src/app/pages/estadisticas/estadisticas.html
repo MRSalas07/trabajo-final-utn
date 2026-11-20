@@ -1,0 +1,165 @@
+<div class="encabezado">
+  <h1>Estadísticas</h1>
+</div>
+
+<div class="filtros">
+  <label>Categoría
+    <select [value]="siglas() ?? ''" (change)="elegirCategoria($any($event.target).value)">
+      @for (c of categorias(); track c.id) {
+        <option [value]="c.siglas" [selected]="c.siglas === siglas()">{{ c.nombre }}</option>
+      }
+    </select>
+  </label>
+  <label>Temporada
+    <select [value]="anioElegido() ?? ''" (change)="elegirAnio($any($event.target).value)" [disabled]="!temporadas().length">
+      @for (t of temporadas(); track t.id) {
+        <option [value]="t.anio" [selected]="t.anio === anioElegido()">{{ t.anio }}</option>
+      }
+    </select>
+  </label>
+  @if (siglas(); as s) {
+    <a class="btn-chico" [routerLink]="['/categorias', s]">Ver campeonato completo</a>
+  }
+</div>
+
+<app-estado-carga [cargando]="cargandoPilotos()" [error]="error()"
+                  [vacio]="!cargandoPilotos() && !error() && anioElegido() !== null && pilotos().length === 0"
+                  mensajeVacio="Todavía no hay resultados cargados para esta temporada." />
+
+<p class="suave chico">Todas las cifras se calculan a partir de los resultados cargados en el sistema.</p>
+
+<div class="tablero">
+  <!-- ------------------------------------------------------------ Evolución -->
+  <section class="panel" aria-labelledby="t-evolucion">
+    <div class="panel-titulo">
+      <h2 id="t-evolucion">Evolución del campeonato</h2>
+      <div class="pestanas mini" role="tablist" aria-label="Dato a graficar">
+        <button type="button" role="tab" [class.activa]="metrica() === 'puntos'" [attr.aria-selected]="metrica() === 'puntos'"
+                (click)="metrica.set('puntos')">Puntos</button>
+        <button type="button" role="tab" [class.activa]="metrica() === 'posicion'" [attr.aria-selected]="metrica() === 'posicion'"
+                (click)="metrica.set('posicion')">Posición</button>
+      </div>
+    </div>
+
+    @if (pilotos().length) {
+      <div class="selector-pilotos" role="group" aria-label="Pilotos del gráfico">
+        @for (p of pilotos(); track p.pilotoId) {
+          <button type="button" class="btn-chico toggle-cat" [class.activo]="idsEvolucion().includes(p.pilotoId)"
+                  [attr.aria-pressed]="idsEvolucion().includes(p.pilotoId)" (click)="alternarPiloto(p.pilotoId)">
+            {{ p.codigo ?? p.piloto }}
+          </button>
+        }
+      </div>
+      <p class="suave chico">
+        @if (idsEvolucion().length) {
+          {{ idsEvolucion().length }} de {{ maximoEvolucion }} pilotos elegidos ·
+          <button type="button" class="enlace" (click)="volverAlTop()">Volver al top 5</button>
+        } @else {
+          Mostrando el top 5. Tocá pilotos para elegir cuáles comparar (hasta {{ maximoEvolucion }}).
+        }
+      </p>
+    }
+
+    <app-estado-carga [cargando]="cargandoEvolucion()" [error]="errorEvolucion()"
+                      [vacio]="!cargandoEvolucion() && !errorEvolucion() && seriesEvolucion().length === 0" mensajeVacio="Sin datos para graficar." />
+    @if (seriesEvolucion().length) {
+      <app-grafico tipo="line" [etiquetas]="etiquetasEvolucion()" [detalles]="detallesEvolucion()" [series]="seriesEvolucion()"
+                   [invertirY]="metrica() === 'posicion'" [tituloY]="metrica() === 'puntos' ? 'Puntos acumulados' : 'Posición en el campeonato'"
+                   [alto]="360" descripcion="Evolución del campeonato fecha a fecha" />
+    }
+  </section>
+
+  <!-- ------------------------------------------------------------ Tendencia -->
+  <section class="panel col-6" aria-labelledby="t-tendencia">
+    <div class="panel-titulo">
+      <h2 id="t-tendencia">Tendencia de un piloto</h2>
+      @if (pilotos().length) {
+        <select aria-label="Piloto" [value]="tendenciaId() ?? ''" (change)="elegirTendencia($any($event.target).value)">
+          @for (p of pilotos(); track p.pilotoId) {
+            <option [value]="p.pilotoId" [selected]="p.pilotoId === tendenciaId()">{{ p.piloto }}</option>
+          }
+        </select>
+      }
+    </div>
+
+    <app-estado-carga [cargando]="cargandoTendencia()" [error]="errorTendencia()" />
+    @if (tendencia(); as t) {
+      <div class="kpis">
+        <div class="kpi"><div class="valor">{{ t.promedioPosicion ?? '—' }}</div><div class="etiqueta">Posición promedio</div></div>
+        <div class="kpi"><div class="valor">{{ t.desviacionEstandar ?? '—' }}</div><div class="etiqueta">Desviación estándar</div></div>
+        <div class="kpi"><div class="valor">{{ t.tasaFinalizacion !== null ? t.tasaFinalizacion + '%' : '—' }}</div><div class="etiqueta">Terminó la carrera</div></div>
+        <div class="kpi"><div class="valor">{{ t.mejorResultado ?? '—' }} / {{ t.peorResultado ?? '—' }}</div><div class="etiqueta">Mejor / peor</div></div>
+      </div>
+      <p class="interpretacion" [attr.data-tendencia]="t.interpretacion">
+        <strong>{{ t.interpretacion }}</strong>
+        @if (t.pendiente !== null) {
+          <span class="suave chico">· pendiente {{ t.pendiente }} posiciones por fecha (negativa = mejora)</span>
+        }
+      </p>
+      @if (seriesTendencia().length && t.puntos.length) {
+        <app-grafico tipo="line" [etiquetas]="etiquetasTendencia()" [detalles]="detallesTendencia()" [series]="seriesTendencia()"
+                     [invertirY]="true" tituloY="Posición" [alto]="280" descripcion="Posición final en cada fecha y su media móvil" />
+      }
+    }
+  </section>
+
+  <!-- ------------------------------------------------------------ Comparativa -->
+  <section class="panel col-6" aria-labelledby="t-comparativa">
+    <div class="panel-titulo"><h2 id="t-comparativa">Comparativa</h2></div>
+
+    @if (pilotos().length > 1) {
+      <div class="filtros">
+        <label>Piloto A
+          <select [value]="idA() ?? ''" (change)="elegirComparado('a', $any($event.target).value)">
+            @for (p of pilotos(); track p.pilotoId) {
+              <option [value]="p.pilotoId" [selected]="p.pilotoId === idA()">{{ p.piloto }}</option>
+            }
+          </select>
+        </label>
+        <label>Piloto B
+          <select [value]="idB() ?? ''" (change)="elegirComparado('b', $any($event.target).value)">
+            @for (p of pilotos(); track p.pilotoId) {
+              <option [value]="p.pilotoId" [selected]="p.pilotoId === idB()">{{ p.piloto }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      @if (idA() !== null && idA() === idB()) {
+        <p class="aviso">Elegí dos pilotos distintos para comparar.</p>
+      }
+    }
+
+    <app-estado-carga [cargando]="cargandoComparativa()" [error]="errorComparativa()" />
+    @if (comparativa(); as c) {
+      <div class="duelo">
+        <div class="duelo-cab">
+          <strong class="nombre-a">{{ c.a.piloto }}</strong>
+          <span class="suave chico">vs</span>
+          <strong class="nombre-b">{{ c.b.piloto }}</strong>
+        </div>
+        @for (fila of filasComparadas(); track fila.etiqueta) {
+          <div class="duelo-fila">
+            <span class="num" [class.gana]="ganaA(fila)">{{ fila.a }}</span>
+            <div class="duelo-barra" [attr.aria-label]="fila.etiqueta + ': ' + fila.a + ' contra ' + fila.b">
+              <div class="lado a" [style.width.%]="porcentaje(fila.a, fila)"></div>
+              <div class="lado b" [style.width.%]="porcentaje(fila.b, fila)"></div>
+              <span class="duelo-etiqueta">{{ fila.etiqueta }}</span>
+            </div>
+            <span class="num" [class.gana]="ganaB(fila)">{{ fila.b }}</span>
+          </div>
+        }
+        <p class="chico">
+          Terminó delante en carrera: <strong>{{ c.a.piloto }} {{ c.carrerasDelanteA }}</strong> –
+          <strong>{{ c.carrerasDelanteB }} {{ c.b.piloto }}</strong>
+          @if (c.clasificacionesDelanteA + c.clasificacionesDelanteB > 0) {
+            <br />En clasificación: <strong>{{ c.clasificacionesDelanteA }}</strong> – <strong>{{ c.clasificacionesDelanteB }}</strong>
+          }
+        </p>
+      </div>
+      @if (serieDiferencia().length && c.rondas.length) {
+        <app-grafico tipo="line" [etiquetas]="etiquetasComparativa()" [detalles]="detallesComparativa()" [series]="serieDiferencia()"
+                     tituloY="Diferencia de puntos (A − B)" [alto]="220" descripcion="Diferencia de puntos acumulados entre A y B" />
+      }
+    }
+  </section>
+</div>

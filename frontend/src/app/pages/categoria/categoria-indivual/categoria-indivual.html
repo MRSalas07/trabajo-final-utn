@@ -1,31 +1,189 @@
 <div class="encabezado">
-      <span class="chip-cat" [attr.data-cat]="siglas()">{{ siglas() }}</span>
-      <h1>{{ siglas() }}</h1>
-      <label class="temporada">Temporada
-        <select [value]="anio()" (change)="anio.set(+$any($event.target).value)">
-          @for (t of temporadas(); track t.id) {
-            <option [value]="t.anio">{{ t.anio }}</option>
-          }
-        </select>
-      </label>
+  <span class="chip-cat" [attr.data-cat]="siglas()">{{ siglas() }}</span>
+  <h1>{{ perfil()?.categoria?.nombre ?? siglas() }}</h1>
+  @if (temporadas().length) {
+    <label class="temporada">Temporada
+      <select [value]="anio()" (change)="cambiarAnio($any($event.target).value)">
+        @for (t of temporadas(); track t.id) {
+          <option [value]="t.anio" [selected]="t.anio === anio()">{{ t.anio }}</option>
+        }
+      </select>
+    </label>
+  }
+</div>
+
+<!-- Ficha de la categoría: resumen de la temporada actual -->
+@if (errorPerfil()) {
+  <app-estado-carga [error]="errorPerfil()" />
+} @else if (perfil(); as p) {
+  <section class="panel ficha" aria-labelledby="t-ficha">
+    <div class="panel-titulo">
+      <h2 id="t-ficha">Temporada {{ p.temporadaActual?.anio ?? '—' }}</h2>
+      @if (p.temporadaActual) {
+        <a routerLink="/estadisticas" [queryParams]="{ categoria: siglas(), anio: p.temporadaActual.anio }">Ver estadísticas</a>
+      }
+    </div>
+    @if (p.categoria.descripcion) { <p class="suave chico">{{ p.categoria.descripcion }}</p> }
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="valor">{{ p.resumen?.eventosDisputados ?? 0 }}/{{ p.resumen?.eventosTotales ?? 0 }}</div>
+        <div class="etiqueta">Fechas disputadas</div>
+      </div>
+      <div class="kpi">
+        @if (p.resumen?.lider; as lider) {
+          <div class="valor"><a [routerLink]="['/pilotos', lider.pilotoId]">{{ lider.codigo ?? lider.piloto }}</a></div>
+          <div class="etiqueta">Líder · {{ lider.puntos }} pts</div>
+        } @else {
+          <div class="valor">—</div><div class="etiqueta">Líder</div>
+        }
+      </div>
+      <div class="kpi">
+        @if (p.resumen?.equipoLider; as equipo) {
+          <div class="valor chico-valor"><a [routerLink]="['/equipos', equipo.equipoId]">{{ equipo.equipo }}</a></div>
+          <div class="etiqueta">Equipo líder · {{ equipo.puntos }} pts</div>
+        } @else {
+          <div class="valor">—</div><div class="etiqueta">Equipo líder</div>
+        }
+      </div>
+      <div class="kpi">
+        <div class="valor">{{ p.resumen?.ganadoresDistintos ?? 0 }}</div>
+        <div class="etiqueta">Ganadores distintos</div>
+      </div>
     </div>
 
+    <div class="grilla-2 eventos-ficha">
+      <div>
+        <h3 class="chico suave">Último evento</h3>
+        @if (p.ultimoEvento; as ultimo) {
+          <p><a [routerLink]="['/eventos', ultimo.id]">{{ ultimo.nombre }}</a> · {{ ultimo.inicio | hora: 'dia' }}</p>
+          @if (ultimoGanador(); as ganador) {
+            <p class="chico">Ganó <a [routerLink]="['/pilotos', ganador.pilotoId]">{{ ganador.piloto }}</a>
+              @if (ganador.equipo) { <span class="suave">({{ ganador.equipo }})</span> }
+            </p>
+          }
+        } @else {
+          <p class="suave">Todavía no se disputó ningún evento.</p>
+        }
+      </div>
+      <div>
+        <h3 class="chico suave">Próximo evento</h3>
+        @if (p.proximoEvento; as proximo) {
+          <p><a [routerLink]="['/eventos', proximo.id]">{{ proximo.nombre }}</a></p>
+          <p class="chico">{{ proximo.inicio | hora: 'corta' }}
+            @if (proximo.circuito) { <span class="suave">· {{ proximo.circuito }}</span> }
+          </p>
+        } @else {
+          <p class="suave">No hay eventos próximos cargados.</p>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Pestañas: calendario y campeonatos de la temporada elegida -->
+<div class="pestanas" role="tablist" aria-label="Contenido de la temporada">
+  <button type="button" role="tab" [class.activa]="pestana() === 'calendario'" [attr.aria-selected]="pestana() === 'calendario'"
+          (click)="pestana.set('calendario')">Calendario</button>
+  <button type="button" role="tab" [class.activa]="pestana() === 'pilotos'" [attr.aria-selected]="pestana() === 'pilotos'"
+          (click)="pestana.set('pilotos')">Campeonato de pilotos</button>
+  <button type="button" role="tab" [class.activa]="pestana() === 'equipos'" [attr.aria-selected]="pestana() === 'equipos'"
+          (click)="pestana.set('equipos')">Campeonato de equipos</button>
+</div>
+
+@switch (pestana()) {
+  @case ('calendario') {
     <app-estado-carga [cargando]="cargando()" [error]="error()" [vacio]="!cargando() && eventos().length === 0"
                       mensajeVacio="Todavía no hay fechas cargadas." />
+    @if (eventos().length) {
+      <div class="tabla-scroll">
+        <table>
+          <thead><tr><th>#</th><th>Evento</th><th>Fecha</th><th>Estado</th></tr></thead>
+          <tbody>
+            @for (evento of eventos(); track evento.id) {
+              <tr>
+                <td class="pos">{{ evento.numeroFecha }}</td>
+                <td><a [routerLink]="['/eventos/', evento.id]">{{ evento.nombre }}</a><div class="suave chico">{{ evento.circuito }}</div></td>
+                <td>{{ evento.inicio | hora }}</td>
+                <td><span class="badge" [attr.data-estado]="evento.estado">{{ evento.estado | estado }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
 
-    <div class="tabla-scroll">
-      <table>
-        <thead><tr><th>#</th><th>Evento</th><th>Fecha</th><th>Estado</th></tr></thead>
-        <tbody>
-          @for (evento of eventos(); track evento.id) {
+  @case ('pilotos') {
+    <app-estado-carga [cargando]="cargandoCampeonato()" [error]="errorCampeonato()"
+                      [vacio]="!cargandoCampeonato() && pilotos().length === 0"
+                      mensajeVacio="Todavía no hay resultados para calcular el campeonato." />
+    @if (pilotos().length) {
+      <div class="tabla-scroll">
+        <table class="campeonato">
+          <thead>
             <tr>
-              <td class="pos">{{ evento.numeroFecha }}</td>
-              <td><a [routerLink]="['/eventos/', evento.id]">{{ evento.nombre }}</a><div class="suave chico">{{ evento.circuito }}</div></td>
-              <td>{{ evento.inicio | hora }}</td>
-              <td><span class="badge" [attr.data-estado]="evento.estado">{{ evento.estado | estado }}</span></td>
+              <th>Pos</th><th>Piloto</th><th class="num">Pts</th><th class="num" title="Victorias">V</th>
+              <th class="num">Podios</th>
+              @if (conPoles()) { <th class="num">Poles</th> }
+              @if (conTramos()) { <th class="num" title="Tramos ganados">Tramos</th> }
+              <th class="num" title="Eventos disputados">Ev.</th><th class="num" title="Abandonos">Ab.</th>
+              <th class="num" title="Mejor resultado">Mejor</th><th class="num" title="Promedio de posición">Prom.</th>
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (fila of pilotos(); track fila.pilotoId) {
+              <tr>
+                <td class="pos">{{ fila.posicion }}</td>
+                <td>
+                  <a [routerLink]="['/pilotos', fila.pilotoId]">{{ fila.piloto }}</a>
+                  @if (fila.equipo) { <div class="suave chico">{{ fila.equipo }}</div> }
+                </td>
+                <td class="num"><strong>{{ fila.puntos }}</strong></td>
+                <td class="num">{{ fila.victorias }}</td>
+                <td class="num">{{ fila.podios }}</td>
+                @if (conPoles()) { <td class="num">{{ fila.poles }}</td> }
+                @if (conTramos()) { <td class="num">{{ fila.victoriasEtapa }}</td> }
+                <td class="num">{{ fila.eventosDisputados }}</td>
+                <td class="num">{{ fila.abandonos }}</td>
+                <td class="num">{{ fila.mejorResultado ?? '—' }}</td>
+                <td class="num">{{ fila.promedioPosicion ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="suave chico aviso-calculo">Calculado a partir de los resultados cargados: si faltan fechas o posiciones, puede diferir de la tabla oficial.</p>
+    }
+  }
 
+  @case ('equipos') {
+    <app-estado-carga [cargando]="cargandoCampeonato()" [error]="errorCampeonato()"
+                      [vacio]="!cargandoCampeonato() && equipos().length === 0"
+                      mensajeVacio="Todavía no hay resultados para calcular el campeonato." />
+    @if (equipos().length) {
+      <div class="tabla-scroll">
+        <table class="campeonato">
+          <thead>
+            <tr><th>Pos</th><th>Equipo</th><th class="num">Pts</th><th class="num" title="Victorias">V</th><th class="num">Podios</th></tr>
+          </thead>
+          <tbody>
+            @for (fila of equipos(); track fila.equipoId) {
+              <tr>
+                <td class="pos">{{ fila.posicion }}</td>
+                <td>
+                  <a [routerLink]="['/equipos', fila.equipoId]">{{ fila.equipo }}</a>
+                  @if (fila.pilotos.length) { <div class="suave chico">{{ fila.pilotos.join(' · ') }}</div> }
+                </td>
+                <td class="num"><strong>{{ fila.puntos }}</strong></td>
+                <td class="num">{{ fila.victorias }}</td>
+                <td class="num">{{ fila.podios }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="suave chico aviso-calculo">Suma de los puntos de los pilotos de cada equipo, calculada a partir de los resultados cargados.</p>
+    }
+  }
+}

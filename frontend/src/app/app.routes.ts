@@ -35,6 +35,9 @@ export const routes: Routes = [
   { path: 'equipos/:id', title: 'Equipo', loadComponent: () => 
     import('./pages/equipo/equipo').then((m) => m.Equipo) 
   },
+  { path: 'estadisticas', title: 'Estadísticas', loadComponent: () => 
+    import('./pages/estadisticas/estadisticas').then((m) => m.Estadisticas) 
+  },
   { path: 'admin', title: 'Administración', canActivate: [adminGuard], loadComponent: () => 
     import('./pages/admin/admin/admin').then((m) => m.Admin) },
 

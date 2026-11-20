@@ -265,4 +265,57 @@ export interface FuenteDisponible {
     habilitada: boolean; 
 }
 
-
+// ---------- MVP 4: estadísticas (espejo de EstadisticaDto.java) ----------
+export interface FilaCampeonatoPiloto {
+  posicion: number; pilotoId: number; piloto: string; codigo: string | null;
+  equipoId: number | null; equipo: string | null; puntos: number;
+  victorias: number; podios: number; poles: number; eventosDisputados: number; abandonos: number;
+  mejorResultado: number | null; promedioPosicion: number | null; puntosPorEvento: number | null;
+  victoriasEtapa: number; // solo WRC: tramos ganados
+}
+export interface FilaCampeonatoEquipo {
+  posicion: number; equipoId: number; equipo: string; puntos: number;
+  victorias: number; podios: number; pilotos: string[];
+}
+export interface Ronda { eventoId: number; numeroFecha: number | null; evento: string; }
+export interface GanadorEvento {
+  eventoId: number; numeroFecha: number | null; evento: string; fecha: string;
+  pilotoId: number; piloto: string; equipo: string | null;
+}
+export interface ResumenTemporada {
+  temporadaId: number; categoria: string; anio: number;
+  eventosTotales: number; eventosDisputados: number;
+  lider: FilaCampeonatoPiloto | null; equipoLider: FilaCampeonatoEquipo | null;
+  ganadoresDistintos: number; ganadores: GanadorEvento[];
+}
+export interface SerieEvolucion {
+  pilotoId: number; piloto: string; codigo: string | null;
+  puntosAcumulados: number[]; posicionCampeonato: (number | null)[]; posicionEvento: (number | null)[];
+}
+export interface EvolucionCampeonato { rondas: Ronda[]; series: SerieEvolucion[]; }
+export interface PuntoTendencia {
+  numeroFecha: number | null; evento: string; posicion: number | null;
+  estado: string | null; puntos: number | null; mediaMovil: number | null;
+}
+export interface TendenciaPiloto {
+  pilotoId: number; piloto: string; anio: number; puntos: PuntoTendencia[];
+  promedioPosicion: number | null; desviacionEstandar: number | null;
+  pendiente: number | null; // negativa = el piloto mejora
+  interpretacion: string | null; tasaFinalizacion: number | null;
+  mejorResultado: number | null; peorResultado: number | null;
+}
+export interface ResumenComparado {
+  pilotoId: number; piloto: string; equipo: string | null; puntos: number;
+  victorias: number; podios: number; poles: number;
+  promedioPosicion: number | null; eventosDisputados: number;
+}
+export interface ComparativaPilotos {
+  anio: number; a: ResumenComparado; b: ResumenComparado;
+  carrerasDelanteA: number; carrerasDelanteB: number;
+  clasificacionesDelanteA: number; clasificacionesDelanteB: number;
+  rondas: Ronda[]; diferenciaPuntos: number[]; // A − B, ronda a ronda
+}
+export interface PerfilCategoria {
+  categoria: Categoria; temporadas: Temporada[]; temporadaActual: Temporada | null;
+  resumen: ResumenTemporada | null; proximoEvento: EventoDto | null; ultimoEvento: EventoDto | null;
+}
