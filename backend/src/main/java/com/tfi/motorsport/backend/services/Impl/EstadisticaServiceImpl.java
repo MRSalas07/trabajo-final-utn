@@ -74,7 +74,7 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
     }
 
     @Override
-    public EvolucionCampeonato evolucion(String siglas, int anio, List<Long> pilotoIds, int top) {
+    public EvolucionCampeonato evolucionPilotos(String siglas, int anio, List<Long> pilotoIds, int top) {
         if (pilotoIds != null && pilotoIds.size() > TOP_MAXIMO) {
             throw new RuleBusinessException("Se pueden comparar como máximo " + TOP_MAXIMO + " pilotos");
         }
@@ -84,14 +84,14 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
     }
 
     @Override
-    public TendenciaPiloto tendencia(String siglas, int anio, Long pilotoId) {
+    public TendenciaPiloto tendenciaPiloto(String siglas, int anio, Long pilotoId) {
         verificarQueExistaElPiloto(pilotoId);
         Temporada temporada = buscarTemporada(siglas, anio);
         return MotorEstadistico.tendenciadePiloto(consolidarParticipacionesDe(temporada), pilotoId);
     }
 
     @Override
-    public ComparativaPilotos comparar(String siglas, int anio, Long pilotoA, Long pilotoB) {
+    public ComparativaPilotos compararPilotos(String siglas, int anio, Long pilotoA, Long pilotoB) {
         if (Objects.equals(pilotoA, pilotoB)) {
             throw new RuleBusinessException("Seleccione dos pilotos distintos para comparar");
         }

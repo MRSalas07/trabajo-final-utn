@@ -7,10 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,5 +37,24 @@ public class EstadisticaController {
     @GetMapping("/{anio}/campeonato/equipos")
     public List<FilaCampeonatoEquipo> equipos(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio) {
         return estadisticaService.campeonatoEquipos(siglas, anio);
+    }
+
+    @GetMapping("/{anio}/evolucion")
+    public EvolucionCampeonato evolucion(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
+                                         @RequestParam(required = false) List<Long> pilotos,
+                                         @RequestParam(defaultValue = "5") @Min(1) @Max(20) int top) {
+        return estadisticaService.evolucionPilotos(siglas, anio, pilotos, top);
+    }
+
+    @GetMapping("/{anio}/tendencia/{pilotoId}")
+    public TendenciaPiloto tendencia(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
+                                     @PathVariable Long pilotoId) {
+        return estadisticaService.tendenciaPiloto(siglas, anio, pilotoId);
+    }
+
+    @GetMapping("/{anio}/comparativa")
+    public ComparativaPilotos comparativa(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
+                                          @RequestParam Long a, @RequestParam Long b) {
+        return estadisticaService.compararPilotos(siglas, anio, a, b);
     }
 }
