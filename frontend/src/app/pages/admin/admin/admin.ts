@@ -9,6 +9,8 @@ import { mensajeError } from '../../../core/errores/error';
 import { FuenteDisponible, ResumenSincronizacion, CargaSincronizacion } from '../../../core/modelos';
 
 import { HoraPipe } from '../../../shared/pipe/formato';
+import { NotificacionService } from '../../../core/services/notificacion.service';
+import { SeguimientoService } from '../../../core/services/seguimiento.service';
 
 @Component({
   imports: [FormsModule, HoraPipe],
@@ -26,24 +28,29 @@ export class Admin {
   protected categoria = 'F1';
   protected anio = new Date().getFullYear();
   protected readonly fuentes = signal<FuenteDisponible[]>([]);
-  protected readonly cargaDatos = signal<CargaSincronizacion[]>([]);
   protected readonly mensaje = signal<string | null>(null);
   protected readonly importacion = signal<ResumenSincronizacion | null>(null);
   protected readonly errorImportacion = signal<string | null>(null);
+
+  private readonly notificacionService = inject(NotificacionService);
+  private readonly seguimientoService = inject(SeguimientoService);
+  
+  protected readonly cargaDatos = this.seguimientoService.trabajos;
 
   constructor() {
     this.syncServices.obtenerFuentes().subscribe((fuente) => {
       this.fuentes.set(fuente);
       
     })
-    this.refrescar();
-    // Consulta el avance cada 3 segundos mientras la página está abierta
-    interval(3000)
-      .pipe(switchMap(() => this.syncServices.trabajos()), takeUntilDestroyed(this.destroyRef))
-      .subscribe({ 
-        next: (t) => this.cargaDatos.set(t), 
-        error: () => {} 
-      });
+    this.seguimientoService.consultar();
+    // this.refrescar();
+    // // Consulta el avance cada 3 segundos mientras la página está abierta
+    // interval(3000)
+    //   .pipe(switchMap(() => this.syncServices.trabajos()), takeUntilDestroyed(this.destroyRef))
+    //   .subscribe({ 
+    //     next: (t) => this.cargaDatos.set(t), 
+    //     error: () => {} 
+    //   });
 
   }
 
@@ -51,10 +58,10 @@ export class Admin {
     this.syncServices.trabajos().subscribe((t) => this.cargaDatos.set(t));
   }
 
-    protected sincronizar(): void {
+  protected sincronizar(): void {
     this.mensaje.set(null);
     this.syncServices.sincronizarDatosxCategoria(this.categoria, this.anio).subscribe({
-      next: () => { this.mensaje.set(`Sincronización de ${this.categoria} ${this.anio} encolada.`); this.refrescar(); },
+      next: () => { this.mensaje.set(`Sincronización de ${this.categoria} ${this.anio} encolada.`); this.seguimientoService.consultar();; },
       error: (e) => this.mensaje.set(mensajeError(e)),
     });
   }
@@ -75,11 +82,17 @@ export class Admin {
         return;
       }
       this.syncServices.importarDatosxJson(json).subscribe({
-        next: (response) => this.importacion.set(response),
-        error : (error) => this.errorImportacion.set(mensajeError(error))
+        next: (response) => {
+          this.importacion.set(response);
+          this.notificacionService.exito(
+            `Importación de ${response.categoria} ${response.anio} completada (${response.eventosProcesados} eventos, ${response.resultadosProcesados} resultados).`);
+        },
+        error : (error) => {
+          this.errorImportacion.set(mensajeError(error));
+          this.notificacionService.error(`No se pudo importar el archivo: ${mensajeError(error)}`);
+        }
       });
     });
-
   }
 
 

@@ -31,8 +31,8 @@ export class PilotoService {
         return this.http.get<Pagina<PilotoResumen>>(`${this.apiUrl}/pilotos`, { params });
     }
 
-    buscarPilotoId(pilotoId :number): Observable<PerfilPiloto> {
-        return this.http.get<PerfilPiloto>(`${this.apiUrl}/pilotos/${pilotoId}`);
+    buscarPilotoId(id :number): Observable<PerfilPiloto> {
+        return this.http.get<PerfilPiloto>(`${this.apiUrl}/pilotos/${id}`);
     }
 
 
