@@ -1,0 +1,835 @@
+{
+    "anio": 2025,
+    "fuente": "RESPALDO_JSON",
+    "nombre": "Campeonato Argentino de Turismo Carretera 2025",
+    "eventos": [
+        {
+            "fin": "2025-02-17T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Viedma, Río Negro",
+            "estado": "FINALIZADO",
+            "inicio": "2025-02-15T03:00:00Z",
+            "nombre": "1ª Fecha - Viedma",
+            "circuito": "Autódromo Ciudad de Viedma",
+            "sesiones": [
+                {
+                    "fin": "2025-02-16T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-02-16T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Tomás Abdala Racing",
+                                "idExterno": "TC:tomas_abdala_racing",
+                                "nombreCorto": "TAR",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 12,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Jonatan",
+                                "numero": 12,
+                                "apellido": "Castellano",
+                                "idExterno": "TC:jonatan_castellano",
+                                "nacionalidad": "Argentina"
+                            },
+                            "posicion": 1
+                        },
+                        {
+                            "equipo": {
+                                "nombre": "Canning Motorsport",
+                                "idExterno": "TC:canning_motorsport",
+                                "nombreCorto": "Canning",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 86,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Agustín",
+                                "numero": 86,
+                                "apellido": "Canapino",
+                                "idExterno": "TC:agustin_canapino",
+                                "nacionalidad": "Argentina",
+                                "fechaNacimiento": "1990-01-19"
+                            },
+                            "posicion": 2
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "01",
+            "nombreCorto": "Viedma",
+            "numeroFecha": 1,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-03-10T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "El Calafate, Santa Cruz",
+            "estado": "FINALIZADO",
+            "inicio": "2025-03-08T03:00:00Z",
+            "nombre": "2ª Fecha - El Calafate",
+            "circuito": "Autódromo Enrique \"Quique\" Freile",
+            "sesiones": [
+                {
+                    "fin": "2025-03-09T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-03-09T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Trotta Racing Team",
+                                "idExterno": "TC:trotta_racing",
+                                "nombreCorto": "Trotta",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 79,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Facundo",
+                                "numero": 79,
+                                "apellido": "Chapur",
+                                "idExterno": "TC:facundo_chapur",
+                                "nacionalidad": "Argentina"
+                            },
+                            "posicion": 1
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "02",
+            "nombreCorto": "El Calafate",
+            "numeroFecha": 2,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-03-31T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Centenario, Neuquén",
+            "estado": "FINALIZADO",
+            "inicio": "2025-03-29T03:00:00Z",
+            "nombre": "3ª Fecha - Centenario",
+            "circuito": "Autódromo Parque Provincia del Neuquén",
+            "sesiones": [
+                {
+                    "fin": "2025-03-30T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "CANCELADO",
+                    "inicio": "2025-03-30T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL"
+                }
+            ],
+            "idExterno": "03",
+            "nombreCorto": "Centenario",
+            "numeroFecha": 3,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-04-21T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Toay, La Pampa",
+            "estado": "FINALIZADO",
+            "inicio": "2025-04-19T03:00:00Z",
+            "nombre": "4ª Fecha - Toay",
+            "circuito": "Autódromo Provincia de La Pampa",
+            "sesiones": [
+                {
+                    "fin": "2025-04-20T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-04-20T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL"
+                }
+            ],
+            "idExterno": "04",
+            "nombreCorto": "Toay",
+            "numeroFecha": 4,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-05-12T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Termas de Río Hondo, Santiago del Estero",
+            "estado": "FINALIZADO",
+            "inicio": "2025-05-10T03:00:00Z",
+            "nombre": "5ª Fecha - Termas de Río Hondo",
+            "circuito": "Autódromo Termas de Río Hondo",
+            "sesiones": [
+                {
+                    "fin": "2025-05-11T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-05-11T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Maquin Parts Racing",
+                                "idExterno": "TC:maquin_parts",
+                                "nombreCorto": "Maquin Parts",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 2,
+                            "piloto": {
+                                "pais": "Uruguay",
+                                "nombre": "Mauricio",
+                                "numero": 2,
+                                "apellido": "Lambiris",
+                                "idExterno": "TC:mauricio_lambiris",
+                                "nacionalidad": "Uruguaya"
+                            },
+                            "posicion": 1
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "05",
+            "nombreCorto": "Termas de Río Hondo",
+            "numeroFecha": 5,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-06-02T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Alta Gracia, Córdoba",
+            "estado": "FINALIZADO",
+            "inicio": "2025-05-31T03:00:00Z",
+            "nombre": "6ª Fecha - Alta Gracia",
+            "circuito": "Autódromo Oscar Cabalén",
+            "sesiones": [
+                {
+                    "fin": "2025-06-01T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-06-01T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Fadel Memo Corse",
+                                "idExterno": "TC:fadel_memo_corse",
+                                "nombreCorto": "Fadel",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 4,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Mariano",
+                                "numero": 4,
+                                "apellido": "Werner",
+                                "idExterno": "TC:mariano_werner",
+                                "nacionalidad": "Argentina"
+                            },
+                            "posicion": 1
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "06",
+            "nombreCorto": "Alta Gracia",
+            "numeroFecha": 6,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-06-23T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Posadas, Misiones",
+            "estado": "FINALIZADO",
+            "inicio": "2025-06-21T03:00:00Z",
+            "nombre": "7ª Fecha - Posadas",
+            "circuito": "Autódromo Rosamonte",
+            "sesiones": [
+                {
+                    "fin": "2025-06-22T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-06-22T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Pradecon Racing",
+                                "idExterno": "TC:pradecon_racing",
+                                "nombreCorto": "Pradecon",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 22,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Otto",
+                                "numero": 22,
+                                "apellido": "Fritzler",
+                                "idExterno": "TC:otto_fritzler",
+                                "nacionalidad": "Argentina"
+                            },
+                            "posicion": 1
+                        },
+                        {
+                            "equipo": {
+                                "nombre": "Canning Motorsport",
+                                "idExterno": "TC:canning_motorsport",
+                                "nombreCorto": "Canning",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 86,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Agustín",
+                                "numero": 86,
+                                "apellido": "Canapino",
+                                "idExterno": "TC:agustin_canapino",
+                                "nacionalidad": "Argentina",
+                                "fechaNacimiento": "1990-01-19"
+                            },
+                            "posicion": 2
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "07",
+            "nombreCorto": "Posadas",
+            "numeroFecha": 7,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-07-14T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Concepción del Uruguay, Entre Ríos",
+            "estado": "FINALIZADO",
+            "inicio": "2025-07-12T03:00:00Z",
+            "nombre": "8ª Fecha - Concepción del Uruguay",
+            "circuito": "Autódromo de Concepción del Uruguay",
+            "sesiones": [
+                {
+                    "fin": "2025-07-13T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-07-13T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Canning Motorsport",
+                                "idExterno": "TC:canning_motorsport",
+                                "nombreCorto": "Canning",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 86,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Agustín",
+                                "numero": 86,
+                                "apellido": "Canapino",
+                                "idExterno": "TC:agustin_canapino",
+                                "nacionalidad": "Argentina",
+                                "fechaNacimiento": "1990-01-19"
+                            },
+                            "posicion": 1
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "08",
+            "nombreCorto": "Concepción del Uruguay",
+            "numeroFecha": 8,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-08-11T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Albardón, San Juan",
+            "estado": "FINALIZADO",
+            "inicio": "2025-08-09T03:00:00Z",
+            "nombre": "9ª Fecha - Albardón",
+            "circuito": "Circuito San Juan Villicum",
+            "sesiones": [
+                {
+                    "fin": "2025-08-10T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-08-10T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Trotta Racing Team",
+                                "idExterno": "TC:trotta_racing",
+                                "nombreCorto": "Trotta",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 79,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Facundo",
+                                "numero": 79,
+                                "apellido": "Chapur",
+                                "idExterno": "TC:facundo_chapur",
+                                "nacionalidad": "Argentina"
+                            },
+                            "posicion": 2
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "09",
+            "nombreCorto": "Albardón",
+            "numeroFecha": 9,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-08-25T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Ciudad Autónoma de Buenos Aires",
+            "estado": "FINALIZADO",
+            "inicio": "2025-08-23T03:00:00Z",
+            "nombre": "10ª Fecha - Ciudad Autónoma de Buenos Aires",
+            "circuito": "Autódromo Oscar y Juan Gálvez",
+            "sesiones": [
+                {
+                    "fin": "2025-08-24T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-08-24T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Canning Motorsport",
+                                "idExterno": "TC:canning_motorsport",
+                                "nombreCorto": "Canning",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 86,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Agustín",
+                                "numero": 86,
+                                "apellido": "Canapino",
+                                "idExterno": "TC:agustin_canapino",
+                                "nacionalidad": "Argentina",
+                                "fechaNacimiento": "1990-01-19"
+                            },
+                            "posicion": 1
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "10",
+            "nombreCorto": "Ciudad Autónoma de Buenos Aires",
+            "numeroFecha": 10,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-09-15T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "San Luis, San Luis",
+            "estado": "FINALIZADO",
+            "inicio": "2025-09-13T03:00:00Z",
+            "nombre": "11ª Fecha - San Luis",
+            "circuito": "Autódromo Rosendo Hernández",
+            "sesiones": [
+                {
+                    "fin": "2025-09-14T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-09-14T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Canning Motorsport",
+                                "idExterno": "TC:canning_motorsport",
+                                "nombreCorto": "Canning",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 86,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Agustín",
+                                "numero": 86,
+                                "apellido": "Canapino",
+                                "idExterno": "TC:agustin_canapino",
+                                "nacionalidad": "Argentina",
+                                "fechaNacimiento": "1990-01-19"
+                            },
+                            "posicion": 1
+                        },
+                        {
+                            "equipo": {
+                                "nombre": "Fispa Corse",
+                                "idExterno": "TC:fispa_corse",
+                                "nombreCorto": "Fispa",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 1,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Julián",
+                                "numero": 1,
+                                "apellido": "Santero",
+                                "idExterno": "TC:julian_santero",
+                                "nacionalidad": "Argentina"
+                            },
+                            "posicion": 2
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "11",
+            "nombreCorto": "San Luis",
+            "numeroFecha": 11,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-10-06T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "San Nicolás, Buenos Aires",
+            "estado": "FINALIZADO",
+            "inicio": "2025-10-04T03:00:00Z",
+            "nombre": "12ª Fecha - San Nicolás",
+            "circuito": "Autódromo Juan María Traverso",
+            "sesiones": [
+                {
+                    "fin": "2025-10-05T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-10-05T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Canning Motorsport",
+                                "idExterno": "TC:canning_motorsport",
+                                "nombreCorto": "Canning",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 86,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Agustín",
+                                "numero": 86,
+                                "apellido": "Canapino",
+                                "idExterno": "TC:agustin_canapino",
+                                "nacionalidad": "Argentina",
+                                "fechaNacimiento": "1990-01-19"
+                            },
+                            "posicion": 1
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "12",
+            "nombreCorto": "San Nicolás",
+            "numeroFecha": 12,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-11-03T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Paraná, Entre Ríos",
+            "estado": "FINALIZADO",
+            "inicio": "2025-11-01T03:00:00Z",
+            "nombre": "13ª Fecha - Paraná",
+            "circuito": "Autódromo Ciudad de Paraná",
+            "sesiones": [
+                {
+                    "fin": "2025-11-02T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-11-02T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Canning Motorsport",
+                                "idExterno": "TC:canning_motorsport",
+                                "nombreCorto": "Canning",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 86,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Agustín",
+                                "numero": 86,
+                                "apellido": "Canapino",
+                                "idExterno": "TC:agustin_canapino",
+                                "nacionalidad": "Argentina",
+                                "fechaNacimiento": "1990-01-19"
+                            },
+                            "posicion": 1
+                        }
+                    ]
+                }
+            ],
+            "idExterno": "13",
+            "nombreCorto": "Paraná",
+            "numeroFecha": 13,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-11-17T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "Toay, La Pampa",
+            "estado": "FINALIZADO",
+            "inicio": "2025-11-15T03:00:00Z",
+            "nombre": "14ª Fecha - Toay",
+            "circuito": "Autódromo Provincia de La Pampa",
+            "sesiones": [
+                {
+                    "fin": "2025-11-16T17:25:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-11-16T16:25:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Pradecon Racing",
+                                "idExterno": "TC:pradecon_racing",
+                                "nombreCorto": "Pradecon",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 24,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Christian",
+                                "numero": 24,
+                                "apellido": "Ledesma",
+                                "idExterno": "TC:christian_ledesma",
+                                "nacionalidad": "Argentina"
+                            },
+                            "posicion": 1
+                        },
+                        {
+                            "equipo": {
+                                "nombre": "Fispa Corse",
+                                "idExterno": "TC:fispa_corse",
+                                "nombreCorto": "Fispa",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 1,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Julián",
+                                "numero": 1,
+                                "apellido": "Santero",
+                                "idExterno": "TC:julian_santero",
+                                "nacionalidad": "Argentina"
+                            },
+                            "posicion": 7
+                        }
+                    ],
+                    "vueltasProgramadas": 30
+                }
+            ],
+            "idExterno": "14",
+            "nombreCorto": "Toay",
+            "numeroFecha": 14,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        },
+        {
+            "fin": "2025-12-08T02:59:59Z",
+            "pais": "Argentina",
+            "ciudad": "La Plata, Buenos Aires",
+            "estado": "FINALIZADO",
+            "inicio": "2025-12-06T03:00:00Z",
+            "nombre": "15ª Fecha - La Plata",
+            "circuito": "Autódromo Roberto José Mouras",
+            "sesiones": [
+                {
+                    "fin": "2025-12-07T17:00:00Z",
+                    "tipo": "CARRERA",
+                    "estado": "FINALIZADO",
+                    "inicio": "2025-12-07T16:00:00Z",
+                    "nombre": "Final",
+                    "numero": 1,
+                    "idExterno": "FINAL",
+                    "resultados": [
+                        {
+                            "equipo": {
+                                "nombre": "Canning Motorsport",
+                                "idExterno": "TC:canning_motorsport",
+                                "nombreCorto": "Canning",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 86,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Agustín",
+                                "numero": 86,
+                                "apellido": "Canapino",
+                                "idExterno": "TC:agustin_canapino",
+                                "nacionalidad": "Argentina",
+                                "fechaNacimiento": "1990-01-19"
+                            },
+                            "tiempo": 2153.333,
+                            "vueltas": 25,
+                            "posicion": 1,
+                            "diferencia": 0
+                        },
+                        {
+                            "equipo": {
+                                "nombre": "Fadel Memo Corse",
+                                "idExterno": "TC:fadel_memo_corse",
+                                "nombreCorto": "Fadel",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 4,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Mariano",
+                                "numero": 4,
+                                "apellido": "Werner",
+                                "idExterno": "TC:mariano_werner",
+                                "nacionalidad": "Argentina"
+                            },
+                            "vueltas": 25,
+                            "posicion": 2,
+                            "diferencia": 3.584
+                        },
+                        {
+                            "equipo": {
+                                "nombre": "Trotta Racing Team",
+                                "idExterno": "TC:trotta_racing",
+                                "nombreCorto": "Trotta",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 79,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Facundo",
+                                "numero": 79,
+                                "apellido": "Chapur",
+                                "idExterno": "TC:facundo_chapur",
+                                "nacionalidad": "Argentina"
+                            },
+                            "vueltas": 25,
+                            "posicion": 5,
+                            "diferencia": 16.384
+                        },
+                        {
+                            "equipo": {
+                                "nombre": "Pradecon Racing",
+                                "idExterno": "TC:pradecon_racing",
+                                "nombreCorto": "Pradecon",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 22,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Otto",
+                                "numero": 22,
+                                "apellido": "Fritzler",
+                                "idExterno": "TC:otto_fritzler",
+                                "nacionalidad": "Argentina"
+                            },
+                            "vueltas": 25,
+                            "posicion": 8,
+                            "diferencia": 34.051
+                        },
+                        {
+                            "equipo": {
+                                "nombre": "Pradecon Racing",
+                                "idExterno": "TC:pradecon_racing",
+                                "nombreCorto": "Pradecon",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 117,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Matías",
+                                "numero": 117,
+                                "apellido": "Rossi",
+                                "idExterno": "TC:matias_rossi",
+                                "nacionalidad": "Argentina"
+                            },
+                            "vueltas": 25,
+                            "posicion": 9,
+                            "diferencia": 34.486
+                        },
+                        {
+                            "equipo": {
+                                "nombre": "Fispa Corse",
+                                "idExterno": "TC:fispa_corse",
+                                "nombreCorto": "Fispa",
+                                "nacionalidad": "Argentina"
+                            },
+                            "estado": "FINALIZADO",
+                            "numero": 1,
+                            "piloto": {
+                                "pais": "Argentina",
+                                "nombre": "Julián",
+                                "numero": 1,
+                                "apellido": "Santero",
+                                "idExterno": "TC:julian_santero",
+                                "nacionalidad": "Argentina"
+                            },
+                            "vueltas": 25,
+                            "posicion": 10,
+                            "diferencia": 39.399
+                        }
+                    ],
+                    "vueltasProgramadas": 25
+                }
+            ],
+            "idExterno": "15",
+            "nombreCorto": "La Plata",
+            "numeroFecha": 15,
+            "zonaHoraria": "America/Argentina/Buenos_Aires"
+        }
+    ],
+    "siglasCategoria": "TC"
+}

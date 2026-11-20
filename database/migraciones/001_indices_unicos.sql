@@ -1,5 +1,7 @@
 -- Migracion 001 - Entrega 2
--- Se ejecuta DESPUES de schema.sql. Es idempotente: puede correrse varias veces.
+-- SOLO para bases creadas con una version de schema.sql anterior a noviembre de 2026.
+-- Una base nueva NO la necesita: schema.sql ya incluye todo lo de este archivo.
+-- Es idempotente (IF NOT EXISTS): correrla sobre una base nueva no cambia nada.
 --
 -- 1) Agrega evento.zona_horaria (la entidad JPA Evento ya la usa, pero schema.sql
 --    no la tenia). Guarda la zona IANA de la sede (ej: "America/Argentina/Buenos_Aires")
