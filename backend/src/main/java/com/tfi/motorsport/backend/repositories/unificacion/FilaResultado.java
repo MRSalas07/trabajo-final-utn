@@ -29,7 +29,7 @@ public record FilaResultado(
         Long equipoId,
         String equipoNombre,
         /** Marca / fabricante (equipo.nombre_corto: "Toyota", "Ford", "McLaren"...). */
-        String equipoMarca,
+        //String equipoMarca,
         String tipo,
         Integer posicion,
         BigDecimal puntos,
