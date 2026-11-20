@@ -1,0 +1,66 @@
+
+.contenedor {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(24rem, calc(100vw - 24px));
+    pointer-events: none;
+}
+.notif {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--superficie);
+    color: var(--texto);
+    border: 1px solid var(--borde);
+    border-left: 4px solid var(--texto-suave);
+    border-radius: var(--radio-chico);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
+    animation: entrar 220ms ease-out;
+}
+.notif[data-tipo='exito'] { 
+    border-left-color: var(--ok); 
+}
+.notif[data-tipo='error'] { 
+    border-left-color: var(--acento); 
+}
+.notif[data-tipo='aviso'] { 
+    border-left-color: var(--oro); 
+}
+.texto { 
+    flex: 1; font-size: 0.95rem; 
+}
+a { 
+    color: var(--texto); 
+    font-weight: 600; 
+    text-decoration: underline; 
+    white-space: nowrap; 
+}
+button { 
+    background: none; 
+    border: 0; 
+    color: var(--texto-suave); 
+    font-size: 1.3rem; 
+    line-height: 1; 
+    cursor: pointer; 
+}
+button:hover { 
+    color: var(--texto); 
+}
+@keyframes entrar { 
+    from { 
+        opacity: 0; 
+        transform: translateX(16px); 
+    } 
+}
+@media (prefers-reduced-motion: reduce) { 
+    .notif { 
+        animation: none; 
+    } 
+}
