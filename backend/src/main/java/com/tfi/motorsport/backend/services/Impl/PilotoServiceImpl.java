@@ -2,6 +2,7 @@ package com.tfi.motorsport.backend.services.Impl;
 
 import com.tfi.motorsport.backend.dtos.comun.PaginaDto;
 import com.tfi.motorsport.backend.dtos.perfil.ParticipacionDto;
+import com.tfi.motorsport.backend.dtos.perfil.ResultadoRecienteDto;
 import com.tfi.motorsport.backend.dtos.piloto.PalmaresDto;
 import com.tfi.motorsport.backend.dtos.piloto.PerfilPilotoDto;
 import com.tfi.motorsport.backend.dtos.piloto.PilotoDto;
@@ -19,6 +20,8 @@ import com.tfi.motorsport.backend.repositories.ResultadoEtapaJPARepository;
 import com.tfi.motorsport.backend.repositories.ResultadoSesionJPARepository;
 import com.tfi.motorsport.backend.repositories.unificacion.FilaResultado;
 import com.tfi.motorsport.backend.services.IPilotoService;
+import com.tfi.motorsport.backend.services.estadisticas.MotorEstadistico;
+import com.tfi.motorsport.backend.services.estadisticas.MotorEstadistico.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,19 +30,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PilotoServiceImpl implements IPilotoService {
+
+    private static final int ULTIMOS_RESULTADOS = 10;
 
     private static final Sort ORDEN_LISTADO = Sort.by("apellido", "nombre", "id");
 
@@ -76,19 +78,25 @@ public class PilotoServiceImpl implements IPilotoService {
                 .filter(p -> !p.isEliminado())
                 .orElseThrow(() -> new ResourceNotFoundException("el piloto", pilotoId));
 
+        Integer edad = piloto.getFechaNacimiento() != null
+                ? Period.between(piloto.getFechaNacimiento(), LocalDate.now()).getYears() : null;
+        PilotoDto detalle = new PilotoDto(piloto.getId(), piloto.getNombre(), piloto.getApellido(), piloto.getCodigoPiloto(),
+                piloto.getNumeroActual(), piloto.getNacionalidad(), piloto.getPais(), piloto.getFechaNacimiento(), edad, piloto.getFotoUrl());
+
         List<PalmaresDto> palmares = palmaresRepo.dePiloto(pilotoId).stream()
-                .sorted(Comparator.comparing(pa -> pa.getCategoria().getId()))
-                .map(PilotoServiceImpl::palmares)
+                .map(pm -> new PalmaresDto(pm.getCategoria().getSiglas(), pm.getCarreras(), pm.getVictorias(),
+                        pm.getPodios(), pm.getPoles(), pm.getCampeonatos(), pm.getPuntosTotales(), pm.getAbandonos()))
                 .toList();
 
         List<ParticipacionDto> trayectoria = equipoPilotoRepo.trayectoriaDePiloto(pilotoId).stream()
-                .map(Participaciones::de)
+                .map(ep -> new ParticipacionDto(ep.getTemporada(), ep.getCategoria().getSiglas(),
+                        ep.getEquipo().getId(), ep.getEquipo().getNombre(), pilotoId, null, ep.getNumero(), ep.getRol()))
                 .toList();
 
         List<FilaResultado> filas = new ArrayList<>(resultadoSesionRepo.filasDePiloto(pilotoId));
         filas.addAll(resultadoEtapaRepo.filasDePiloto(pilotoId));
 
-        return new PerfilPilotoDto(datos(piloto), palmares, trayectoria, ResultadosRecientes.de(filas, true));
+        return new PerfilPilotoDto(detalle, palmares, trayectoria, ultimos(filas, siglasPorTemporada(filas)));
     }
 
     // ------------------------------------------------------------------ conversiones
@@ -123,5 +131,30 @@ public class PilotoServiceImpl implements IPilotoService {
         return categoriaRepo.findBySiglasIgnoreCase(siglas.trim())
                 .filter(c -> !c.isEliminado())
                 .orElseThrow(() -> new ResourceNotFoundException("No existe la categoría '" + siglas + "'"));
+    }
+
+    /** Últimos resultados principales (carrera o clasificación general), del más reciente al más antiguo. */
+    private List<ResultadoRecienteDto> ultimos(List<FilaResultado> filas, Map<Long, String> siglas) {
+        return MotorEstadistico.consolidar(filas).stream()
+                .filter(Participacion::disputo)
+                .sorted(Comparator.comparing(Participacion::fecha, Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(ULTIMOS_RESULTADOS)
+                .map(p -> new ResultadoRecienteDto(p.eventoId(), p.evento(), siglas.get(p.temporadaId()), p.anio(),
+                        p.fecha(), p.posicionFinal(), p.estadoFinal(), p.puntos(), p.equipo(), p.piloto()))
+                .toList();
+    }
+
+    /** Siglas de la categoría de cada temporada presente en las filas. */
+    private Map<Long, String> siglasPorTemporada(List<FilaResultado> filas) {
+        Map<Long, String> mapa = new HashMap<>();
+        Set<Long> temporadas = filas.stream().map(FilaResultado::temporadaId).collect(Collectors.toSet());
+        if (temporadas.isEmpty()) {
+            return mapa;
+        }
+        for (Categoria c : categoriaRepo.findAll()) {
+            c.getTemporadas().stream().filter(t -> temporadas.contains(t.getId()))
+                    .forEach(t -> mapa.put(t.getId(), c.getSiglas()));
+        }
+        return mapa;
     }
 }
