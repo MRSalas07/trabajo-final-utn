@@ -225,7 +225,13 @@ public final class MotorEstadistico {
         return tabla;
     }
 
-    // =================================================================== ganadores
+    public static List<GanadorEvento> ganadores(List<Participacion> participaciones) {
+        return participaciones.stream().filter(Participacion::gano)
+                .sorted(ordenCronologico())
+                .map(p -> new GanadorEvento(p.eventoId(), p.numeroFecha(), p.evento(), p.fecha(),
+                        p.pilotoId(), p.piloto(), p.equipo()))
+                .toList();
+    }
 
     static BigDecimal sumarPuntos(List<Participacion> participaciones) {
         return participaciones.stream().map(Participacion::puntos).filter(Objects::nonNull)
