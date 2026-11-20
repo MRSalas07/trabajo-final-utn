@@ -58,7 +58,7 @@ class EquipoServiceImplTest {
 
     private static FilaResultado fila(long eventoId, String tipo, Integer posicion, String puntos) {
         return new FilaResultado(eventoId, 1, "Evento " + eventoId, Instant.parse("2025-03-16T04:00:00Z").plusSeconds(eventoId * 86_400),
-                1L, 2025, "F1", 1L, "Lando", "Norris", "NOR", 10L, "McLaren", tipo, posicion,
+                1L, 2025, "F1", 1L, "Lando", "Norris", "NOR", 10L, "McLaren",tipo, posicion,
                 puntos != null ? new BigDecimal(puntos) : null, "FINALIZADO");
     }
 

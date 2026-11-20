@@ -3,7 +3,9 @@ package com.tfi.motorsport.backend.controllers;
 import com.tfi.motorsport.backend.dtos.categoria.CategoriaCreateDto;
 import com.tfi.motorsport.backend.dtos.categoria.CategoriaDto;
 import com.tfi.motorsport.backend.dtos.categoria.CategoriaUpdateDto;
+import com.tfi.motorsport.backend.dtos.categoria.PerfilCategoriaDto;
 import com.tfi.motorsport.backend.services.ICategoriaService;
+import com.tfi.motorsport.backend.services.ZonaHoraria;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -56,6 +58,12 @@ public class CategoriaController {
             @PathVariable Long id,
             @Valid @RequestBody CategoriaUpdateDto dto) {
         return ResponseEntity.ok(categoriaService.modificarCategoria(id, dto));
+    }
+
+    @Operation(summary = "Perfil de una categoría: temporadas, líder, último ganador y próximo evento")
+    @GetMapping("/{siglas}/perfil")
+    public PerfilCategoriaDto perfil(@PathVariable String siglas, @RequestParam(required = false) String zona) {
+        return categoriaService.obtenerPerfil(siglas, ZonaHoraria.resolverZonaHoraria(zona));
     }
 
 }
