@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EquipoJPARepository extends JpaRepository<Equipo, Long> {
@@ -21,4 +22,6 @@ public interface EquipoJPARepository extends JpaRepository<Equipo, Long> {
             order by e.nombre
             """)
     List<Equipo> deCategoria(Long categoriaId, Integer anio);
+
+    Optional<Equipo> findByIdExterno(String idExterno);
 }

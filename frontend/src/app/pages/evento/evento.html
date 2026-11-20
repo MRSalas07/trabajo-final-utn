@@ -16,7 +16,7 @@
             <div class="kpi"><div class="valor chica">{{ evento.inicio | hora: 'dia' }}</div><div class="etiqueta">Inicio (tu hora: {{ evento.inicio | hora: 'hora' }} h)</div></div>
             <div class="kpi"><div class="valor chica">{{ evento.inicioHoraSede | horaSede }}</div><div class="etiqueta">Hora en la sede ({{ evento.zonaHorariaSede }})</div>
             @if (evento.diferenciaSedeTexto) { <div class="etiqueta dif">🕒 {{ evento.diferenciaSedeTexto }}</div> }</div>
-            <div class="kpi"><a class="btn btn-primario" [href]="eventoService.urlIcsEvento(evento.id)" download>📅 Agregar al calendario</a></div>
+            <div class="kpi"><a class="btn btn-primario" [href]="calendarioService.urlIcsEvento(evento.id)" download>📅 Agregar al calendario</a></div>
         </div>
 
         @if (evento.sesiones.length) {

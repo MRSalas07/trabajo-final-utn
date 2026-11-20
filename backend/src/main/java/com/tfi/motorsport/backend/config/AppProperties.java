@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 public record AppProperties(
         Jwt jwt,
         Admin admin,
-        Cors cors
+        Cors cors,
+        Integracion integracion
 ) {
 
     /** Configuración del token JWT. */
@@ -39,6 +40,26 @@ public record AppProperties(
         public List<String> lista() {
             return separarPorComa(origenesPermitidos);
         }
+    }
+
+    /** Parámetros comunes a todos los clientes de APIs externas. */
+    public record Integracion(
+            int timeoutConexionMs,
+            int timeoutLecturaMs,
+            int reintentos,
+            Proveedor f1,
+            ProveedorWrc wrc,
+            boolean syncAutomatica,
+            String syncCron
+    ) {
+    }
+
+    /** Proveedor externo genérico. intervaloMinimoMs limita la frecuencia de llamadas. */
+    public record Proveedor(String urlBase, long intervaloMinimoMs) {
+    }
+
+    /** WRC se puede deshabilitar porque su API es no oficial. */
+    public record ProveedorWrc(String urlBase, long intervaloMinimoMs, boolean habilitado) {
     }
 
     private static List<String> separarPorComa(String valor) {

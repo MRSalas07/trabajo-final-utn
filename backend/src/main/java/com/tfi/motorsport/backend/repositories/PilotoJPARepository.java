@@ -1,11 +1,15 @@
 package com.tfi.motorsport.backend.repositories;
 
 import com.tfi.motorsport.backend.model.Piloto;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public interface PilotoJPARepository extends JpaRepository<Piloto, Long> {
@@ -36,4 +40,6 @@ public interface PilotoJPARepository extends JpaRepository<Piloto, Long> {
             countQuery = "select count(p) from Piloto p " + FILTRO_BUSQUEDA)
     Page<Piloto> buscar(String patron, boolean filtrarParticipacion, Long categoriaId, Integer anio,
                         Pageable pageable);
+
+    Optional<Piloto> findByIdExterno(String idExterno);
 }

@@ -14,7 +14,6 @@ public interface ResultadoEtapaJPARepository extends JpaRepository<ResultadoEtap
 
     Optional<ResultadoEtapa> findByEtapaIdAndTripulacionId(Long etapaId, Long tripulacionId);
 
-    /** Resultados existentes de una etapa (la sincronización los carga de una sola vez). */
     List<ResultadoEtapa> findByEtapaId(Long etapaId);
 
     @Query("""
