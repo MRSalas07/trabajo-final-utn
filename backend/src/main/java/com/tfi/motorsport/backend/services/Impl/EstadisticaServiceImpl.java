@@ -2,16 +2,15 @@ package com.tfi.motorsport.backend.services.Impl;
 
 import com.tfi.motorsport.backend.dtos.estadistica.EstadisticaDto.*;
 import com.tfi.motorsport.backend.handlers.exceptions.ResourceNotFoundException;
+import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.Temporada;
-import com.tfi.motorsport.backend.repositories.EventoJPARepository;
-import com.tfi.motorsport.backend.repositories.ResultadoEtapaJPARepository;
-import com.tfi.motorsport.backend.repositories.ResultadoSesionJPARepository;
-import com.tfi.motorsport.backend.repositories.TemporadaJPARepository;
+import com.tfi.motorsport.backend.repositories.*;
 import com.tfi.motorsport.backend.repositories.unificacion.FilaResultado;
 import com.tfi.motorsport.backend.services.IEstadisticaService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.tfi.motorsport.backend.services.estadisticas.MotorEstadistico;
 import com.tfi.motorsport.backend.services.estadisticas.MotorEstadistico.*;
@@ -25,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 
 public class EstadisticaServiceImpl implements IEstadisticaService {
+    private static final int TOP_MAXIMO = 20;
 
+    private final PilotoJPARepository pilotoRepo;
     private final TemporadaJPARepository temporadaRepo;
     private final EventoJPARepository eventoRepo;
     private final ResultadoSesionJPARepository resultadoSesionRepo;
@@ -72,6 +73,35 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
                 eventosEnElCalendario, rondasDisputadas, pilotoLider, equipoLider, pilotosConVictoria, ganadores);
     }
 
+    @Override
+    public EvolucionCampeonato evolucion(String siglas, int anio, List<Long> pilotoIds, int top) {
+        if (pilotoIds != null && pilotoIds.size() > TOP_MAXIMO) {
+            throw new RuleBusinessException("Se pueden comparar como máximo " + TOP_MAXIMO + " pilotos");
+        }
+        int topAcotado = Math.max(1, Math.min(top, TOP_MAXIMO));
+        Temporada temporada = buscarTemporada(siglas, anio);
+        return MotorEstadistico.evolucion(consolidarParticipacionesDe(temporada), pilotoIds, topAcotado);
+    }
+
+    @Override
+    public TendenciaPiloto tendencia(String siglas, int anio, Long pilotoId) {
+        verificarQueExistaElPiloto(pilotoId);
+        Temporada temporada = buscarTemporada(siglas, anio);
+        return MotorEstadistico.tendenciadePiloto(consolidarParticipacionesDe(temporada), pilotoId);
+    }
+
+    @Override
+    public ComparativaPilotos comparar(String siglas, int anio, Long pilotoA, Long pilotoB) {
+        if (Objects.equals(pilotoA, pilotoB)) {
+            throw new RuleBusinessException("Seleccione dos pilotos distintos para comparar");
+        }
+        verificarQueExistaElPiloto(pilotoA);
+        verificarQueExistaElPiloto(pilotoB);
+        Temporada temporada = buscarTemporada(siglas, anio);
+        return MotorEstadistico.comparativaPilotos(consolidarParticipacionesDe(temporada), pilotoA, pilotoB);
+    }
+
+
 
     private List<Participacion> consolidarParticipacionesDe(Temporada t) {
         List<FilaResultado> filas = new ArrayList<>(resultadoSesionRepo.filasDeTemporada(t.getId()));
@@ -83,6 +113,13 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
         return temporadaRepo.buscarPorSiglasYAnio(siglas, anio).orElseThrow(() -> new ResourceNotFoundException(
                 "No hay datos de la temporada " + anio + " de " + siglas.toUpperCase()));
     }
+
+    private void verificarQueExistaElPiloto(Long pilotoId) {
+        if (pilotoId == null || !pilotoRepo.existsById(pilotoId)) {
+            throw new ResourceNotFoundException("el piloto", pilotoId);
+        }
+    }
+
 
 
 }

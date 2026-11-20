@@ -13,4 +13,10 @@ public interface IEstadisticaService {
     List<FilaCampeonatoEquipo> campeonatoEquipos(String siglas, int anio);
     ResumenTemporada resumen(String siglas, int anio);
 
+    EvolucionCampeonato evolucion(String siglas, int anio, List<Long> pilotoIds, int top);
+
+    TendenciaPiloto tendencia(String siglas, int anio, Long pilotoId);
+
+    ComparativaPilotos comparar(String siglas, int anio, Long pilotoA, Long pilotoB);
+
 }
