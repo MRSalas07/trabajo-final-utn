@@ -1,5 +1,4 @@
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
-import { EventoService } from '../../core/services/evento.service';
 import { ZonaHorariaService } from '../../core/services/zona-horaria.service';
 import { EventoDto, TablaEtapa, TablaSesion } from '../../core/modelos';
 import { RouterLink } from '@angular/router';
@@ -7,7 +6,6 @@ import { EstadoCarga } from '../../shared/estado-carga/estado-carga';
 import { EstadoPipe, HoraPipe, HoraSedePipe, TiempoPipe } from '../../shared/pipe/formato';
 import { ResultadoService } from '../../core/services/resultados.service';
 import { mensajeError } from '../../core/errores/error';
-import { compatForm } from '@angular/forms/signals/compat';
 import { CalendarioService } from '../../core/services/calendario.service';
 
 @Component({
@@ -19,10 +17,8 @@ import { CalendarioService } from '../../core/services/calendario.service';
 export class Evento {
 
   private readonly resultadoService = inject(ResultadoService);
-  // protected: la plantilla lo usa para armar el enlace de descarga del .ics
-  protected readonly eventoService = inject(EventoService);
   private readonly zonaService = inject(ZonaHorariaService);
-  private readonly calendarioService = inject(CalendarioService);
+  protected readonly calendarioService = inject(CalendarioService);
 
   readonly id = input.required<string>();
 
