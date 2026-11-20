@@ -37,6 +37,38 @@
    </table>
 </section>
 
+<section class="panel col-3" aria-labelledby="t-campeonatos">
+   <div class="panel-titulo">
+      <h2 id="t-campeonatos">Campeonatos {{ anioCampeonato() ?? '' }}</h2>
+      <a routerLink="/estadisticas" [queryParams]="{ categoria: categoriaCampeonato(), anio: anioCampeonato() }">Estadísticas</a>
+   </div>
+   <div class="pestanas" role="tablist" aria-label="Categoría del campeonato">
+      @for (c of categoriasCampeonato; track c) {
+         <button type="button" role="tab" [class.activa]="categoriaCampeonato() === c" [attr.aria-selected]="categoriaCampeonato() === c"
+                 (click)="categoriaCampeonato.set(c)">{{ c }}</button>
+      }
+   </div>
+   <app-estado-carga [cargando]="cargandoCampeonato()" [error]="errorCampeonato()"
+                     [vacio]="!cargandoCampeonato() && !errorCampeonato() && topCampeonato().length === 0"
+                     mensajeVacio="Todavía no hay resultados en la temporada actual." />
+   @if (topCampeonato().length) {
+      <table>
+         <tbody>
+         @for (fila of topCampeonato(); track fila.pilotoId) {
+            <tr>
+               <td class="pos num">{{ fila.posicion }}</td>
+               <td><a [routerLink]="['/pilotos', fila.pilotoId]">{{ fila.piloto }}</a>
+                  @if (fila.equipo) { <div class="suave chico">{{ fila.equipo }}</div> }
+               </td>
+               <td class="num"><strong>{{ fila.puntos }}</strong></td>
+            </tr>
+         }
+         </tbody>
+      </table>
+      <a class="chico" [routerLink]="['/categorias', categoriaCampeonato()]">Ver tabla completa</a>
+   }
+</section>
+
 <section class="panel col-3" aria-labelledby="t-recientes">
    <div class="panel-titulo"><h2 id="t-recientes">Últimos eventos</h2></div>
    <div class="lista-eventos">

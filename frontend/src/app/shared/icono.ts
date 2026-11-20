@@ -19,6 +19,7 @@ const TRAZOS: Record<string, string[]> = {
   derecha: ['M9 5.5 15.5 12 9 18.5'],
   admin: ['M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z', 'M9 12l2 2 4-4'],
   flecha: ['M5 12h14', 'M13 6l6 6-6 6'],
+  estadisticas: ['M4 20h16', 'M7 16v-4', 'M12 16V7', 'M17 16v-7'],
 };
 
 /**

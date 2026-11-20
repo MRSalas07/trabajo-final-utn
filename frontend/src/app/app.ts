@@ -25,6 +25,7 @@ export class App {
     { ruta: '/calendario', texto: 'Calendario', icono: 'calendario' },
     { ruta: '/pilotos', texto: 'Pilotos', icono: 'pilotos' },
     { ruta: '/equipos', texto: 'Equipos', icono: 'equipos' },
+    { ruta: '/estadisticas', texto: 'Estadísticas', icono: 'estadisticas' },
   ];
 
 
