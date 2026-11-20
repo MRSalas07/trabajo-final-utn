@@ -4,10 +4,8 @@ import { interval, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SyncServices } from '../../../core/services/sync.service';
 import { AuthService } from '../../../core/services/auth.service';
-
 import { mensajeError } from '../../../core/errores/error';
 import { FuenteDisponible, ResumenSincronizacion, CargaSincronizacion } from '../../../core/modelos';
-
 import { HoraPipe } from '../../../shared/pipe/formato';
 
 @Component({

@@ -1,11 +1,7 @@
 import { inject,Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { ZonaHorariaService } from './zona-horaria.service';
-import { SaludServices } from './salud.service';
-
-
-import { EquipoResumen, EventoDto, Pagina, PerfilEquipo, PerfilPiloto, PilotoResumen, Temporada } from '../modelos';
+import { EquipoResumen, PerfilEquipo } from '../modelos';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root'})

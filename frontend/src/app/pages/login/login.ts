@@ -4,7 +4,6 @@ import { AuthService } from '../../core/services/auth.service';
 import { mensajeError } from '../../core/errores/error';
 import { ZonaHorariaService } from '../../core/services/zona-horaria.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { email } from '@angular/forms/signals';
 
 @Component({
   imports: [ReactiveFormsModule],

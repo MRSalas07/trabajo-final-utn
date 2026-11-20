@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { EventoService } from '../../core/services/evento.service';
 import { ZonaHorariaService } from '../../core/services/zona-horaria.service';
 import { EventoDto, ResultadoSesion } from '../../core/modelos';
@@ -9,8 +9,7 @@ import { interval } from 'rxjs';
 import { mensajeError } from '../../core/errores/error';
 import { EstadoCarga } from '../../shared/estado-carga/estado-carga';
 import { FilaEvento } from '../../shared/fila-evento/fila-evento';
-import { EstadoPipe, HoraPipe, TiempoPipe } from '../../shared/pipe/formato';
-import { Calendario } from '../calendario/calendario';
+import { HoraPipe, TiempoPipe } from '../../shared/pipe/formato';
 import { CalendarioMes } from '../../shared/calendario-mes/calendario-mes';
 
 @Component({
