@@ -33,20 +33,20 @@ class MotorEstadisticoTest {
     static List<FilaResultado> campeonato() {
         List<FilaResultado> filas = new ArrayList<>();
         // Fecha 1
-        filas.add(fila(1, 1, 1, "Ana", EQUIPO_ROJO, "CARRERA", 1, 25, "FINALIZADO"));
-        filas.add(fila(1, 1, 2, "Beto", EQUIPO_AZUL, "CARRERA", 2, 18, "FINALIZADO"));
-        filas.add(fila(1, 1, 3, "Caro", EQUIPO_ROJO, "CARRERA", 3, 15, "FINALIZADO"));
-        filas.add(fila(1, 1, 2, "Beto", EQUIPO_AZUL, "CLASIFICACION", 1, 0, "FINALIZADO"));
-        filas.add(fila(1, 1, 1, "Ana", EQUIPO_ROJO, "CLASIFICACION", 2, 0, "FINALIZADO"));
+        filas.add(fila(1, 1, 1, "Mateo", EQUIPO_ROJO, "CARRERA", 1, 25, "FINALIZADO"));
+        filas.add(fila(1, 1, 2, "Gerardo", EQUIPO_AZUL, "CARRERA", 2, 18, "FINALIZADO"));
+        filas.add(fila(1, 1, 3, "Salas", EQUIPO_ROJO, "CARRERA", 3, 15, "FINALIZADO"));
+        filas.add(fila(1, 1, 2, "Gerardo", EQUIPO_AZUL, "CLASIFICACION", 1, 0, "FINALIZADO"));
+        filas.add(fila(1, 1, 1, "Mateo", EQUIPO_ROJO, "CLASIFICACION", 2, 0, "FINALIZADO"));
         // Fecha 2 (con sprint)
-        filas.add(fila(2, 2, 2, "Beto", EQUIPO_AZUL, "CARRERA", 1, 25, "FINALIZADO"));
-        filas.add(fila(2, 2, 1, "Ana", EQUIPO_ROJO, "CARRERA", 2, 18, "FINALIZADO"));
-        filas.add(fila(2, 2, 3, "Caro", EQUIPO_ROJO, "CARRERA", 3, 15, "FINALIZADO"));
-        filas.add(fila(2, 2, 2, "Beto", EQUIPO_AZUL, "SPRINT", 1, 8, "FINALIZADO"));
+        filas.add(fila(2, 2, 2, "Gerardo", EQUIPO_AZUL, "CARRERA", 1, 25, "FINALIZADO"));
+        filas.add(fila(2, 2, 1, "Mateo", EQUIPO_ROJO, "CARRERA", 2, 18, "FINALIZADO"));
+        filas.add(fila(2, 2, 3, "Salas", EQUIPO_ROJO, "CARRERA", 3, 15, "FINALIZADO"));
+        filas.add(fila(2, 2, 2, "Gerardo", EQUIPO_AZUL, "SPRINT", 1, 8, "FINALIZADO"));
         // Fecha 3
-        filas.add(fila(3, 3, 3, "Caro", EQUIPO_ROJO, "CARRERA", 1, 25, "FINALIZADO"));
-        filas.add(fila(3, 3, 1, "Ana", EQUIPO_ROJO, "CARRERA", 3, 15, "FINALIZADO"));
-        filas.add(fila(3, 3, 2, "Beto", EQUIPO_AZUL, "CARRERA", 3, 0, "ABANDONO"));
+        filas.add(fila(3, 3, 3, "Salas", EQUIPO_ROJO, "CARRERA", 1, 25, "FINALIZADO"));
+        filas.add(fila(3, 3, 1, "Mateo", EQUIPO_ROJO, "CARRERA", 3, 15, "FINALIZADO"));
+        filas.add(fila(3, 3, 2, "Gerardo", EQUIPO_AZUL, "CARRERA", 3, 0, "ABANDONO"));
         return filas;
     }
 
@@ -93,8 +93,57 @@ class MotorEstadisticoTest {
                 MotorEstadistico.campeonatoEquipos(MotorEstadistico.consolidar(campeonato()));
 
         assertThat(tabla.get(0).equipo()).isEqualTo("Rojo");
-        assertThat(tabla.get(0).puntos()).isEqualByComparingTo("113"); // Ana 58 + Caro 55
-        assertThat(tabla.get(1).puntos()).isEqualByComparingTo("51");  // Beto
+        assertThat(tabla.get(0).puntos()).isEqualByComparingTo("113"); // Gerardo 58 + Salas 55
+        assertThat(tabla.get(1).puntos()).isEqualByComparingTo("51");  // Mateo
+    }
+
+    @Test
+    void evolucionAcumulaPuntosYPosicionRondaARonda() {
+        EvolucionCampeonato evolucion = MotorEstadistico.evolucion(
+                MotorEstadistico.consolidar(campeonato()), List.of(2L), 5);
+
+        assertThat(evolucion.rondas()).hasSize(3);
+        assertThat(evolucion.series().get(0).puntosAcumulados())
+                .usingElementComparator(BigDecimal::compareTo)
+                .containsExactly(new BigDecimal("18"), new BigDecimal("51"), new BigDecimal("51"));
+        // Tras la fecha 2 Mateo (51) lidera sobre Gerardo (43)
+        assertThat(evolucion.series().get(0).posicionCampeonato()).containsExactly(2, 1, 3);
+    }
+
+    @Test
+    void tendenciaDetectaEmpeoramiento() {
+        TendenciaPiloto tendencia = MotorEstadistico.tendenciadePiloto(MotorEstadistico.consolidar(campeonato()), 1L);
+
+        // Mateo: 1º, 2º, 3º -> pendiente +1 (posiciones cada vez más altas = empeora)
+        assertThat(tendencia.pendiente()).isEqualByComparingTo("1.000");
+        assertThat(tendencia.interpretacion()).isEqualTo("Empeorando");
+        assertThat(tendencia.tasaFinalizacion()).isEqualByComparingTo("100.0");
+    }
+
+    @Test
+    void tendenciaConPocosDatosNoSeInterpreta() {
+        TendenciaPiloto tendencia = MotorEstadistico.tendenciadePiloto(MotorEstadistico.consolidar(campeonato()), 2L);
+
+        // Gerardo solo terminó 2 carreras (abandonó la 3ra)
+        assertThat(tendencia.pendiente()).isNull();
+        assertThat(tendencia.interpretacion()).startsWith("Datos insuficientes");
+    }
+
+    @Test
+    void comparativaCuentaDuelosDirectos() {
+        ComparativaPilotos comparativa = MotorEstadistico.comparativaPilotos(
+                MotorEstadistico.consolidar(campeonato()), 1L, 3L);
+
+        assertThat(comparativa.carrerasDelanteA()).isEqualTo(2);
+        assertThat(comparativa.carrerasDelanteB()).isEqualTo(1);
+        assertThat(comparativa.diferenciaPuntos().get(2)).isEqualByComparingTo("3"); // 58 - 55
+    }
+
+    @Test
+    void regresionLinealYDesviacion() {
+        assertThat(MotorEstadistico.pendienteDeRegresionLineal(List.of(
+                new double[]{1, 10}, new double[]{2, 8}, new double[]{3, 6}))).isEqualByComparingTo("-2.000");
+        assertThat(MotorEstadistico.desviacionEstandar(List.of(2, 4, 4, 4, 5, 5, 7, 9))).isEqualByComparingTo("2.00");
     }
 
 
