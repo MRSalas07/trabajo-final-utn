@@ -12,9 +12,16 @@
         <label>Categoría
             <select [(ngModel)]="categoria"><option value="F1">F1</option><option value="WRC">WRC</option></select>
         </label>
-        <label>Año <input type="number" [(ngModel)]="anio" min="1950" [max]="anioMaximo" /></label>
-        <button type="button" class="btn-primario" (click)="sincronizar()">Sincronizar</button>
+        <label>Desde <input type="number" [(ngModel)]="anioDesde" min="1950" [max]="anioMaximo" /></label>
+        <label>Hasta <input type="number" [(ngModel)]="anioHasta" min="1950" [max]="anioMaximo" /></label>
+        <button type="button" class="btn-primario" [disabled]="encolando()" (click)="sincronizar()">
+            {{ encolando() ? 'Encolando…' : 'Sincronizar' }}
+        </button>
         </div>
+        <p class="suave chico">
+            Para una sola temporada, use el mismo año en «Desde» y «Hasta». Como máximo {{ maximoPorTanda }} temporadas
+            por tanda: para cargar muchos años conviene hacerlo en varias tandas separadas por un rato.
+        </p>
         @if (mensaje()) { <p class="chico">{{ mensaje() }}</p> }
 
         <table>
@@ -43,4 +50,3 @@
         }
     </section>
 }
-
