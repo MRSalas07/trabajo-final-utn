@@ -1,17 +1,15 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { interval, switchMap } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SyncServices } from '../../../core/services/sync.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { mensajeError } from '../../../core/errores/error';
-import { FuenteDisponible, ResumenSincronizacion, CargaSincronizacion } from '../../../core/modelos';
+import { FuenteDisponible, ResumenSincronizacion } from '../../../core/modelos';
 import { HoraPipe } from '../../../shared/pipe/formato';
 import { NotificacionService } from '../../../core/services/notificacion.service';
 import { SeguimientoService } from '../../../core/services/seguimiento.service';
-
+import { GestionDatos } from './../gestion-datos/gestion-datos';
 @Component({
-  imports: [FormsModule, HoraPipe],
+  imports: [FormsModule, HoraPipe, GestionDatos],
   selector: 'app-admin',
   styleUrl: './admin.css',
   templateUrl: './admin.html',
@@ -35,20 +33,14 @@ export class Admin {
   
   protected readonly cargaDatos = this.seguimientoService.trabajos;
 
+  protected readonly vista = signal<'datos' | 'sync'>('datos');
+
   constructor() {
     this.syncServices.obtenerFuentes().subscribe((fuente) => {
       this.fuentes.set(fuente);
       
     })
     this.seguimientoService.consultar();
-    // this.refrescar();
-    // // Consulta el avance cada 3 segundos mientras la página está abierta
-    // interval(3000)
-    //   .pipe(switchMap(() => this.syncServices.trabajos()), takeUntilDestroyed(this.destroyRef))
-    //   .subscribe({ 
-    //     next: (t) => this.cargaDatos.set(t), 
-    //     error: () => {} 
-    //   });
 
   }
 
@@ -60,7 +52,7 @@ export class Admin {
     this.mensaje.set(null);
     this.syncServices.sincronizarDatosxCategoria(this.categoria, this.anio).subscribe({
       next: () => { this.mensaje.set(`Sincronización de ${this.categoria} ${this.anio} encolada.`); this.seguimientoService.consultar();; },
-      error: (e) => this.mensaje.set(mensajeError(e)),
+      error: (errorHttp) => this.mensaje.set(mensajeError(errorHttp)),
     });
   }
 
@@ -85,9 +77,9 @@ export class Admin {
           this.notificacionService.exito(
             `Importación de ${response.categoria} ${response.anio} completada (${response.eventosProcesados} eventos, ${response.resultadosProcesados} resultados).`);
         },
-        error : (error) => {
-          this.errorImportacion.set(mensajeError(error));
-          this.notificacionService.error(`No se pudo importar el archivo: ${mensajeError(error)}`);
+        error : (errorHttp) => {
+          this.errorImportacion.set(mensajeError(errorHttp));
+          this.notificacionService.error(`No se pudo importar el archivo: ${mensajeError(errorHttp)}`);
         }
       });
     });
