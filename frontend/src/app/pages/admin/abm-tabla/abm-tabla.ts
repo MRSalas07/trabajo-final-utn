@@ -204,5 +204,5 @@ function aInputLocal(iso: string | null): string | null {
   if (!iso) return null;
   const fecha = new Date(iso);
   const conDosDigitos = (n: number) => String(n).padStart(2, '0');
-  return `${fecha.getFullYear()}-${conDosDigitos(fecha.getMonth() + 1)}-${conDosDigitos(date.getDate())}T${p(date.getHours())}:${p(fecha.getMinutes())}`;
+  return `${fecha.getFullYear()}-${conDosDigitos(fecha.getMonth() + 1)}-${conDosDigitos(fecha.getDate())}T${conDosDigitos(fecha.getHours())}:${conDosDigitos(fecha.getMinutes())}`;
 }

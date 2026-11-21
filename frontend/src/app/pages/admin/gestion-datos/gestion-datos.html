@@ -1,31 +1,57 @@
+<div class="filtros">
+    <label>Categoría
+    <select [ngModel]="categoriaId()" (ngModelChange)="elegirCategoria($event)">
+        @for (categoria of categorias(); track categoria.id) {
+        <option [ngValue]="categoria.id">{{ categoria['siglas'] }} — {{ categoria['nombre'] }}</option>
+        }
+    </select>
+    </label>
+</div>
+
 <div class="pestanas" role="tablist">
     @for (pestana of pestanas; track pestana.id) {
     <button type="button" role="tab" [class.activa]="pestanaActiva() === pestana.id"
             (click)="pestanaActiva.set(pestana.id)">{{ pestana.texto }}</button>
     }
 </div>
+@if (errorGeneral()) { <p class="err">{{ errorGeneral() }}</p> }
 
 @switch (pestanaActiva()) {
+    @case ('calendario') {
+    <app-abm-tabla titulo="Temporadas" nombreRecurso="temporadas"
+                    [columnas]="columnasTemporadas" [campos]="camposTemporadas"
+                    [filtros]="{ categoriaId: categoriaId() }" [valoresFijos]="{ categoriaId: categoriaId() }"
+                    [habilitado]="!!categoriaId()"
+                    [seleccionable]="true" [seleccionadoId]="temporadaId()"
+                    (seleccionado)="elegirTemporada($event)" />
+
+    <app-abm-tabla titulo="Eventos" nombreRecurso="eventos"
+                    [columnas]="columnasEventos" [campos]="camposEventos"
+                    [filtros]="{ temporadaId: temporadaId() }" [valoresFijos]="{ temporadaId: temporadaId() }"
+                    [habilitado]="!!temporadaId()"
+                    mensajeDeshabilitado="Elija una temporada (botón «Ver ›») para administrar sus eventos." />
+    }
+
     @case ('pilotos') {
-        <label class="buscar">Buscar
-            <input type="search" [ngModel]="textoBusquedaPiloto()" (ngModelChange)="textoBusquedaPiloto.set($event)"
-                    placeholder="Apellido o código" />
-        </label>
-        <app-abm-tabla titulo="Pilotos" nombreRecurso="pilotos" [columnas]="columnasPilotos" [campos]="camposPilotos"
-                        [filtros]="{ filtros: textoBusquedaPiloto() }" />
+    <label class="buscar">Buscar
+        <input type="search" [ngModel]="textoBusquedaPiloto()" (ngModelChange)="textoBusquedaPiloto.set($event)"
+                placeholder="Apellido o código" />
+    </label>
+    <app-abm-tabla titulo="Pilotos" nombreRecurso="pilotos" [columnas]="columnasPilotos" [campos]="camposPilotos"
+                    [filtros]="{ q: textoBusquedaPiloto() }" />
     }
 
     @case ('equipos') {
-        <label class="buscar">Buscar
-            <input type="search" [ngModel]="textoBusquedaEquipo()" (ngModelChange)="textoBusquedaEquipo.set($event)"
-                    placeholder="Nombre o marca" />
-        </label>
-        <app-abm-tabla titulo="Equipos" nombreRecurso="equipos" [columnas]="columnasEquipos" [campos]="camposEquipos"
-                        [filtros]="{ filtros : textoBusquedaEquipo() }" />
+    <label class="buscar">Buscar
+        <input type="search" [ngModel]="textoBusquedaEquipo()" (ngModelChange)="textoBusquedaEquipo.set($event)"
+                placeholder="Nombre o marca" />
+    </label>
+    <app-abm-tabla titulo="Equipos" nombreRecurso="equipos" [columnas]="columnasEquipos" [campos]="camposEquipos"
+                    [filtros]="{ q: textoBusquedaEquipo() }" />
     }
 
     @case ('categorias') {
-        <app-abm-tabla titulo="Categorías" nombreRecurso="categorias" [columnas]="columnasCategorias"
-                        [campos]="camposCategorias" />
+    <app-abm-tabla titulo="Categorías" nombreRecurso="categorias" [columnas]="columnasCategorias"
+                    [campos]="camposCategorias" (cambio)="cargarCategorias()" />
     }
 }
