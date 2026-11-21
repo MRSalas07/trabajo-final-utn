@@ -13,6 +13,10 @@ const ESTADOS_EVENTO = ['PROGRAMADO', 'EN_CURSO', 'FINALIZADO', 'CANCELADO'].map
   texto: estado,
 }));
 
+const TIPOS_SESION = ['PRACTICA', 'CLASIFICACION', 'SPRINT_CLASIFICACION', 'SPRINT', 'SERIE', 'CARRERA'].map(
+  (tipo) => ({ valor: tipo, texto: tipo }),
+);
+
 /** Fecha-hora UTC (ISO) -> texto corto en la hora local del dispositivo. */
 const formatearFechaHora = (valor: unknown) =>
   valor ? new Date(String(valor)).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '';
@@ -41,7 +45,7 @@ export class GestionDatos {
   protected readonly categorias = signal<RegistroGenerico[]>([]);
   protected readonly categoriaId = signal<number | null>(null);
   protected readonly temporadaId = signal<number | null>(null);
-
+  protected readonly eventoId = signal<number | null>(null);
   protected readonly textoBusquedaPiloto = signal('');
   protected readonly textoBusquedaEquipo = signal('');
 
@@ -66,10 +70,21 @@ export class GestionDatos {
   protected elegirCategoria(categoriaId: number | null): void {
     this.categoriaId.set(categoriaId);
     this.temporadaId.set(null);   
+    this.deseleccionarEvento();
   }
 
   protected elegirTemporada(temporada: RegistroGenerico): void {
     this.temporadaId.set(temporada.id);
+    this.deseleccionarEvento();
+  }
+
+  protected elegirEvento(evento: RegistroGenerico): void {
+    this.eventoId.set(evento.id);
+  }
+
+  /** Al subir de nivel (cambiar de categoría o temporada), lo que estaba más abajo deja de tener sentido. */
+  private deseleccionarEvento(): void {
+    this.eventoId.set(null);
   }
 
   protected readonly columnasTemporadas: ColumnaAbm[] = [
@@ -111,6 +126,39 @@ export class GestionDatos {
     { clave: 'inicio', etiqueta: 'Inicio (hora de este dispositivo)', tipo: 'fechahora', requerido: true },
     { clave: 'fin', etiqueta: 'Fin (hora de este dispositivo)', tipo: 'fechahora' },
     { clave: 'estado', etiqueta: 'Estado', tipo: 'select', opciones: ESTADOS_EVENTO, porDefecto: 'PROGRAMADO' },
+  ];
+
+  protected readonly columnasSesiones: ColumnaAbm[] = [
+    { clave: 'nombre', etiqueta: 'Sesión' },
+    { clave: 'tipo', etiqueta: 'Tipo' },
+    { clave: 'inicio', etiqueta: 'Inicio', formato: (registro) => formatearFechaHora(registro['inicio']) },
+    { clave: 'estado', etiqueta: 'Estado' },
+  ];
+  protected readonly camposSesiones: CampoAbm[] = [
+    { clave: 'nombre', etiqueta: 'Nombre', tipo: 'texto', requerido: true },
+    { clave: 'tipo', etiqueta: 'Tipo', tipo: 'select', requerido: true, opciones: TIPOS_SESION, porDefecto: 'CARRERA' },
+    { clave: 'numero', etiqueta: 'Número', tipo: 'numero' },
+    { clave: 'inicio', etiqueta: 'Inicio', tipo: 'fechahora' },
+    { clave: 'fin', etiqueta: 'Fin', tipo: 'fechahora' },
+    { clave: 'vueltasProgramadas', etiqueta: 'Vueltas programadas', tipo: 'numero' },
+    { clave: 'distancia', etiqueta: 'Distancia (km)', tipo: 'decimal' },
+    { clave: 'estado', etiqueta: 'Estado', tipo: 'select', opciones: ESTADOS_EVENTO, porDefecto: 'PROGRAMADO' },
+  ];
+
+  protected readonly columnasEtapas: ColumnaAbm[] = [
+    { clave: 'numero', etiqueta: '#' },
+    { clave: 'nombre', etiqueta: 'Tramo' },
+    { clave: 'distancia', etiqueta: 'Km' },
+    { clave: 'clasificacionGeneral', etiqueta: 'General', formato: (registro) => (registro['clasificacionGeneral'] ? 'Sí' : '') },
+  ];
+  protected readonly camposEtapas: CampoAbm[] = [
+    { clave: 'nombre', etiqueta: 'Nombre', tipo: 'texto', requerido: true },
+    { clave: 'numero', etiqueta: 'Número', tipo: 'numero' },
+    { clave: 'dia', etiqueta: 'Día', tipo: 'numero' },
+    { clave: 'distancia', etiqueta: 'Distancia (km)', tipo: 'decimal' },
+    { clave: 'inicio', etiqueta: 'Largada', tipo: 'fechahora' },
+    { clave: 'estado', etiqueta: 'Estado', tipo: 'select', opciones: ESTADOS_EVENTO, porDefecto: 'PROGRAMADO' },
+    { clave: 'clasificacionGeneral', etiqueta: 'Es la clasificación general del rally', tipo: 'checkbox', soloAlta: true },
   ];
   
   protected readonly columnasPilotos: ColumnaAbm[] = [
