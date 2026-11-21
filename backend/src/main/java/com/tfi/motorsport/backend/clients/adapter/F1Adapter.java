@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -34,6 +35,8 @@ public class F1Adapter implements FuenteDatosCategoria{
 
     static final String PROVEEDOR = "JOLPICA";
     private static final int TAMANIO_PAGINA = 100;
+    /** Hora asumida cuando la API no informa la hora (temporadas viejas): mediodía UTC no cambia el día en América. */
+    private static final String HORA_POR_DEFECTO = "12:00:00Z";
 
     private final ClientHttpExternal cliente;
 
@@ -73,10 +76,39 @@ public class F1Adapter implements FuenteDatosCategoria{
         for (JsonNode race : carreras) {
             eventos.add(mapearEvento(race, carrera, clasificacion, sprint, ahora, avisos));
         }
-        return new TemporadaNorm("F1", anio, "Fórmula 1 " + anio, PROVEEDOR, eventos);
+
+        // 3) Campeón oficial, solo si todas las carreras del calendario ya tienen resultados
+        boolean temporadaCompleta = carreras.stream()
+                .allMatch(race -> carrera.containsKey(FormatJson.aString(race, "round")));
+        String idExternoCampeon = temporadaCompleta ? campeonOficial(anio, avisos) : null;
+
+        return new TemporadaNorm("F1", anio, "Fórmula 1 " + anio, PROVEEDOR, eventos, idExternoCampeon);
     }
 
-    // ------------------------------------------------------------------ descarga
+    /**
+     * Primero de la tabla oficial de pilotos. Hasta 1990 la F1 descartaba los peores resultados,
+     * así que el campeón no siempre es el que más puntos sumó (ej: 1988, Senna sobre Prost).
+     * Si falla, la sincronización sigue: el palmarés usará la tabla calculada.
+     */
+    private String campeonOficial(int anio, List<String> avisos) {
+        try {
+            JsonNode respuesta = cliente.get(anio + "/driverStandings.json?limit=1");
+            for (JsonNode tabla : FormatJson.lista(respuesta, "MRData", "StandingsTable", "StandingsLists")) {
+                for (JsonNode fila : FormatJson.lista(tabla, "DriverStandings")) {
+                    String driverId = FormatJson.aString(fila, "Driver", "driverId");
+                    if ("1".equals(FormatJson.aString(fila, "position")) && driverId != null) {
+                        return "F1:" + driverId;
+                    }
+                }
+            }
+            avisos.add("F1 " + anio + ": la tabla oficial de pilotos no informa campeón");
+        } catch (IntegrationExternalException ex) {
+            avisos.add("F1 " + anio + ": no se pudo obtener el campeón oficial (" + ex.getMessage() + ")");
+        }
+        return null;
+    }
+
+
 
     /**
      * Descarga todas las páginas de un endpoint de resultados y agrupa las filas por "round".
@@ -100,7 +132,7 @@ public class F1Adapter implements FuenteDatosCategoria{
         return porRonda;
     }
 
-    // ------------------------------------------------------------------ mapeo
+
 
     private EventoNorm mapearEvento(JsonNode race, Map<String, List<JsonNode>> resCarrera,
                                     Map<String, List<JsonNode>> resClasif, Map<String, List<JsonNode>> resSprint,
@@ -119,8 +151,15 @@ public class F1Adapter implements FuenteDatosCategoria{
         agregarSesion(sesiones, sq, "sq", "Clasificación Sprint", TipoSesion.SPRINT_CLASIFICACION, 1, 45, null, ahora);
         agregarSesion(sesiones, race.get("Sprint"), "sprint", "Sprint", TipoSesion.SPRINT, 1, 60,
                 mapearResultadosCarrera(resSprint.get(ronda)), ahora);
-        agregarSesion(sesiones, race.get("Qualifying"), "q", "Clasificación", TipoSesion.CLASIFICACION, 1, 60,
-                mapearResultadosClasificacion(resClasif.get(ronda)), ahora);
+        List<ResultadoNorm> resultadosClasificacion = mapearResultadosClasificacion(resClasif.get(ronda));
+        if (race.has("Qualifying")) {
+            agregarSesion(sesiones, race.get("Qualifying"), "q", "Clasificación", TipoSesion.CLASIFICACION, 1, 60,
+                    resultadosClasificacion, ahora);
+        } else if (!resultadosClasificacion.isEmpty()) {
+            // Temporadas viejas: hay resultados de clasificación pero no el horario de la sesión
+            agregarSesion(sesiones, diaAnterior(FormatJson.aString(race, "date")), HORA_POR_DEFECTO, "q", "Clasificación",
+                    TipoSesion.CLASIFICACION, 1, 60, resultadosClasificacion, ahora);
+        }
         // La carrera usa la fecha/hora del nodo raíz
         agregarSesion(sesiones, race, "race", "Carrera", TipoSesion.CARRERA, 1, 120,
                 mapearResultadosCarrera(resCarrera.get(ronda)), ahora);
@@ -150,14 +189,23 @@ public class F1Adapter implements FuenteDatosCategoria{
         if (nodo == null) {
             return; // la sesión no existe en este fin de semana (ej: FP2 en formato sprint)
         }
-        String fecha = FormatJson.aString(nodo, "date");
-        String hora = FormatJson.aString(nodo, "time");
-        Instant inicio = fecha == null ? null : FormatJson.instantUtc(fecha + "T" + (hora != null ? hora : "00:00:00Z"));
+        agregarSesion(sesiones, FormatJson.aString(nodo, "date"), FormatJson.aString(nodo, "time"), id, nombre, tipo,
+                numero, duracionMin, resultados, ahora);
+    }
+
+    private void agregarSesion(List<SesionNorm> sesiones, String fecha, String hora, String id, String nombre,
+                               String tipo, int numero, int duracionMin, List<ResultadoNorm> resultados, Instant ahora) {
+        Instant inicio = fecha == null ? null : FormatJson.instantUtc(fecha + "T" + (hora != null ? hora : HORA_POR_DEFECTO));
         Instant fin = inicio == null ? null : inicio.plus(Duration.ofMinutes(duracionMin));
         boolean conResultados = resultados != null && !resultados.isEmpty();
         sesiones.add(new SesionNorm(id, nombre, tipo, numero, inicio, fin, null, null,
                 estadoPorFechas(inicio, fin, ahora, conResultados),
                 resultados != null ? resultados : List.of()));
+    }
+
+    /** Las temporadas viejas no informan cuándo fue la clasificación: se asume el día anterior a la carrera. */
+    private static String diaAnterior(String fecha) {
+        return fecha == null ? null : LocalDate.parse(fecha).minusDays(1).toString();
     }
 
     /** Resultados de carrera o sprint. */
@@ -237,7 +285,7 @@ public class F1Adapter implements FuenteDatosCategoria{
         return new EquipoNorm("F1:" + FormatJson.aString(c, "constructorId"), nombre, nombre, FormatJson.aString(c, "nationality"));
     }
 
-    // ------------------------------------------------------------------ normalización de valores
+
 
     /**
      * Traduce el estado de Jolpica al catálogo propio.

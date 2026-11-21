@@ -111,6 +111,16 @@ class CalendarioPersistidor {
         }
     }
 
+    void asignarCampeon(Long temporadaId, String idExternoCampeon, ContextoNormalizacion ctx) {
+        if (idExternoCampeon == null || idExternoCampeon.isBlank()) {
+            return;
+        }
+        pilotoRepo.findByIdExterno(idExternoCampeon.trim()).ifPresentOrElse(
+                campeon -> temporadaRepo.findById(temporadaId).ifPresent(temporada -> temporada.setCampeon(campeon)),
+                () -> ctx.avisos.add("No se encontró al campeón '" + idExternoCampeon
+                        + "' entre los pilotos: el palmarés usará la tabla calculada"));
+    }
+
     // Manejo de datos de F1
 
     private void persistirSesion(Evento evento, SesionNorm s, ContextoNormalizacion ctx) {
