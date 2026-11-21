@@ -82,7 +82,7 @@ export class AbmTabla {
   protected readonly errorForm = signal<string | null>(null);
   protected readonly guardando = signal(false);
 
-    protected readonly textosBusqueda = signal<Record<string, string>>({});
+  protected readonly textosBusqueda = signal<Record<string, string>>({});
   protected readonly sugerencias = signal<Record<string, OpcionAbm[]>>({});
   protected readonly busquedaAbierta = signal<string | null>(null);
 
@@ -136,6 +136,7 @@ export class AbmTabla {
     for (const campo of this.campos()) {
       valoresIniciales[campo.clave] = campo.porDefecto ?? (campo.tipo === 'checkbox' ? false : null);
     } 
+    this.limpiarBusquedas({});
     this.editandoId.set(null);
     this.errorForm.set(null);
     this.formulario.set(valoresIniciales);
@@ -143,16 +144,17 @@ export class AbmTabla {
 
   protected editar(registro: RegistroGenerico): void {
     const formData: Record<string, unknown> = {};
+    const textosIniciales: Record<string, string> = {};
     for (const campo of this.campos()) {
       const valor = registro[campo.clave];
       formData[campo.clave] = campo.tipo === 'fechahora' ? aInputLocal(valor as string | null) 
                   : (valor ?? (campo.tipo === 'checkbox' ? false : null));
       const claveTexto = campo.busqueda?.claveTexto;
       if (campo.tipo === 'busqueda' && claveTexto) {
-        formData[campo.clave] = String(registro[claveTexto] ?? '');
+        textosIniciales[campo.clave] = String(registro[claveTexto] ?? '');
       }
     }
-    this.limpiarBusquedas(formData);
+    this.limpiarBusquedas(textosIniciales);
     this.editandoId.set(registro.id);
     this.errorForm.set(null);
     this.formulario.set(formData);

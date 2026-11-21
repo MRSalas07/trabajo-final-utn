@@ -49,4 +49,8 @@ public class Temporada extends AuditableEntity {
 
     @OneToMany(mappedBy = "temporada")
     private List<Evento> eventos = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_piloto_campeon")
+    private Piloto campeon;
 }

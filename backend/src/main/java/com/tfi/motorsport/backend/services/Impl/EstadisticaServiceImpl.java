@@ -167,9 +167,12 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
             if (!temporadaTerminada(temporadaId)) {
                 return;
             }
-            List<FilaCampeonatoPiloto> tabla = MotorEstadistico.campeonatoPilotos(participacionesDeLaTemporada);
-            if (!tabla.isEmpty()) {
-                Long campeonId = tabla.get(0).pilotoId();
+            Long campeonId = campeonOficial(temporadaId);
+            if (campeonId == null) {
+                List<FilaCampeonatoPiloto> tabla = MotorEstadistico.campeonatoPilotos(participacionesDeLaTemporada);
+                campeonId = tabla.isEmpty() ? null : tabla.get(0).pilotoId();
+            }
+            if (campeonId != null) {
                 campeonatosPorPiloto.merge(campeonId, 1, Integer::sum);
             }
         });
@@ -217,5 +220,12 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
             return EstadoEvento.FINALIZADO;
         }
         return EstadoEvento.EN_CURSO;
+    }
+
+    private Long campeonOficial(Long temporadaId) {
+        return temporadaRepo.findById(temporadaId)
+                .map(Temporada::getCampeon)
+                .map(campeon -> campeon.getId())
+                .orElse(null);
     }
 }

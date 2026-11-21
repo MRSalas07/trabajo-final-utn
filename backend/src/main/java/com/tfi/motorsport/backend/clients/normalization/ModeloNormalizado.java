@@ -30,8 +30,12 @@ public final class ModeloNormalizado {
             @NotNull @Min(1950) @Max(2100) Integer anio,
             @Size(max = 120) String nombre,
             @Size(max = 40) String fuente, // Origen de los datos
-            @NotNull List<@Valid EventoNorm> eventos
+            @NotNull List<@Valid EventoNorm> eventos,
+            @Size(max = 80) String idExternoCampeon
     ) {
+        public TemporadaNorm(String siglasCategoria, Integer anio, String nombre, String fuente, List<EventoNorm> eventos) {
+            this(siglasCategoria, anio, nombre, fuente, eventos, null);
+        }
     }
 
     public record EventoNorm(

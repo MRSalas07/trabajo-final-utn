@@ -149,7 +149,8 @@ public class SincronizacionServiceImpl implements ISincronizacionService {
     public ResumenSincronizacion importar(TemporadaNorm temporada) {
         String fuente = temporada.fuente() != null ? temporada.fuente() : "IMPORTACION_JSON";
         TemporadaNorm conFuente = new TemporadaNorm(temporada.siglasCategoria().toUpperCase(Locale.ROOT),
-                temporada.anio(), temporada.nombre(), fuente, temporada.eventos());
+                temporada.anio(), temporada.nombre(), fuente, temporada.eventos(), temporada.idExternoCampeon());
+
         ResumenSincronizacion resumen = normalizador.persistir(conFuente, List.of());
         estadisticaService.recalcularPalmares(conFuente.siglasCategoria());
         return resumen;
