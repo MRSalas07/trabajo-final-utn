@@ -1,4 +1,4 @@
-import { Component, signal,inject } from '@angular/core';
+import { Component, signal,inject, effect, untracked,computed  } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AbmTabla, CampoAbm, ColumnaAbm } from './../abm-tabla/abm-tabla';
 import { sign } from 'chart.js/helpers';
@@ -9,6 +9,11 @@ type PestanaGestion = 'categorias' | 'pilotos' | 'equipos' | 'calendario';
 
 
 const ESTADOS_EVENTO = ['PROGRAMADO', 'EN_CURSO', 'FINALIZADO', 'CANCELADO'].map((estado) => ({
+  valor: estado,
+  texto: estado,
+}));
+
+const ESTADOS_RESULTADO = ['FINALIZADO', 'ABANDONO', 'DESCALIFICADO', 'NO_LARGO'].map((estado) => ({
   valor: estado,
   texto: estado,
 }));
@@ -45,12 +50,52 @@ export class GestionDatos {
   protected readonly categorias = signal<RegistroGenerico[]>([]);
   protected readonly categoriaId = signal<number | null>(null);
   protected readonly temporadaId = signal<number | null>(null);
+  protected readonly anioTemporada = signal<number | null>(null);
   protected readonly eventoId = signal<number | null>(null);
+  protected readonly sesionId = signal<number | null>(null);
+  protected readonly etapaId = signal<number | null>(null);
+
+
   protected readonly textoBusquedaPiloto = signal('');
   protected readonly textoBusquedaEquipo = signal('');
 
+  private readonly listaPilotos = signal<RegistroGenerico[]>([]);
+  private readonly listaEquipos = signal<RegistroGenerico[]>([]);
+  private readonly listaTripulaciones = signal<RegistroGenerico[]>([]);
+
+  private readonly opcionesPilotos = computed(() =>
+    this.listaPilotos().map((piloto) => ({
+      valor: piloto.id,
+      texto: `${piloto['apellido']}, ${piloto['nombre'] ?? ''}${piloto['codigo'] ? ' (' + piloto['codigo'] + ')' : ''}`,
+    })),
+  );
+  private readonly opcionesEquipos = computed(() =>
+    this.listaEquipos().map((equipo) => ({ 
+      valor: equipo.id, texto: String(equipo['nombre']) 
+    })),
+  );
+  private readonly opcionesTripulaciones = computed(() =>
+    this.listaTripulaciones().map((tripulacion) => ({
+      valor: tripulacion.id,
+      texto: `#${tripulacion['numero'] ?? '-'} ${tripulacion['piloto']} / ${tripulacion['copiloto']}`,
+    })),
+  );
+
     constructor() {
     this.cargarCategorias();
+    this.cargarOpciones();
+    effect(() => {
+      const categoriaId = this.categoriaId();
+      const anio = this.anioTemporada();
+      if (categoriaId) {
+        untracked(() =>
+          this.abmService.listar('tripulaciones', { categoriaId, anio }).subscribe({
+            next: (tripulaciones) => this.listaTripulaciones.set(tripulaciones),
+            error: (errorHttp) => this.errorGeneral.set(mensajeError(errorHttp)),
+          }),
+        );
+      }
+    });
   }
 
   /** Carga las categorías y, si la elegida ya no existe o todavía no hay ninguna, elige la primera. */
@@ -63,6 +108,17 @@ export class GestionDatos {
           this.elegirCategoria(categorias.length ? categorias[0].id : null);
         }
       },
+      error: (errorHttp) => this.errorGeneral.set(mensajeError(errorHttp)),
+    });
+  }
+
+  cargarOpciones(): void {
+    this.abmService.listar('pilotos').subscribe({
+      next: (pilotos) => this.listaPilotos.set(pilotos),
+      error: (errorHttp) => this.errorGeneral.set(mensajeError(errorHttp)),
+    });
+    this.abmService.listar('equipos').subscribe({
+      next: (equipos) => this.listaEquipos.set(equipos),
       error: (errorHttp) => this.errorGeneral.set(mensajeError(errorHttp)),
     });
   }
@@ -160,6 +216,54 @@ export class GestionDatos {
     { clave: 'estado', etiqueta: 'Estado', tipo: 'select', opciones: ESTADOS_EVENTO, porDefecto: 'PROGRAMADO' },
     { clave: 'clasificacionGeneral', etiqueta: 'Es la clasificación general del rally', tipo: 'checkbox', soloAlta: true },
   ];
+
+  protected readonly columnasResultadosSesion: ColumnaAbm[] = [
+    { clave: 'posicion', etiqueta: 'Pos' },
+    { clave: 'piloto', etiqueta: 'Piloto' },
+    { clave: 'equipo', etiqueta: 'Equipo' },
+    { clave: 'puntos', etiqueta: 'Pts' },
+    { clave: 'estado', etiqueta: 'Estado' },
+  ];
+  // Es un computed (y no una constante) porque las opciones de los selects se cargan después, desde el backend
+  protected readonly camposResultadosSesion = computed<CampoAbm[]>(() => [
+    { clave: 'pilotoId', etiqueta: 'Piloto', tipo: 'select', requerido: true, opciones: this.opcionesPilotos(), soloAlta: true },
+    { clave: 'equipoId', etiqueta: 'Equipo', tipo: 'select', requerido: true, opciones: this.opcionesEquipos() },
+    { clave: 'posicion', etiqueta: 'Posición', tipo: 'numero' },
+    { clave: 'numero', etiqueta: 'Número de auto', tipo: 'numero' },
+    { clave: 'puntos', etiqueta: 'Puntos', tipo: 'decimal' },
+    { clave: 'tiempo', etiqueta: 'Tiempo (segundos)', tipo: 'decimal' },
+    { clave: 'diferencia', etiqueta: 'Diferencia (segundos)', tipo: 'decimal' },
+    { clave: 'vueltas', etiqueta: 'Vueltas', tipo: 'numero' },
+    { clave: 'mejorVuelta', etiqueta: 'Mejor vuelta (segundos)', tipo: 'decimal' },
+    { clave: 'estado', etiqueta: 'Estado', tipo: 'select', opciones: ESTADOS_RESULTADO, porDefecto: 'FINALIZADO' },
+    { clave: 'motivoAbandono', etiqueta: 'Motivo de abandono', tipo: 'texto' },
+  ]);
+
+  protected readonly columnasResultadosEtapa: ColumnaAbm[] = [
+    { clave: 'posicion', etiqueta: 'Pos' },
+    { clave: 'tripulacion', etiqueta: 'Tripulación' },
+    { clave: 'tiempo', etiqueta: 'Tiempo (s)' },
+    { clave: 'puntos', etiqueta: 'Pts' },
+    { clave: 'estado', etiqueta: 'Estado' },
+  ];
+  protected readonly camposResultadosEtapa = computed<CampoAbm[]>(() => [
+    {
+      clave: 'tripulacionId',
+      etiqueta: 'Tripulación',
+      tipo: 'select',
+      requerido: true,
+      opciones: this.opcionesTripulaciones(),
+      soloAlta: true,
+      ayuda: 'Debe ser de la misma categoría y temporada que el rally',
+    },
+    { clave: 'posicion', etiqueta: 'Posición', tipo: 'numero' },
+    { clave: 'tiempo', etiqueta: 'Tiempo (segundos)', tipo: 'decimal' },
+    { clave: 'diferencia', etiqueta: 'Diferencia (segundos)', tipo: 'decimal' },
+    { clave: 'puntos', etiqueta: 'Puntos', tipo: 'decimal' },
+    { clave: 'estado', etiqueta: 'Estado', tipo: 'select', opciones: ESTADOS_RESULTADO, porDefecto: 'FINALIZADO' },
+    { clave: 'motivoAbandono', etiqueta: 'Motivo de abandono', tipo: 'texto' },
+  ]);
+  
   
   protected readonly columnasPilotos: ColumnaAbm[] = [
     { clave: 'apellido', etiqueta: 'Apellido' },
