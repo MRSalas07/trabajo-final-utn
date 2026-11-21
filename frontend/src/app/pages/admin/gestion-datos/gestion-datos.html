@@ -1,0 +1,31 @@
+<div class="pestanas" role="tablist">
+    @for (pestana of pestanas; track pestana.id) {
+    <button type="button" role="tab" [class.activa]="pestanaActiva() === pestana.id"
+            (click)="pestanaActiva.set(pestana.id)">{{ pestana.texto }}</button>
+    }
+</div>
+
+@switch (pestanaActiva()) {
+    @case ('pilotos') {
+        <label class="buscar">Buscar
+            <input type="search" [ngModel]="textoBusquedaPiloto()" (ngModelChange)="textoBusquedaPiloto.set($event)"
+                    placeholder="Apellido o código" />
+        </label>
+        <app-abm-tabla titulo="Pilotos" nombreRecurso="pilotos" [columnas]="columnasPilotos" [campos]="camposPilotos"
+                        [filtros]="{ filtros: textoBusquedaPiloto() }" />
+    }
+
+    @case ('equipos') {
+        <label class="buscar">Buscar
+            <input type="search" [ngModel]="textoBusquedaEquipo()" (ngModelChange)="textoBusquedaEquipo.set($event)"
+                    placeholder="Nombre o marca" />
+        </label>
+        <app-abm-tabla titulo="Equipos" nombreRecurso="equipos" [columnas]="columnasEquipos" [campos]="camposEquipos"
+                        [filtros]="{ filtros : textoBusquedaEquipo() }" />
+    }
+
+    @case ('categorias') {
+        <app-abm-tabla titulo="Categorías" nombreRecurso="categorias" [columnas]="columnasCategorias"
+                        [campos]="camposCategorias" />
+    }
+}
