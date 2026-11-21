@@ -2,10 +2,7 @@ import { inject,Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ZonaHorariaService } from './zona-horaria.service';
-import { SaludServices } from './salud.service';
-
-
-import { EventoDto, Pagina, PerfilPiloto, PilotoResumen, Temporada } from '../modelos';
+import { Pagina, PerfilPiloto, PilotoResumen } from '../modelos';
 import { Observable } from 'rxjs';
 
 export interface Filtros{ 
@@ -31,8 +28,8 @@ export class PilotoService {
         return this.http.get<Pagina<PilotoResumen>>(`${this.apiUrl}/pilotos`, { params });
     }
 
-    buscarPilotoId(pilotoId :number): Observable<PerfilPiloto> {
-        return this.http.get<PerfilPiloto>(`${this.apiUrl}/pilotos/${pilotoId}`);
+    buscarPilotoId(id :number): Observable<PerfilPiloto> {
+        return this.http.get<PerfilPiloto>(`${this.apiUrl}/pilotos/${id}`);
     }
 
 

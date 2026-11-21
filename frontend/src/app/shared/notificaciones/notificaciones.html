@@ -1,0 +1,11 @@
+<div class="contenedor" aria-live="polite">
+    @for (notificacion of notificacionService.lista(); track notificacion.id) {
+        <div class="notif" [attr.data-tipo]="notificacion.tipo" [attr.role]="notificacion.tipo === 'error' ? 'alert' : 'status'">
+            <span class="texto">{{ notificacion.texto }}</span>
+            @if (notificacion.enlace) {
+                <a [routerLink]="notificacion.enlace" (click)="notificacionService.cerrar(notificacion.id)">Ver</a>
+            }
+            <button type="button" aria-label="Cerrar notificación" (click)="notificacionService.cerrar(notificacion.id)">×</button>
+        </div>
+    }
+</div>

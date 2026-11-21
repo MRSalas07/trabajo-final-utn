@@ -4,7 +4,9 @@ package com.tfi.motorsport.backend.services;
 import com.tfi.motorsport.backend.dtos.categoria.CategoriaDto;
 import com.tfi.motorsport.backend.dtos.categoria.CategoriaCreateDto;
 import com.tfi.motorsport.backend.dtos.categoria.CategoriaUpdateDto;
+import com.tfi.motorsport.backend.dtos.categoria.PerfilCategoriaDto;
 
+import java.time.ZoneId;
 import java.util.List;
 
 public interface ICategoriaService {
@@ -19,4 +21,5 @@ public interface ICategoriaService {
 
     CategoriaDto modificarCategoria(Long id, CategoriaUpdateDto dto);
 
+    PerfilCategoriaDto obtenerPerfil(String siglas, ZoneId zona);
 }

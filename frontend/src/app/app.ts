@@ -7,9 +7,11 @@ import {ZonaHorariaService } from './core/services/zona-horaria.service'
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from './core/services/auth.service';
+import { Notificaciones } from './shared/notificaciones/notificaciones';
+import { SeguimientoService } from './core/services/seguimiento.service';
 
 @Component({
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icono, NgTemplateOutlet, FormsModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icono, NgTemplateOutlet, FormsModule, Notificaciones],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
@@ -23,6 +25,7 @@ export class App {
     { ruta: '/calendario', texto: 'Calendario', icono: 'calendario' },
     { ruta: '/pilotos', texto: 'Pilotos', icono: 'pilotos' },
     { ruta: '/equipos', texto: 'Equipos', icono: 'equipos' },
+    { ruta: '/estadisticas', texto: 'Estadísticas', icono: 'estadisticas' },
   ];
 
 
@@ -41,6 +44,8 @@ export class App {
 
 
   constructor() {
+
+    inject(SeguimientoService);
     // Al navegar, el menú del celular se cierra solo
     inject(Router)
       .events.pipe(

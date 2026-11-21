@@ -1,17 +1,18 @@
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { EventoService } from '../../core/services/evento.service';
 import { ZonaHorariaService } from '../../core/services/zona-horaria.service';
-import { EventoDto, ResultadoSesion } from '../../core/modelos';
+import { EventoDto, FilaCampeonatoPiloto, ResultadoSesion } from '../../core/modelos';
 import { ResultadoService } from '../../core/services/resultados.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 import { mensajeError } from '../../core/errores/error';
 import { EstadoCarga } from '../../shared/estado-carga/estado-carga';
 import { FilaEvento } from '../../shared/fila-evento/fila-evento';
-import { EstadoPipe, HoraPipe, TiempoPipe } from '../../shared/pipe/formato';
-import { Calendario } from '../calendario/calendario';
+import { HoraPipe, TiempoPipe } from '../../shared/pipe/formato';
 import { CalendarioMes } from '../../shared/calendario-mes/calendario-mes';
+import { SaludServices } from '../../core/services/salud.service';
+import { EstadisticaService } from '../../core/services/estadistica.service';
 
 @Component({
   imports: [RouterLink,EstadoCarga, FilaEvento, HoraPipe, TiempoPipe, CalendarioMes],
@@ -24,6 +25,8 @@ export class Inicio {
   private readonly resultadoService = inject(ResultadoService);
   private readonly eventoService = inject(EventoService);
   private readonly zonaService = inject(ZonaHorariaService);
+  private readonly serviceSalud = inject(SaludServices);
+  private readonly estadisticaService = inject(EstadisticaService);
 
   protected readonly proximosEventos = signal<EventoDto[]>([]);
   protected readonly recientesEventos = signal<EventoDto[]>([]);
@@ -36,6 +39,15 @@ export class Inicio {
 
   protected readonly mes = signal(this.mesActual());
   protected readonly eventosMes = signal<EventoDto[]>([]);
+
+  // Panel de campeonatos (MVP 4): top 5 de la temporada actual de cada categoría
+  protected readonly categoriasCampeonato = ['F1', 'WRC', 'TC'] as const;
+  protected readonly categoriaCampeonato = signal<string>('F1');
+  protected readonly anioCampeonato = signal<number | null>(null);
+  protected readonly topCampeonato = signal<FilaCampeonatoPiloto[]>([]);
+  protected readonly cargandoCampeonato = signal(false);
+  protected readonly errorCampeonato = signal<string | null>(null);
+  private pedidoCampeonato = 0;
   protected readonly hoy = computed(() =>
     new Intl.DateTimeFormat('en-CA', { timeZone: this.zonaService.zona(), year: 'numeric', month: '2-digit', day: '2-digit' }).format(
       new Date(this.ahora()),
@@ -58,8 +70,34 @@ export class Inicio {
         });
       });
     });
+    effect(() => {
+      const siglas = this.categoriaCampeonato();
+      untracked(() => this.cargarCampeonato(siglas));
+    });
     interval(60_000).pipe(takeUntilDestroyed()).subscribe(() => {
       this.ahora.set(Date.now())
+    });
+  }
+
+  /** La temporada "actual" la decide el backend (perfil de la categoría); después se pide su campeonato. */
+  private cargarCampeonato(siglas: string): void {
+    const pedido = ++this.pedidoCampeonato;
+    const vigente = () => pedido === this.pedidoCampeonato;
+    this.cargandoCampeonato.set(true);
+    this.errorCampeonato.set(null);
+    this.topCampeonato.set([]);
+    this.serviceSalud.perfil(siglas).subscribe({
+      next: (perfil) => {
+        if (!vigente()) return;
+        const anio = perfil.temporadaActual?.anio ?? null;
+        this.anioCampeonato.set(anio);
+        if (anio === null) { this.cargandoCampeonato.set(false); return; }
+        this.estadisticaService.campeonatoPilotos(siglas, anio).subscribe({
+          next: (filas) => { if (vigente()) { this.topCampeonato.set(filas.slice(0, 5)); this.cargandoCampeonato.set(false); } },
+          error: (e) => { if (vigente()) { this.errorCampeonato.set(mensajeError(e)); this.cargandoCampeonato.set(false); } },
+        });
+      },
+      error: (e) => { if (vigente()) { this.errorCampeonato.set(mensajeError(e)); this.cargandoCampeonato.set(false); } },
     });
   }
 
