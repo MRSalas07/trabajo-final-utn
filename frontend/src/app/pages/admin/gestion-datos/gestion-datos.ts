@@ -1,12 +1,18 @@
-import { Component, signal,inject, effect, untracked,computed  } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AbmTabla, CampoAbm, ColumnaAbm } from './../abm-tabla/abm-tabla';
-import { sign } from 'chart.js/helpers';
-import { AbmService, RegistroGenerico } from '../../../core/services/abm.service';   // ← tu ruta
-import { mensajeError } from '../../../core/errores/error';    
+import { AbmTabla, BusquedaAbm, CampoAbm, ColumnaAbm, OpcionAbm } from './../abm-tabla/abm-tabla';
+import { AbmService, RegistroGenerico } from '../../../core/services/abm.service';
+import { mensajeError } from '../../../core/errores/error';
+import { EstadisticaService } from '../../../core/services/estadistica.service';
 
-type PestanaGestion = 'categorias' | 'pilotos' | 'equipos' | 'calendario';
-
+type PestanaGestion =
+  | 'calendario'
+  | 'pilotos'
+  | 'equipos'
+  | 'participaciones'
+  | 'tripulaciones'
+  | 'palmares'
+  | 'categorias';
 
 const ESTADOS_EVENTO = ['PROGRAMADO', 'EN_CURSO', 'FINALIZADO', 'CANCELADO'].map((estado) => ({
   valor: estado,
@@ -22,31 +28,69 @@ const TIPOS_SESION = ['PRACTICA', 'CLASIFICACION', 'SPRINT_CLASIFICACION', 'SPRI
   (tipo) => ({ valor: tipo, texto: tipo }),
 );
 
+const ROLES_PARTICIPACION = ['PILOTO', 'COPILOTO', 'RESERVA'].map((rol) => ({ valor: rol, texto: rol }));
+
+/** Tope de registros que devuelve el backend en los listados de pilotos y equipos. */
+const TOPE_LISTADO_BACKEND = 500;
+
 /** Fecha-hora UTC (ISO) -> texto corto en la hora local del dispositivo. */
 const formatearFechaHora = (valor: unknown) =>
   valor ? new Date(String(valor)).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '';
 
 
+
+const textoPiloto = (piloto: RegistroGenerico) =>
+  `${piloto['apellido']}, ${piloto['nombre'] ?? ''}${piloto['codigo'] ? ' (' + piloto['codigo'] + ')' : ''}`;
+
+
+
+const buscarPiloto = (claveTexto: string): BusquedaAbm => ({ 
+  recurso: 'pilotos', textoOpcion: textoPiloto, claveTexto }
+);
+
+const buscarEquipo: BusquedaAbm = {
+  recurso: 'equipos',
+  textoOpcion: (equipo) => String(equipo['nombre']),
+  claveTexto: 'equipo',
+};
+
+/** Convierte una lista de participaciones en opciones sin repetidos, ordenadas por nombre. */
+function opcionesUnicas(participaciones: RegistroGenerico[], claveId: string, claveNombre: string): OpcionAbm[] {
+  const nombresPorId = new Map<number, string>();
+  for (const participacion of participaciones) {
+    nombresPorId.set(Number(participacion[claveId]), String(participacion[claveNombre]));
+  }
+  return [...nombresPorId]
+    .map(([valor, texto]) => ({ valor, texto }))
+    .sort((a, b) => a.texto.localeCompare(b.texto));
+}
+
 @Component({
-  imports: [FormsModule, AbmTabla],
   selector: 'app-gestion-datos',
-  styleUrl: './gestion-datos.css',
+  imports: [FormsModule, AbmTabla],
   templateUrl: './gestion-datos.html',
+  styleUrl: './gestion-datos.css',
 })
 export class GestionDatos {
-
   private readonly abmService = inject(AbmService);
+  private readonly estadisticaService = inject(EstadisticaService);
+
+  protected readonly topeListado = TOPE_LISTADO_BACKEND;
 
   protected readonly pestanas: { id: PestanaGestion; texto: string }[] = [
-    { id: 'calendario', texto: 'Temporadas y eventos' },
+    { id: 'calendario', texto: 'Temporadas, eventos y resultados' },
     { id: 'pilotos', texto: 'Pilotos' },
     { id: 'equipos', texto: 'Equipos' },
+    { id: 'participaciones', texto: 'Participaciones' },
+    { id: 'tripulaciones', texto: 'Tripulaciones' },
+    { id: 'palmares', texto: 'Palmarés' },
     { id: 'categorias', texto: 'Categorías' },
   ];
 
   protected readonly pestanaActiva = signal<PestanaGestion>('pilotos');
   protected readonly errorGeneral = signal<string | null>(null);
 
+  
   protected readonly categorias = signal<RegistroGenerico[]>([]);
   protected readonly categoriaId = signal<number | null>(null);
   protected readonly temporadaId = signal<number | null>(null);
@@ -55,24 +99,25 @@ export class GestionDatos {
   protected readonly sesionId = signal<number | null>(null);
   protected readonly etapaId = signal<number | null>(null);
 
+  
+  protected readonly anioFiltro = signal<number | null>(new Date().getFullYear());
 
   protected readonly textoBusquedaPiloto = signal('');
   protected readonly textoBusquedaEquipo = signal('');
 
-  private readonly listaPilotos = signal<RegistroGenerico[]>([]);
-  private readonly listaEquipos = signal<RegistroGenerico[]>([]);
+  
+  protected readonly contadorRecalculos = signal(0);
+
+  
+  private readonly participantesDeLaTemporada = signal<RegistroGenerico[]>([]);
+  
   private readonly listaTripulaciones = signal<RegistroGenerico[]>([]);
 
-  private readonly opcionesPilotos = computed(() =>
-    this.listaPilotos().map((piloto) => ({
-      valor: piloto.id,
-      texto: `${piloto['apellido']}, ${piloto['nombre'] ?? ''}${piloto['codigo'] ? ' (' + piloto['codigo'] + ')' : ''}`,
-    })),
+  private readonly opcionesPilotosDeLaTemporada = computed(() =>
+    opcionesUnicas(this.participantesDeLaTemporada(), 'pilotoId', 'piloto'),
   );
-  private readonly opcionesEquipos = computed(() =>
-    this.listaEquipos().map((equipo) => ({ 
-      valor: equipo.id, texto: String(equipo['nombre']) 
-    })),
+  private readonly opcionesEquiposDeLaTemporada = computed(() =>
+    opcionesUnicas(this.participantesDeLaTemporada(), 'equipoId', 'equipo'),
   );
   private readonly opcionesTripulaciones = computed(() =>
     this.listaTripulaciones().map((tripulacion) => ({
@@ -81,24 +126,22 @@ export class GestionDatos {
     })),
   );
 
-    constructor() {
+  constructor() {
     this.cargarCategorias();
-    this.cargarOpciones();
+
     effect(() => {
-      const categoriaId = this.categoriaId();
-      const anio = this.anioTemporada();
-      if (categoriaId) {
-        untracked(() =>
-          this.abmService.listar('tripulaciones', { categoriaId, anio }).subscribe({
-            next: (tripulaciones) => this.listaTripulaciones.set(tripulaciones),
-            error: (errorHttp) => this.errorGeneral.set(mensajeError(errorHttp)),
-          }),
-        );
-      }
+      this.categoriaId();
+      this.anioTemporada();
+      this.anioFiltro();
+      untracked(() => {
+        this.cargarParticipantesDeLaTemporada();
+        this.cargarTripulaciones();
+      });
     });
   }
 
-  /** Carga las categorías y, si la elegida ya no existe o todavía no hay ninguna, elige la primera. */
+  
+  
   cargarCategorias(): void {
     this.abmService.listar('categorias').subscribe({
       next: (categorias) => {
@@ -112,37 +155,82 @@ export class GestionDatos {
     });
   }
 
-  cargarOpciones(): void {
-    this.abmService.listar('pilotos').subscribe({
-      next: (pilotos) => this.listaPilotos.set(pilotos),
+  
+  cargarParticipantesDeLaTemporada(): void {
+    const categoriaId = this.categoriaId();
+    const anio = this.anioTemporada();
+    if (!categoriaId || !anio) {
+      this.participantesDeLaTemporada.set([]);
+      return;
+    }
+    this.abmService.listar('participaciones', { categoriaId, anio }).subscribe({
+      next: (participantes) => this.participantesDeLaTemporada.set(participantes),
       error: (errorHttp) => this.errorGeneral.set(mensajeError(errorHttp)),
     });
-    this.abmService.listar('equipos').subscribe({
-      next: (equipos) => this.listaEquipos.set(equipos),
+  }
+
+  
+  cargarTripulaciones(): void {
+    const categoriaId = this.categoriaId();
+    const anio = this.anioTemporada() ?? this.anioFiltro();
+    if (!categoriaId) {
+      this.listaTripulaciones.set([]);
+      return;
+    }
+    this.abmService.listar('tripulaciones', { categoriaId, anio }).subscribe({
+      next: (tripulaciones) => this.listaTripulaciones.set(tripulaciones),
       error: (errorHttp) => this.errorGeneral.set(mensajeError(errorHttp)),
     });
   }
 
   protected elegirCategoria(categoriaId: number | null): void {
     this.categoriaId.set(categoriaId);
-    this.temporadaId.set(null);   
-    this.deseleccionarEvento();
+    this.temporadaId.set(null);    
+    this.anioTemporada.set(null);
+    this.limpiarSeleccionDesdeEvento();
   }
 
   protected elegirTemporada(temporada: RegistroGenerico): void {
     this.temporadaId.set(temporada.id);
-    this.deseleccionarEvento();
+    this.anioTemporada.set(Number(temporada['anio']));   
+    this.limpiarSeleccionDesdeEvento();
   }
 
   protected elegirEvento(evento: RegistroGenerico): void {
     this.eventoId.set(evento.id);
+    this.sesionId.set(null);   
+    this.etapaId.set(null);
   }
 
-  /** Al subir de nivel (cambiar de categoría o temporada), lo que estaba más abajo deja de tener sentido. */
-  private deseleccionarEvento(): void {
+  protected elegirSesion(sesion: RegistroGenerico): void {
+    this.sesionId.set(sesion.id);
+    this.etapaId.set(null);   
+  }
+
+  protected elegirEtapa(etapa: RegistroGenerico): void {
+    this.etapaId.set(etapa.id);
+    this.sesionId.set(null);
+  }
+
+  
+  private limpiarSeleccionDesdeEvento(): void {
     this.eventoId.set(null);
+    this.sesionId.set(null);
+    this.etapaId.set(null);
   }
 
+  
+  protected recalcularPalmares(): void {
+    const siglas = this.categorias().find((categoria) => categoria.id === this.categoriaId())?.['siglas'];
+    if (!siglas) return;
+    this.estadisticaService.recalcularPalmares(String(siglas)).subscribe({
+      next: () => this.contadorRecalculos.update((cantidad) => cantidad + 1),
+      error: (errorHttp) => this.errorGeneral.set(mensajeError(errorHttp)),
+    });
+  }
+
+ 
+  
   protected readonly columnasTemporadas: ColumnaAbm[] = [
     { clave: 'anio', etiqueta: 'Año' },
     { clave: 'nombre', etiqueta: 'Nombre' },
@@ -162,7 +250,7 @@ export class GestionDatos {
     { clave: 'circuito', etiqueta: 'Circuito / sede' },
     { clave: 'inicio', etiqueta: 'Inicio', formato: (registro) => formatearFechaHora(registro['inicio']) },
     { clave: 'estado', etiqueta: 'Estado' },
-    // Un evento con id externo vino de una sincronización con una API; si no, se cargó a mano
+    
     { clave: 'idExterno', etiqueta: 'Origen', formato: (registro) => (registro['idExterno'] ? 'API' : 'Manual') },
   ];
   protected readonly camposEventos: CampoAbm[] = [
@@ -224,10 +312,17 @@ export class GestionDatos {
     { clave: 'puntos', etiqueta: 'Pts' },
     { clave: 'estado', etiqueta: 'Estado' },
   ];
-  // Es un computed (y no una constante) porque las opciones de los selects se cargan después, desde el backend
+  
   protected readonly camposResultadosSesion = computed<CampoAbm[]>(() => [
-    { clave: 'pilotoId', etiqueta: 'Piloto', tipo: 'select', requerido: true, opciones: this.opcionesPilotos(), soloAlta: true },
-    { clave: 'equipoId', etiqueta: 'Equipo', tipo: 'select', requerido: true, opciones: this.opcionesEquipos() },
+    {
+      clave: 'pilotoId',
+      etiqueta: 'Piloto',
+      tipo: 'select',
+      requerido: true,
+      opciones: this.opcionesPilotosDeLaTemporada(),
+      soloAlta: true,
+    },
+    { clave: 'equipoId', etiqueta: 'Equipo', tipo: 'select', requerido: true, opciones: this.opcionesEquiposDeLaTemporada() },
     { clave: 'posicion', etiqueta: 'Posición', tipo: 'numero' },
     { clave: 'numero', etiqueta: 'Número de auto', tipo: 'numero' },
     { clave: 'puntos', etiqueta: 'Puntos', tipo: 'decimal' },
@@ -263,8 +358,7 @@ export class GestionDatos {
     { clave: 'estado', etiqueta: 'Estado', tipo: 'select', opciones: ESTADOS_RESULTADO, porDefecto: 'FINALIZADO' },
     { clave: 'motivoAbandono', etiqueta: 'Motivo de abandono', tipo: 'texto' },
   ]);
-  
-  
+
   protected readonly columnasPilotos: ColumnaAbm[] = [
     { clave: 'apellido', etiqueta: 'Apellido' },
     { clave: 'nombre', etiqueta: 'Nombre' },
@@ -274,6 +368,7 @@ export class GestionDatos {
     {
       clave: 'idExterno',
       etiqueta: 'Origen',
+     
       formato: (registro) => (registro['idExterno'] ? String(registro['idExterno']).split(':')[0] : 'Manual'),
     },
   ];
@@ -303,6 +398,49 @@ export class GestionDatos {
     { clave: 'sede', etiqueta: 'Sede', tipo: 'texto' },
     { clave: 'fechaFundacion', etiqueta: 'Fundación', tipo: 'fecha' },
     { clave: 'logoUrl', etiqueta: 'URL del logo', tipo: 'texto' },
+  ];
+
+  protected readonly columnasParticipaciones: ColumnaAbm[] = [
+    { clave: 'temporada', etiqueta: 'Año' },
+    { clave: 'piloto', etiqueta: 'Piloto' },
+    { clave: 'equipo', etiqueta: 'Equipo' },
+    { clave: 'numero', etiqueta: '#' },
+    { clave: 'rol', etiqueta: 'Rol' },
+  ];
+  
+  protected readonly camposParticipaciones = computed<CampoAbm[]>(() => [
+    { clave: 'temporada', etiqueta: 'Año', tipo: 'numero', requerido: true, porDefecto: this.anioFiltro() },
+    { clave: 'pilotoId', etiqueta: 'Piloto', tipo: 'busqueda', requerido: true, busqueda: buscarPiloto('piloto') },
+    { clave: 'equipoId', etiqueta: 'Equipo', tipo: 'busqueda', requerido: true, busqueda: buscarEquipo },
+    { clave: 'numero', etiqueta: 'Número', tipo: 'numero' },
+    { clave: 'rol', etiqueta: 'Rol', tipo: 'select', opciones: ROLES_PARTICIPACION, porDefecto: 'PILOTO' },
+    { clave: 'fechaDesde', etiqueta: 'Desde', tipo: 'fecha' },
+    { clave: 'fechaHasta', etiqueta: 'Hasta', tipo: 'fecha' },
+  ]);
+
+  protected readonly columnasTripulaciones: ColumnaAbm[] = [
+    { clave: 'temporada', etiqueta: 'Año' },
+    { clave: 'numero', etiqueta: '#' },
+    { clave: 'piloto', etiqueta: 'Piloto' },
+    { clave: 'copiloto', etiqueta: 'Copiloto' },
+    { clave: 'equipo', etiqueta: 'Equipo' },
+  ];
+  protected readonly camposTripulaciones = computed<CampoAbm[]>(() => [
+    { clave: 'temporada', etiqueta: 'Año', tipo: 'numero', requerido: true, porDefecto: this.anioFiltro() },
+    { clave: 'pilotoId', etiqueta: 'Piloto', tipo: 'busqueda', requerido: true, busqueda: buscarPiloto('piloto') },
+    { clave: 'copilotoId', etiqueta: 'Copiloto', tipo: 'busqueda', requerido: true, busqueda: buscarPiloto('copiloto') },
+    { clave: 'equipoId', etiqueta: 'Equipo', tipo: 'busqueda', requerido: true, busqueda: buscarEquipo },
+    { clave: 'numero', etiqueta: 'Número', tipo: 'numero' },
+  ]);
+
+  protected readonly columnasPalmares: ColumnaAbm[] = [
+    { clave: 'piloto', etiqueta: 'Piloto' },
+    { clave: 'campeonatos', etiqueta: 'Títulos' },
+    { clave: 'victorias', etiqueta: 'Victorias' },
+    { clave: 'podios', etiqueta: 'Podios' },
+    { clave: 'poles', etiqueta: 'Poles' },
+    { clave: 'carreras', etiqueta: 'Eventos' },
+    { clave: 'puntosTotales', etiqueta: 'Puntos' },
   ];
 
   protected readonly columnasCategorias: ColumnaAbm[] = [

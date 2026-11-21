@@ -2,14 +2,34 @@ import { Component, computed, effect, inject, input, output, signal, untracked }
 import { AbmService, Filtros, NombreRecurso, RegistroGenerico } from '../../../core/services/abm.service';
 import { mensajeError } from '../../../core/errores/error';
 import { FormsModule } from '@angular/forms';
+import { catchError, debounceTime, map, Observable, of, Subject, switchMap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+
+/** Cantidad máxima de sugerencias que muestra un campo de búsqueda. */
+const LIMITE_SUGERENCIAS = 20;
+/** Letras mínimas para empezar a buscar (con menos, los resultados serían demasiados). */
+const LETRAS_MINIMAS_BUSQUEDA = 3;
+
+export interface OpcionAbm {
+  valor: string | number;
+  texto: string;
+}
+
+export interface BusquedaAbm {
+  recurso: NombreRecurso;
+  textoOpcion: (registro: RegistroGenerico) => string;
+  claveTexto?: string;
+}
 
 /** Definición de un campo del formulario. */
 export interface CampoAbm {
   clave: string;
   etiqueta: string;
-  tipo: 'texto' | 'numero' | 'decimal' | 'fecha' | 'fechahora' | 'select' | 'checkbox';
+  tipo: 'texto' | 'numero' | 'decimal' | 'fecha' | 'fechahora' | 'select' | 'checkbox' | 'busqueda';
   requerido?: boolean;
-  opciones?: { valor: string | number; texto: string }[];
+  opciones?: OpcionAbm[];
+  busqueda?: BusquedaAbm;
   ayuda?: string;
   /** Valor inicial al crear un registro nuevo. */
   porDefecto?: unknown;
@@ -31,6 +51,7 @@ export interface ColumnaAbm {
   templateUrl: './abm-tabla.html',
 })
 export class AbmTabla {
+
   private readonly abmService = inject(AbmService);
 
   readonly titulo = input.required<string>();
@@ -61,6 +82,12 @@ export class AbmTabla {
   protected readonly errorForm = signal<string | null>(null);
   protected readonly guardando = signal(false);
 
+    protected readonly textosBusqueda = signal<Record<string, string>>({});
+  protected readonly sugerencias = signal<Record<string, OpcionAbm[]>>({});
+  protected readonly busquedaAbierta = signal<string | null>(null);
+
+  private readonly terminosBusqueda = new Subject<{ campo: CampoAbm; texto: string }>();
+
   private readonly claveRecarga = computed(() => JSON.stringify(this.filtros()) + '|' + this.habilitado());
 
   constructor() {
@@ -72,6 +99,17 @@ export class AbmTabla {
         this.recargar();
       });
     });
+    this.terminosBusqueda
+      .pipe(
+        debounceTime(300),
+        switchMap(({ campo, texto }) =>
+          this.buscarOpciones(campo, texto).pipe(map((opciones) => ({ campo, opciones }))),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe(({ campo, opciones }) =>
+        this.sugerencias.update((actuales) => ({ ...actuales, [campo.clave]: opciones })),
+      );
   }
 
   recargar(): void {
@@ -109,7 +147,12 @@ export class AbmTabla {
       const valor = registro[campo.clave];
       formData[campo.clave] = campo.tipo === 'fechahora' ? aInputLocal(valor as string | null) 
                   : (valor ?? (campo.tipo === 'checkbox' ? false : null));
+      const claveTexto = campo.busqueda?.claveTexto;
+      if (campo.tipo === 'busqueda' && claveTexto) {
+        formData[campo.clave] = String(registro[claveTexto] ?? '');
+      }
     }
+    this.limpiarBusquedas(formData);
     this.editandoId.set(registro.id);
     this.errorForm.set(null);
     this.formulario.set(formData);
@@ -176,7 +219,54 @@ export class AbmTabla {
   protected tipoInput(campo: CampoAbm): string {
     return { numero: 'number', decimal: 'number', fecha: 'date', fechahora: 'datetime-local' }[campo.tipo as string] ?? 'text';
   }
+
+  protected escribirBusqueda(campo: CampoAbm, evento: Event): void {
+    const texto = (evento.target as HTMLInputElement).value;
+    this.textosBusqueda.update((actuales) => ({ ...actuales, [campo.clave]: texto }));
+    
+    const valoresFormulario = this.formulario();
+    if (valoresFormulario) valoresFormulario[campo.clave] = null;
+    this.busquedaAbierta.set(campo.clave);
+
+    if (texto.trim().length < LETRAS_MINIMAS_BUSQUEDA) {
+      this.sugerencias.update((actuales) => ({ ...actuales, [campo.clave]: [] }));
+      return;
+    }
+    this.terminosBusqueda.next({ campo, texto: texto.trim() });
+  }
+
+  /** El usuario eligió una sugerencia: se guarda el id y se muestra el texto. */
+  protected elegirSugerencia(campo: CampoAbm, opcion: OpcionAbm): void {
+    const valoresFormulario = this.formulario();
+    if (valoresFormulario) valoresFormulario[campo.clave] = opcion.valor;
+    this.textosBusqueda.update((actuales) => ({ ...actuales, [campo.clave]: opcion.texto }));
+    this.busquedaAbierta.set(null);
+  }
+
+  private buscarOpciones(campo: CampoAbm, texto: string): Observable<OpcionAbm[]> {
+    const configuracion = campo.busqueda;
+    if (!configuracion) return of([]);
+    return this.abmService.listar(configuracion.recurso, { q: texto, limit: LIMITE_SUGERENCIAS }).pipe(
+      // Se recorta también acá por si el backend todavía no respeta "limit"
+      map((registros) =>
+        registros.slice(0, LIMITE_SUGERENCIAS).map((registro) => ({
+          valor: registro.id,
+          texto: configuracion.textoOpcion(registro),
+        })),
+      ),
+      catchError(() => of([])),
+    );
+  }
+
+  private limpiarBusquedas(textosIniciales: Record<string, string>): void {
+    this.textosBusqueda.set(textosIniciales);
+    this.sugerencias.set({});
+    this.busquedaAbierta.set(null);
+  }
 }
+
+
+
 
 function estaVacio(valor: unknown): boolean {
   return valor === null || valor === undefined || (typeof valor === 'string' && valor.trim() === '');
