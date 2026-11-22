@@ -320,3 +320,39 @@ export interface PerfilCategoria {
   categoria: Categoria; temporadas: Temporada[]; temporadaActual: Temporada | null;
   resumen: ResumenTemporada | null; proximoEvento: EventoDto | null; ultimoEvento: EventoDto | null;
 }
+// ---------- MVP 6: equipos, marcas e histórico (espejo de EstadisticaDto.java) ----------
+export type TipoGrupo = 'EQUIPO' | 'MARCA';
+
+export interface FilaMarca {
+  posicion: number; marca: string; puntos: number; victorias: number; podios: number;
+  eventosConResultados: number; mejorResultado: number | null; equipos: string[]; pilotos: number;
+}
+export interface PuntoGrupo {
+  numeroFecha: number | null; evento: string; puntos: number; puntosAcumulados: number;
+  mejorPosicion: number | null; mediaMovilPuntos: number | null;
+}
+export interface TendenciaGrupo {
+  tipo: TipoGrupo; clave: string; nombre: string; anio: number; fechas: PuntoGrupo[];
+  promedioPuntos: number | null;
+  pendiente: number | null; // regresión de los puntos por fecha: positiva = MEJORA (al revés que en pilotos)
+  interpretacion: string | null; victorias: number; podios: number; pilotos: string[];
+}
+export interface SerieGrupo { clave: string; nombre: string; puntosAcumulados: number[]; puntosPorFecha: number[]; }
+export interface EvolucionGrupos { tipo: TipoGrupo; rondas: Ronda[]; series: SerieGrupo[]; }
+export interface TemporadaHistorica {
+  anio: number; posicionCampeonato: number | null; participantes: number; puntos: number;
+  victorias: number; podios: number; poles: number; eventosDisputados: number;
+  promedioPosicion: number | null; puntosPorEvento: number | null; detalle: string | null;
+}
+export interface Historico {
+  tipo: string; id: number; nombre: string; categoria: string; temporadas: TemporadaHistorica[];
+  puntosTotales: number; victoriasTotales: number; podiosTotales: number;
+  mejorPosicionCampeonato: number | null; variacionPuntosPorEvento: number | null;
+}
+export interface ComparativaHistorica {
+  categoria: string; anios: number[]; a: Historico; b: Historico;
+  posicionesA: (number | null)[]; posicionesB: (number | null)[];
+  puntosA: (number | null)[]; puntosB: (number | null)[];
+  carrerasDelanteA: number; carrerasDelanteB: number;
+  temporadasDelanteA: number; temporadasDelanteB: number;
+}

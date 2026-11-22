@@ -1,0 +1,10 @@
+.tablero { margin-top: var(--gap); }
+.panel { gap: 0.75rem; }
+.panel-titulo { flex-wrap: wrap; gap: 0.5rem; }
+.filtros label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; }
+.pestanas.mini { margin: 0; border-bottom: none; }
+.pestanas.mini button { min-height: 36px; }
+.ranking td.num, .ranking th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.interpretacion { margin: 0; }
+.interpretacion[data-tendencia='Mejorando'] strong { color: var(--ok); }
+.interpretacion[data-tendencia='Empeorando'] strong { color: var(--acento-claro); }

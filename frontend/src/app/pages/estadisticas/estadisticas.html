@@ -10,6 +10,7 @@
       }
     </select>
   </label>
+  @if (seccion() !== 'historico') {
   <label>Temporada
     <select [value]="anioElegido() ?? ''" (change)="elegirAnio($any($event.target).value)" [disabled]="!temporadas().length">
       @for (t of temporadas(); track t.id) {
@@ -17,6 +18,7 @@
       }
     </select>
   </label>
+  }
   @if (siglas(); as s) {
     <a class="btn-chico" [routerLink]="['/categorias', s]">Ver campeonato completo</a>
   }
@@ -26,8 +28,31 @@
                   [vacio]="!cargandoPilotos() && !error() && anioElegido() !== null && pilotos().length === 0"
                   mensajeVacio="Todavía no hay resultados cargados para esta temporada." />
 
+<div class="pestanas" role="tablist" aria-label="Sección de estadísticas">
+  <button type="button" role="tab" [class.activa]="seccion() === 'pilotos'" [attr.aria-selected]="seccion() === 'pilotos'"
+          (click)="seccion.set('pilotos')">Pilotos</button>
+  <button type="button" role="tab" [class.activa]="seccion() === 'equipos'" [attr.aria-selected]="seccion() === 'equipos'"
+          (click)="seccion.set('equipos')">Equipos y marcas</button>
+  <button type="button" role="tab" [class.activa]="seccion() === 'historico'" [attr.aria-selected]="seccion() === 'historico'"
+          (click)="seccion.set('historico')">Histórico</button>
+</div>
+
 <p class="suave chico">Todas las cifras se calculan a partir de los resultados cargados en el sistema.</p>
 
+@switch (seccion()) {
+@case ('equipos') {
+  @if (siglas(); as s) {
+    @if (anioElegido(); as anio) {
+      <app-equipos-marcas [siglas]="s" [anio]="anio" />
+    }
+  }
+}
+@case ('historico') {
+  @if (siglas(); as s) {
+    <app-historico [siglas]="s" [pilotosTemporada]="pilotos()" />
+  }
+}
+@default {
 <div class="tablero">
   <!-- ------------------------------------------------------------ Evolución -->
   <section class="panel" aria-labelledby="t-evolucion">
@@ -163,3 +188,5 @@
     }
   </section>
 </div>
+}
+}

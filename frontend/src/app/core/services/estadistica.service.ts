@@ -2,8 +2,14 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import {
+  ComparativaHistorica,
   ComparativaPilotos,
   EvolucionCampeonato,
+  EvolucionGrupos,
+  FilaMarca,
+  Historico,
+  TendenciaGrupo,
+  TipoGrupo,
   FilaCampeonatoEquipo,
   FilaCampeonatoPiloto,
   ResumenTemporada,
@@ -42,5 +48,35 @@ export class EstadisticaService {
       `${this.api}/${siglas}/palmares/recalcular`,
       {},
     );
+  }
+
+  // ---------------------------------------------------------------- MVP 6: equipos y marcas
+  marcas(siglas: string, anio: number): Observable<FilaMarca[]> {
+    return this.http.get<FilaMarca[]>(`${this.api}/${siglas}/${anio}/marcas`);
+  }
+
+  evolucionGrupos(siglas: string, anio: number, tipo: TipoGrupo, top = 6): Observable<EvolucionGrupos> {
+    return this.http.get<EvolucionGrupos>(`${this.api}/${siglas}/${anio}/evolucion-grupos`, { params: { tipo, top } });
+  }
+
+  tendenciaEquipo(siglas: string, anio: number, equipoId: number): Observable<TendenciaGrupo> {
+    return this.http.get<TendenciaGrupo>(`${this.api}/${siglas}/${anio}/tendencia-equipo/${equipoId}`);
+  }
+
+  tendenciaMarca(siglas: string, anio: number, marca: string): Observable<TendenciaGrupo> {
+    return this.http.get<TendenciaGrupo>(`${this.api}/${siglas}/${anio}/tendencia-marca`, { params: { marca } });
+  }
+
+  // ---------------------------------------------------------------- MVP 6: histórico
+  historicoPiloto(siglas: string, pilotoId: number): Observable<Historico> {
+    return this.http.get<Historico>(`${this.api}/${siglas}/historico/pilotos/${pilotoId}`);
+  }
+
+  historicoEquipo(siglas: string, equipoId: number): Observable<Historico> {
+    return this.http.get<Historico>(`${this.api}/${siglas}/historico/equipos/${equipoId}`);
+  }
+
+  comparativaHistorica(siglas: string, a: number, b: number): Observable<ComparativaHistorica> {
+    return this.http.get<ComparativaHistorica>(`${this.api}/${siglas}/historico/comparativa`, { params: { a, b } });
   }
 }
