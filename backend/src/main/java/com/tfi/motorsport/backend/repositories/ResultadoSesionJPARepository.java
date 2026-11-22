@@ -45,5 +45,9 @@ public interface ResultadoSesionJPARepository extends JpaRepository<ResultadoSes
     List<FilaResultado> filasDeEquipo(Long equipoId);
 
     List<ResultadoSesion> findBySesionId(Long sesionId);
+
+    long countByPilotoIdAndEliminadoFalse(Long pilotoId);
+
+    long countByEquipoIdAndEliminadoFalse(Long equipoId);
 }
 
