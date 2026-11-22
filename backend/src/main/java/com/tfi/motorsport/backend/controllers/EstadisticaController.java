@@ -50,6 +50,7 @@ public class EstadisticaController {
         return estadisticaService.evolucionPilotos(siglas, anio, pilotos, top);
     }
 
+    @Operation(summary = "Tendencia de rendimiento de un piloto en la temporada")
     @GetMapping("/{anio}/tendencia/{pilotoId}")
     public TendenciaPiloto tendencia(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
                                      @PathVariable Long pilotoId) {
@@ -75,6 +76,20 @@ public class EstadisticaController {
     public List<FilaMarca> marcas(@PathVariable String siglas,
                                   @PathVariable @Min(1950) @Max(2100) int anio) {
         return estadisticaService.rankingMarcas(siglas, anio);
+    }
+
+    @Operation(summary = "Tendencia de rendimiento de un equipo (puntos por fecha, media móvil y regresión)")
+    @GetMapping("/{anio}/tendencia-equipo/{equipoId}")
+    public TendenciaGrupo tendenciaEquipo(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
+                                          @PathVariable Long equipoId) {
+        return estadisticaService.tendenciaEquipo(siglas, anio, equipoId);
+    }
+
+    @Operation(summary = "Tendencia de rendimiento de una marca (ej: Toyota, Ford)")
+    @GetMapping("/{anio}/tendencia-marca")
+    public TendenciaGrupo tendenciaMarca(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
+                                         @RequestParam @Size(min = 1, max = 60) String marca) {
+        return estadisticaService.tendenciaMarca(siglas, anio, marca);
     }
 
 
