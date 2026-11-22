@@ -20,6 +20,58 @@ public final class AnalisisHistorico {
     private AnalisisHistorico() {
     }
 
+    public static Historico historicoPiloto (List<Participacion> participacionesxCategoria, Long pilotoId,
+                                             String categoria) {
+        List<TemporadaHistorica> temporadas = new ArrayList<>();
+        String nombre = null;
+        for (Map.Entry<Integer, List<Participacion>> temporada : agruparPorAnio(participacionesxCategoria).entrySet()) {
+            List<FilaCampeonatoPiloto> tabla = MotorEstadistico.campeonatoPilotos(temporada.getValue());
+            Optional<FilaCampeonatoPiloto> filaDelPiloto = tabla.stream()
+                    .filter(fila -> fila.pilotoId().equals(pilotoId)).findFirst();
+            if (filaDelPiloto.isEmpty()) {
+                continue;
+            }
+            FilaCampeonatoPiloto fila = filaDelPiloto.get();
+            nombre = fila.piloto();
+            temporadas.add(new TemporadaHistorica(temporada.getKey(), fila.posicion(), tabla.size(), fila.puntos(),
+                    fila.victorias(), fila.podios(), fila.poles(), fila.eventosDisputados(), fila.promedioPosicion(),
+                    fila.puntosPorEvento(), fila.equipo()));
+        }
+        return armarHistorico(TIPO_PILOTO, pilotoId, nombre, categoria, temporadas);
+    }
+
+    public static Historico historicoEquipo(List<Participacion> participacionesXCategoria, Long equipoId, String categoria) {
+        List<TemporadaHistorica> temporadas = new ArrayList<>();
+        String nombre = null;
+
+        for (Map.Entry<Integer, List<Participacion>> temporada : agruparPorAnio(participacionesXCategoria).entrySet()) {
+            List<FilaCampeonatoEquipo> tabla = MotorEstadistico.campeonatoEquipos(temporada.getValue());
+            Optional<FilaCampeonatoEquipo> filaDelEquipo = tabla.stream()
+                    .filter(fila -> fila.equipoId().equals(equipoId)).findFirst();
+            if (filaDelEquipo.isEmpty()) {
+                continue;
+            }
+            FilaCampeonatoEquipo fila = filaDelEquipo.get();
+            nombre = fila.equipo();
+            List<Participacion> disputadasDelEquipo = temporada.getValue().stream()
+                    .filter(participacion -> equipoId.equals(participacion.equipoId()) && participacion.disputo())
+                    .toList();
+            int eventosDisputados = (int) disputadasDelEquipo.stream().map(Participacion::eventoId).distinct().count();
+            List<Integer> posicionesTerminadas = disputadasDelEquipo.stream().filter(Participacion::finalizo)
+                    .map(Participacion::posicionFinal).filter(Objects::nonNull).toList();
+
+            temporadas.add(new TemporadaHistorica(temporada.getKey(), fila.posicion(), tabla.size(), fila.puntos(),
+                    fila.victorias(), fila.podios(),
+                    (int) disputadasDelEquipo.stream().filter(Participacion::pole).count(),
+                    eventosDisputados,
+                    MotorEstadistico.promedioDePosiciones(posicionesTerminadas),
+                    eventosDisputados == 0 ? null
+                            : fila.puntos().divide(BigDecimal.valueOf(eventosDisputados), 2, RoundingMode.HALF_UP),
+                    String.join(", ", fila.pilotos())));
+        }
+        return armarHistorico(TIPO_EQUIPO, equipoId, nombre, categoria, temporadas);
+    }
+
     private static TreeMap<Integer, List<Participacion>> agruparPorAnio(List<Participacion> participaciones) {
         return participaciones.stream().filter(participacion -> participacion.anio() != null)
                 .collect(Collectors.groupingBy(Participacion::anio, TreeMap::new, Collectors.toList()));
@@ -47,7 +99,8 @@ public final class AnalisisHistorico {
         if (primera == null || ultima == null || primera.signum() <= 0) {
             return null;
         }
-        return ultima.subtract(primera).multiply(BigDecimal.valueOf(100)).divide(primera, 1, RoundingMode.HALF_UP);
+        BigDecimal resultado = ultima.subtract(primera).multiply(BigDecimal.valueOf(100)).divide(primera, 1, RoundingMode.HALF_UP);
+        return resultado;
     }
 
     private static Map<Integer, TemporadaHistorica> indexarPorAnio(Historico historico) {
