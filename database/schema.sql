@@ -1,8 +1,8 @@
 -- Motor: PostgreSQL
 -- Esquema relacional basado en diagramaUML.md
 --
--- Crea la base COMPLETA en su estado actual: incluye lo que antes agregaba
--- migraciones/001_indices_unicos.sql (evento.zona_horaria e indices unicos).
+-- Crea la base COMPLETA en su estado actual: incluye lo que agregan las migraciones
+-- 001 (evento.zona_horaria e indices unicos) y 002 (campeon de cada temporada).
 -- Se ejecuta UNA VEZ sobre una base vacia. Orden: schema.sql -> datos_iniciales.sql
 -- (ver database/README.md).
 --
@@ -47,6 +47,9 @@ CREATE TABLE temporada (
     nombre VARCHAR,
     fecha_inicio DATE,
     fecha_fin DATE,
+    -- Campeon oficial que informa la fuente (antes de 1991 la F1 descartaba resultados, asi que
+    -- no siempre coincide con el que mas puntos sumo). La FK se agrega al final: piloto se crea despues.
+    id_piloto_campeon BIGINT,
     "fechaCreacion" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "fechaActualizacion" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     creadopor BIGINT REFERENCES usuario(id_usuario) ON DELETE SET NULL,
@@ -256,6 +259,11 @@ CREATE INDEX idx_resultado_etapa_etapa ON resultado_etapa(id_etapa);
 CREATE INDEX idx_resultado_etapa_tripulacion ON resultado_etapa(id_tripulacion);
 CREATE INDEX idx_palmares_piloto ON palmares(id_piloto);
 CREATE INDEX idx_palmares_categoria ON palmares(id_categoria);
+
+-- Campeon de la temporada (antes en migraciones/002_campeon_temporada.sql)
+ALTER TABLE temporada
+    ADD CONSTRAINT fk_temporada_piloto_campeon
+    FOREIGN KEY (id_piloto_campeon) REFERENCES piloto(id_piloto) ON DELETE SET NULL;
 
 -- Indices de apoyo para el calendario (consultas por rango de fechas)
 CREATE INDEX idx_evento_fecha_inicio ON evento(fecha_inicio);
