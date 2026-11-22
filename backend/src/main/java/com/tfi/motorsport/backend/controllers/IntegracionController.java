@@ -62,11 +62,5 @@ public class IntegracionController {
         return sincronizacion.importar(temporada);
     }
 
-    @Operation(summary = "Recalcular el palmarés histórico de una categoría")
-    @PostMapping("/palmares/{siglas}/recalcular")
-    public Map<String, Object> recalcular(@PathVariable String siglas) {
-        return Map.of("categoria", siglas.toUpperCase(), "pilotosActualizados", estadisticas.recalcularPalmares(siglas));
-    }
-
 
 }

@@ -39,7 +39,7 @@ export class EstadisticaService {
 
   recalcularPalmares(siglas: string): Observable<{ categoria: string; pilotosActualizados: number }> {
     return this.http.post<{ categoria: string; pilotosActualizados: number }>(
-      `${this.api}/palmares/${siglas}/recalcular`,
+      `${this.api}/${siglas}/palmares/recalcular`,
       {},
     );
   }

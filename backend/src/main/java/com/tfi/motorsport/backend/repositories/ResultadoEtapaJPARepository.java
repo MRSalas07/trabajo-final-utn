@@ -47,7 +47,7 @@ public interface ResultadoEtapaJPARepository extends JpaRepository<ResultadoEtap
     List<FilaResultado> filasDeTemporada(Long temporadaId);
 
     @Query(SELECT_FILA + "where t.categoria.id = :categoriaId" + FILTRO_RELEVANTE)
-    List<FilaResultado> filasDeCategoria(Long idCategoria);
+    List<FilaResultado> filasDeCategoria(Long categoriaId);
 
     @Query(SELECT_FILA + "where p.id= :pilotoId" + FILTRO_RELEVANTE)
     List<FilaResultado> filasDePiloto(Long pilotoId);

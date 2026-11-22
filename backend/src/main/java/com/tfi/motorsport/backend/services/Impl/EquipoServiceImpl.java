@@ -63,16 +63,9 @@ public class EquipoServiceImpl implements IEquipoService {
 
         List<FilaResultado> filas = new ArrayList<>(resultadoSesionRepo.filasDeEquipo(equipoId));
         filas.addAll(resultadoEtapaRepo.filasDeEquipo(equipoId));
-        List<MotorEstadistico.Participacion> participaciones = MotorEstadistico.consolidar(filas).stream().filter(Participacion::disputo).toList();
-        EstadisticasEquipoDto estadisticasEquipoDto = new EstadisticasEquipoDto(
-                (int) participaciones.stream().map(MotorEstadistico.Participacion::eventoId).distinct().count(),
-                (int) participaciones.stream().filter(Participacion::gano).count(),
-                (int) participaciones.stream().filter(Participacion::podio).count(),
-                participaciones.stream().map(Participacion::puntos).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
-
 
         return new PerfilEquipoDto(resumen(equipo), equipo.getSede(), equipo.getFechaFundacion(), List.copyOf(categorias),
-                plantelDto,estadisticasEquipoDto, ResultadosRecientes.de(filas, false));
+                plantelDto, estadisticas(filas), ResultadosRecientes.de(filas, false));
     }
 
     /**

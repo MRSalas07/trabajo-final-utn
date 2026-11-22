@@ -78,28 +78,21 @@ public class PilotoServiceImpl implements IPilotoService {
                 .filter(p -> !p.isEliminado())
                 .orElseThrow(() -> new ResourceNotFoundException("el piloto", pilotoId));
 
-        Integer edad = piloto.getFechaNacimiento() != null
-                ? Period.between(piloto.getFechaNacimiento(), LocalDate.now()).getYears() : null;
-        PilotoDto detalle = new PilotoDto(piloto.getId(), piloto.getNombre(), piloto.getApellido(), piloto.getCodigoPiloto(),
-                piloto.getNumeroActual(), piloto.getNacionalidad(), piloto.getPais(), piloto.getFechaNacimiento(), edad, piloto.getFotoUrl());
-
         List<PalmaresDto> palmares = palmaresRepo.dePiloto(pilotoId).stream()
-                .map(pm -> new PalmaresDto(pm.getCategoria().getSiglas(), pm.getCarreras(), pm.getVictorias(),
-                        pm.getPodios(), pm.getPoles(), pm.getCampeonatos(), pm.getPuntosTotales(), pm.getAbandonos()))
+                .map(PilotoServiceImpl::palmares)
                 .toList();
 
         List<ParticipacionDto> trayectoria = equipoPilotoRepo.trayectoriaDePiloto(pilotoId).stream()
-                .map(ep -> new ParticipacionDto(ep.getTemporada(), ep.getCategoria().getSiglas(),
-                        ep.getEquipo().getId(), ep.getEquipo().getNombre(), pilotoId, null, ep.getNumero(), ep.getRol()))
+                .map(Participaciones::de)
                 .toList();
 
         List<FilaResultado> filas = new ArrayList<>(resultadoSesionRepo.filasDePiloto(pilotoId));
         filas.addAll(resultadoEtapaRepo.filasDePiloto(pilotoId));
 
-        return new PerfilPilotoDto(detalle, palmares, trayectoria, ultimos(filas, siglasPorTemporada(filas)));
+        return new PerfilPilotoDto(datos(piloto), palmares, trayectoria, ultimos(filas, siglasPorTemporada(filas)));
     }
 
-    // ------------------------------------------------------------------ conversiones
+
 
     private PilotoResumenDto resumen(Piloto p, EquipoPiloto actual) {
         Integer numero = p.getNumeroActual() != null ? p.getNumeroActual()
