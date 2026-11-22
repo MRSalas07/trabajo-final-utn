@@ -91,8 +91,9 @@ public class SincronizacionServiceImpl implements ISincronizacionService {
         if (anio > anioMaximo) {
             throw new RuleBusinessException("No se puede sincronizar una temporada posterior a " + anioMaximo);
         }
-        boolean yaEnCurso = trabajos.values().stream().anyMatch(t -> t.categoria().equals(clave) && t.anio() == anio
-                && (CargaSincronizacionDto.EN_COLA.equals(t.estado()) || CargaSincronizacionDto.EN_PROCESO.equals(t.estado())));
+        boolean yaEnCurso = trabajos.values().stream()
+                .anyMatch(t -> t.categoria().equals(clave) && t.anio() == anio && estaActivo(t));
+
         if (yaEnCurso) {
             throw new RuleBusinessException("Ya hay una sincronización de " + clave + " " + anio + " en curso",
                     HttpStatus.CONFLICT);
