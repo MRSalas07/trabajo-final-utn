@@ -57,6 +57,7 @@ public class EstadisticaController {
         return estadisticaService.tendenciaPiloto(siglas, anio, pilotoId);
     }
 
+    @Operation(summary = "Comparativa entre 2 pilotos de la temporada")
     @GetMapping("/{anio}/comparativa")
     public ComparativaPilotos comparativa(@PathVariable String siglas,
                                           @PathVariable @Min(1950) @Max(2100) int anio,
@@ -90,6 +91,13 @@ public class EstadisticaController {
     public TendenciaGrupo tendenciaMarca(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
                                          @RequestParam @Size(min = 1, max = 60) String marca) {
         return estadisticaService.tendenciaMarca(siglas, anio, marca);
+    }
+
+    @Operation(summary = "Comparativa histórica entre dos pilotos a lo largo de todas las temporadas")
+    @GetMapping("/historico/comparativa")
+    public ComparativaHistorica comparativaHistorica(@PathVariable String siglas,
+                                                     @RequestParam("a") Long pilotoA, @RequestParam("b") Long pilotoB) {
+        return estadisticaService.comparativaHistorica(siglas, pilotoA, pilotoB);
     }
 
 
