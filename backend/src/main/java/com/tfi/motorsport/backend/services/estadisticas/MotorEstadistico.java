@@ -49,6 +49,7 @@ public final class MotorEstadistico {
             String codigo,
             Long equipoId,
             String equipo,
+            String marca,
             Integer posicionFinal,
             String estadoFinal,
             BigDecimal puntos,
@@ -119,7 +120,7 @@ public final class MotorEstadistico {
                     filaReferencia.eventoId(), filaReferencia.numeroFecha(), filaReferencia.eventoNombre(),
                     filaReferencia.eventoInicio(), filaReferencia.temporadaId(), filaReferencia.anio(),
                     filaReferencia.pilotoId(), filaReferencia.nombreCompleto(), filaReferencia.pilotoCodigo(),
-                    filaReferencia.equipoId(), filaReferencia.equipoNombre(),
+                    filaReferencia.equipoId(), filaReferencia.equipoNombre(), filaReferencia.equipoMarca(),
                     filaPrincipal != null ? filaPrincipal.posicion() : null,
                     filaPrincipal != null ? filaPrincipal.estado() : null,
                     puntosDelEvento, posicionEnClasificacion, tramosGanados, filaPrincipal != null));

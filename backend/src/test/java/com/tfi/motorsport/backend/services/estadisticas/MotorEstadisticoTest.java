@@ -26,7 +26,7 @@ class MotorEstadisticoTest {
                 1L, 2025,
                 "F1",
                 pilotoId, "Piloto", apellido, apellido.substring(0, 3).toUpperCase(),
-                equipoId, equipoId == EQUIPO_ROJO ? "Rojo" : "Azul",
+                equipoId, equipoId == EQUIPO_ROJO ? "Rojo" : "Azul", equipoId == EQUIPO_ROJO ? "Ford" : "Toyota",
                 tipoSesion, posicion, BigDecimal.valueOf(puntos), estado);
     }
 
