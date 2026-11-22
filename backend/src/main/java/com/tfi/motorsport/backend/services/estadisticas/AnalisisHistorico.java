@@ -72,6 +72,59 @@ public final class AnalisisHistorico {
         return armarHistorico(TIPO_EQUIPO, equipoId, nombre, categoria, temporadas);
     }
 
+    public static ComparativaHistorica compararPilotos(List<Participacion> participacionesXCategoria,
+                                                       Long pilotoAId, Long pilotoBId, String categoria) {
+
+        Historico historicoA = historicoPiloto(participacionesXCategoria, pilotoAId, categoria);
+        Historico historicoB = historicoPiloto(participacionesXCategoria, pilotoBId, categoria);
+        Map<Integer, TemporadaHistorica> temporadasDeA = indexarPorAnio(historicoA);
+        Map<Integer, TemporadaHistorica> temporadasDeB = indexarPorAnio(historicoB);
+        TreeSet<Integer> anios = new TreeSet<>(temporadasDeA.keySet());
+        anios.addAll(temporadasDeB.keySet());
+
+        List<Integer> posicionesA = new ArrayList<>();
+        List<Integer> posicionesB = new ArrayList<>();
+        List<BigDecimal> puntosA = new ArrayList<>();
+        List<BigDecimal> puntosB = new ArrayList<>();
+        int temporadasDelanteA = 0;
+        int temporadasDelanteB = 0;
+
+        for (Integer anio : anios) {
+            TemporadaHistorica deA = temporadasDeA.get(anio);
+            TemporadaHistorica deB = temporadasDeB.get(anio);
+            posicionesA.add(deA != null ? deA.posicionCampeonato() : null);
+            posicionesB.add(deB != null ? deB.posicionCampeonato() : null);
+            puntosA.add(deA != null ? deA.puntos() : null);
+            puntosB.add(deB != null ? deB.puntos() : null);
+            if (deA != null && deB != null) {
+                if (deA.posicionCampeonato() < deB.posicionCampeonato()) temporadasDelanteA++;
+                else if (deB.posicionCampeonato() < deA.posicionCampeonato()) temporadasDelanteB++;
+            }
+        }
+
+        Map<Long, Participacion> carrerasDeA = participacionesXCategoria.stream()
+                .filter(participacion -> participacion.pilotoId().equals(pilotoAId) && participacion.disputo())
+                .collect(Collectors.toMap(Participacion::eventoId, participacion -> participacion, (primera, otra) -> primera));
+        int carrerasDelanteA = 0;
+        int carrerasDelanteB = 0;
+        for (Participacion deB : participacionesXCategoria) {
+            if (!deB.pilotoId().equals(pilotoBId) || !deB.disputo()) {
+                continue;
+            }
+            int duelo = MotorEstadistico.calculoTerminoPorDelante(carrerasDeA.get(deB.eventoId()), deB);
+            if (duelo > 0){
+                carrerasDelanteA++;
+            }
+            else if (duelo < 0) {
+                carrerasDelanteB++;
+            }
+        }
+
+        return new ComparativaHistorica(categoria, List.copyOf(anios), historicoA, historicoB,
+                posicionesA, posicionesB, puntosA, puntosB,
+                carrerasDelanteA, carrerasDelanteB, temporadasDelanteA, temporadasDelanteB);
+    }
+
     private static TreeMap<Integer, List<Participacion>> agruparPorAnio(List<Participacion> participaciones) {
         return participaciones.stream().filter(participacion -> participacion.anio() != null)
                 .collect(Collectors.groupingBy(Participacion::anio, TreeMap::new, Collectors.toList()));
