@@ -4,7 +4,6 @@ import com.tfi.motorsport.backend.clients.normalization.ModeloNormalizado.*;
 import com.tfi.motorsport.backend.dtos.integracionAPI.CargaSincronizacionDto;
 import com.tfi.motorsport.backend.dtos.integracionAPI.CargaSincronizacionDto.*;
 import com.tfi.motorsport.backend.dtos.integracionAPI.ResumenSincronizacion;
-import com.tfi.motorsport.backend.services.IEstadisticaService;
 import com.tfi.motorsport.backend.services.ISincronizacionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "Integracion (ADMIN)")
 @RestController
@@ -27,8 +25,6 @@ import java.util.Map;
 public class IntegracionController {
 
     private final ISincronizacionService sincronizacion;
-
-    private final IEstadisticaService estadisticas;
 
     @Operation(summary = "Fuentes automáticas disponibles por categoría")
     @GetMapping("/fuentes")
