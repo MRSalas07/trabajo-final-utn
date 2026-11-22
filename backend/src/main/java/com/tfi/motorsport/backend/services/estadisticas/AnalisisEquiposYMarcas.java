@@ -33,7 +33,105 @@ public final class AnalisisEquiposYMarcas {
         return marca != null ? marca.trim().toUpperCase(Locale.ROOT) : null;
     }
 
-    
+    public static List<FilaMarca> rankingMarcas(List<Participacion> participaciones) {
+        Map<String, List<Participacion>> participacionesPorMarca = agruparPor(participaciones, AnalisisEquiposYMarcas::claveMarca);
+        List<FilaMarca> filasSinPosicion = new ArrayList<>();
+
+        for (List<Participacion> participacionesDeLaMarca : participacionesPorMarca.values()) {
+            List<Participacion> disputadas = participacionesDeLaMarca.stream().filter(Participacion::disputo).toList();
+            if (disputadas.isEmpty()) {
+                continue;
+            }
+            Set<String> equipos = participacionesDeLaMarca.stream().map(Participacion::equipo).filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            filasSinPosicion.add(new FilaMarca(0, nombreDeLaMarca(participacionesDeLaMarca),
+                    MotorEstadistico.sumarPuntos(participacionesDeLaMarca),
+                    (int) participacionesDeLaMarca.stream().filter(Participacion::gano).count(),
+                    (int) participacionesDeLaMarca.stream().filter(Participacion::podio).count(),
+                    (int) disputadas.stream().map(Participacion::eventoId).distinct().count(),
+                    mejorPosicion(disputadas),
+                    List.copyOf(equipos),
+                    (int) disputadas.stream().map(Participacion::pilotoId).distinct().count()));
+        }
+
+        filasSinPosicion.sort(Comparator.comparing(FilaMarca::puntos).reversed()
+                .thenComparing(Comparator.comparingInt(FilaMarca::victorias).reversed()));
+
+        List<FilaMarca> ranking = new ArrayList<>();
+        for (int indice = 0; indice < filasSinPosicion.size(); indice++) {
+            FilaMarca fila = filasSinPosicion.get(indice);
+            ranking.add(new FilaMarca(indice + 1, fila.marca(), fila.puntos(), fila.victorias(), fila.podios(),
+                    fila.eventosConResultados(), fila.mejorResultado(), fila.equipos(), fila.pilotos()));
+        }
+        return ranking;
+    }
+
+    /** Puntos por fecha de un equipo o marca, con acumulado, media móvil y regresión lineal. */
+    public static TendenciaGrupo tendencia(List<Participacion> participaciones, String tipo, String clave) {
+        Function<Participacion, String> obtenerClave = funcionDeClave(tipo);
+        String claveBuscada = TIPO_MARCA.equals(tipo) ? clave.trim().toUpperCase(Locale.ROOT) : clave;
+        List<Participacion> delGrupo = participaciones.stream()
+                .filter(participacion -> claveBuscada.equals(obtenerClave.apply(participacion))).toList();
+        List<Ronda> rondas = MotorEstadistico.rondas(participaciones);
+
+        List<PuntoGrupo> fechas = new ArrayList<>();
+        List<double[]> puntosParaRegresion = new ArrayList<>();
+        List<BigDecimal> puntosPorFecha = new ArrayList<>();
+        BigDecimal acumulado = BigDecimal.ZERO;
+
+        for (int indiceRonda = 0; indiceRonda < rondas.size(); indiceRonda++) {
+            Ronda ronda = rondas.get(indiceRonda);
+            List<Participacion> enLaFecha = delGrupo.stream()
+                    .filter(participacion -> participacion.eventoId().equals(ronda.eventoId())).toList();
+            if (enLaFecha.stream().noneMatch(Participacion::disputo)) {
+                continue;
+            }
+            BigDecimal puntos = MotorEstadistico.sumarPuntos(enLaFecha);
+            acumulado = acumulado.add(puntos);
+            puntosPorFecha.add(puntos);
+            puntosParaRegresion.add(new double[]{indiceRonda + 1, puntos.doubleValue()});
+            fechas.add(new PuntoGrupo(ronda.numeroFecha(), ronda.evento(), puntos, acumulado,
+                    mejorPosicion(enLaFecha), mediaMovil(puntosPorFecha)));
+        }
+
+        BigDecimal pendiente = MotorEstadistico.pendienteDeRegresionLineal(puntosParaRegresion);
+        BigDecimal promedio = fechas.isEmpty() ? null
+                : acumulado.divide(BigDecimal.valueOf(fechas.size()), 2, RoundingMode.HALF_UP);
+        String nombre = delGrupo.isEmpty() ? clave
+                : TIPO_MARCA.equals(tipo) ? nombreDeLaMarca(delGrupo) : delGrupo.get(0).equipo();
+        List<String> pilotos = delGrupo.stream().filter(Participacion::disputo).map(Participacion::piloto)
+                .distinct().toList();
+
+        return new TendenciaGrupo(tipo, clave, nombre, delGrupo.isEmpty() ? null : delGrupo.get(0).anio(),
+                fechas, promedio, pendiente, interpretarPendiente(pendiente),
+                (int) delGrupo.stream().filter(Participacion::gano).count(),
+                (int) delGrupo.stream().filter(Participacion::podio).count(), pilotos);
+    }
+
+    /** Puntos acumulados ronda a ronda de los {@code top} equipos o marcas con más puntos. */
+    public static EvolucionGrupos evolucion(List<Participacion> participaciones, String tipo, int top) {
+        List<Ronda> rondas = MotorEstadistico.rondas(participaciones);
+        Map<String, List<Participacion>> grupos = agruparPor(participaciones, funcionDeClave(tipo));
+
+        List<SerieGrupo> series = new ArrayList<>();
+        for (Map.Entry<String, List<Participacion>> grupo : grupos.entrySet()) {
+            List<BigDecimal> puntosPorFecha = new ArrayList<>();
+            List<BigDecimal> puntosAcumulados = new ArrayList<>();
+            BigDecimal acumulado = BigDecimal.ZERO;
+            for (Ronda ronda : rondas) {
+                BigDecimal puntos = MotorEstadistico.sumarPuntos(grupo.getValue().stream()
+                        .filter(participacion -> participacion.eventoId().equals(ronda.eventoId())).toList());
+                acumulado = acumulado.add(puntos);
+                puntosPorFecha.add(puntos);
+                puntosAcumulados.add(acumulado);
+            }
+            String nombre = TIPO_MARCA.equals(tipo) ? nombreDeLaMarca(grupo.getValue()) : grupo.getValue().get(0).equipo();
+            series.add(new SerieGrupo(grupo.getKey(), nombre, puntosAcumulados, puntosPorFecha));
+        }
+
+        series.sort(Comparator.comparing(AnalisisEquiposYMarcas::puntosFinales).reversed());
+        return new EvolucionGrupos(tipo, rondas, series.stream().limit(Math.max(1, top)).toList());
+    }
 
     private static Function<Participacion, String> funcionDeClave(String tipo) {
         return TIPO_MARCA.equals(tipo) ? AnalisisEquiposYMarcas::claveMarca : AnalisisEquiposYMarcas::claveEquipo;
