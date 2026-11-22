@@ -429,13 +429,17 @@ public final class MotorEstadistico {
     /**
      * Duelo directo en un evento: positivo si A terminó delante de B, negativo si B delante de A,
      * 0 si no se puede decidir (alguno no corrió o no tiene posición).
-     * En esta versión compara directamente la posición final; en el PR #19 se mejora para que
-     * quien termina la carrera quede delante de quien abandona.
+     * Quien termina la carrera queda delante de quien abandona, aunque la fuente le asigne una posición.
      */
     static int calculoTerminoPorDelante(Participacion participacionA, Participacion participacionB) {
         if (participacionA == null || participacionB == null
-                || !participacionA.disputo() || !participacionB.disputo()
-                || participacionA.posicionFinal() == null || participacionB.posicionFinal() == null) {
+                || !participacionA.disputo() || !participacionB.disputo()) {
+            return 0;
+        }
+        if (participacionA.finalizo() != participacionB.finalizo()) {
+            return participacionA.finalizo() ? 1 : -1;
+        }
+        if (participacionA.posicionFinal() == null || participacionB.posicionFinal() == null) {
             return 0;
         }
         return Integer.compare(participacionB.posicionFinal(), participacionA.posicionFinal());
