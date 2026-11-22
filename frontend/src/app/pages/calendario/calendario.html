@@ -40,7 +40,8 @@
 @for (dia of dias(); track dia.clave) {
     <section class="dia">
     <h2 class="dia-titulo">{{ dia.titulo }}</h2>
-    @for (evento of dia.eventos; track evento.id) {
+    @for (item of dia.eventos; track item.evento.id) {
+        @let evento = item.evento;
         <article class="tarjeta evento" [attr.data-cat]="evento.categoria.siglas">
         <div class="fila">
             <span class="chip-cat" [attr.data-cat]="evento.categoria.siglas">{{ evento.categoria.siglas }}</span>
@@ -49,20 +50,22 @@
         </div>
         <p class="suave chico">Fecha {{ evento.numeroFecha }} · {{ evento.circuito }}@if (evento.pais) { · {{ evento.pais }} }
             @if (evento.diferenciaSedeMinutos) { · <span class="dif" [title]="evento.diferenciaSedeTexto ?? ''">sede {{ difCorta(evento.diferenciaSedeMinutos) }}</span> }</p>
-        @if (evento.sesiones.length) {
+        @if (item.sesiones.length) {
             <ul class="lista-plana sesiones">
-            @for (sesion of evento.sesiones; track sesion.id) {
+            @for (sesion of item.sesiones; track sesion.id) {
                 <li>
                 <span>{{ sesion.nombre }}</span>
-                <span class="suave">{{ sesion.inicio | hora: 'corta' }}</span>
+                <span class="suave">{{ sesion.inicio | hora: 'hora' }}</span>
                 </li>
             }
             </ul>
         } @else {
             <p class="chico">{{ evento.inicio | hora: 'dia' }} al {{ evento.fin | hora: 'dia' }}
-            @if (evento.etapas.length) { · {{ tramos(evento) }} tramos cronometrados }</p>
+            @if (item.tramos) { · {{ item.tramos }} tramos cronometrados }</p>
         }
-        <a class="btn-chico" [href]="calendarioService.urlIcsEvento(evento.id)" download>📅 Agregar al calendario</a>
+        @if (item.primerDia) {
+            <a class="btn-chico" [href]="calendarioService.urlIcsEvento(evento.id)" download>📅 Agregar al calendario</a>
+        }
         </article>
     }
     </section>

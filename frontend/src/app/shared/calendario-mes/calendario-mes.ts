@@ -2,6 +2,7 @@ import { Component,ChangeDetectionStrategy, input, output, computed } from '@ang
 import { RouterLink } from '@angular/router';
 import { Icono } from '../icono';
 import { EventoDto } from '../../core/modelos';
+import { diasDelEvento } from '../dias-evento';
 
 
 interface Dia {
@@ -43,9 +44,9 @@ export class CalendarioMes {
   protected readonly dias = computed<Dia[]>(() => {
     const porDia = new Map<string, EventoDto[]>();
     for (const evento of this.eventos()) {
-      const clave = evento.inicio?.local.substring(0, 10);
-      if (clave) 
+      for (const clave of diasDelEvento(evento)) {
         porDia.set(clave, [...(porDia.get(clave) ?? []), evento]);
+      }
     }
     const cantidad = new Date(this.anio(), this.mes() + 1, 0).getDate();
     const prefijo = `${this.anio()}-${String(this.mes() + 1).padStart(2, '0')}-`;

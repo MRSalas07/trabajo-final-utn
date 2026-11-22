@@ -3,6 +3,7 @@ package com.tfi.motorsport.backend.services.Impl;
 import com.tfi.motorsport.backend.dtos.equipo.EquipoResumenDto;
 import com.tfi.motorsport.backend.dtos.equipo.EstadisticasEquipoDto;
 import com.tfi.motorsport.backend.dtos.equipo.PerfilEquipoDto;
+import com.tfi.motorsport.backend.dtos.perfil.ResultadoRecienteDto;
 import com.tfi.motorsport.backend.handlers.exceptions.ResourceNotFoundException;
 import com.tfi.motorsport.backend.model.Categoria;
 import com.tfi.motorsport.backend.model.Equipo;
@@ -121,6 +122,8 @@ class EquipoServiceImplTest {
         assertThat(est.victorias()).isEqualTo(1);
         assertThat(est.podios()).isEqualTo(2);
         assertThat(est.puntos()).as("carreras + sprint").isEqualByComparingTo("48");
-        assertThat(perfil.ultimosResultados()).as("los dos pilotos del mismo evento").hasSize(2);
+        assertThat(perfil.ultimosResultados()).extracting(ResultadoRecienteDto::sesion)
+                .as("el evento con solo sprint y los dos pilotos del mismo evento")
+                .containsExactly("SPRINT", "CARRERA", "CARRERA");
     }
 }
