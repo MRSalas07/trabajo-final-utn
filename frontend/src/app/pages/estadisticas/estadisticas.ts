@@ -8,6 +8,10 @@ import { mensajeError } from '../../core/errores/error';
 import { EstadoCarga } from '../../shared/estado-carga/estado-carga';
 import { Grafico, SerieGrafico } from '../../shared/grafico/grafico';
 import { colorDe } from '../../shared/colores';
+import { EquiposMarcas } from './equipos-marcas/equipos-marcas';
+import { Historico } from './historico/historico';
+
+type Seccion = 'pilotos' | 'equipos' | 'historico';
 
 /** Máximo de pilotos que acepta el backend en la evolución. */
 const MAXIMO_EVOLUCION = 20;
@@ -38,7 +42,7 @@ interface FilaComparada {
  * Acepta ?categoria=F1&anio=2025 en la URL (link desde la página de cada categoría).
  */
 @Component({
-  imports: [RouterLink, EstadoCarga, Grafico],
+  imports: [RouterLink, EstadoCarga, Grafico, EquiposMarcas, Historico],
   selector: 'app-estadisticas',
   styleUrl: './estadisticas.css',
   templateUrl: './estadisticas.html',
@@ -57,6 +61,9 @@ export class Estadisticas {
   protected readonly temporadas = signal<Temporada[]>([]);
   protected readonly anioElegido = signal<number | null>(null);
   protected readonly error = signal<string | null>(null);
+
+  /** Pestaña: pilotos (MVP 4), equipos y marcas, e histórico (MVP 6). */
+  protected readonly seccion = signal<Seccion>('pilotos');
 
   /** Categoría + año elegidos: cada selección de pilotos vale solo para su temporada. */
   private readonly clave = computed(() => {
@@ -213,7 +220,7 @@ export class Estadisticas {
       const siglas = this.siglas();
       const anio = this.anioElegido();
       const ids = this.idsEvolucion();
-      if (!this.clave() || !siglas || !anio) return;
+      if (this.seccion() !== 'pilotos' || !this.clave() || !siglas || !anio) return;
       untracked(() => {
         const pedido = ++this.pedidoEvolucion;
         this.cargandoEvolucion.set(true);
@@ -230,6 +237,7 @@ export class Estadisticas {
       const siglas = this.siglas();
       const anio = this.anioElegido();
       const id = this.tendenciaId();
+      if (this.seccion() !== 'pilotos') return;
       if (!siglas || !anio || id === null) { untracked(() => this.tendencia.set(null)); return; }
       untracked(() => {
         const pedido = ++this.pedidoTendencia;
@@ -248,6 +256,7 @@ export class Estadisticas {
       const anio = this.anioElegido();
       const a = this.idA();
       const b = this.idB();
+      if (this.seccion() !== 'pilotos') return;
       if (!siglas || !anio || a === null || b === null || a === b) {
         untracked(() => this.comparativa.set(null));
         return;

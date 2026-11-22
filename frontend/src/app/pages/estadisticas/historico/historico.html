@@ -1,0 +1,128 @@
+<div class="tablero">
+  <!-- ------------------------------------------------------------ Historial -->
+  <section class="panel" aria-labelledby="t-historial">
+    <div class="panel-titulo">
+      <h2 id="t-historial">Historial por temporada</h2>
+      <div class="pestanas mini" role="tablist" aria-label="Historial de">
+        <button type="button" role="tab" [class.activa]="tipo() === 'PILOTO'" [attr.aria-selected]="tipo() === 'PILOTO'"
+                (click)="elegirTipo('PILOTO')">Piloto</button>
+        <button type="button" role="tab" [class.activa]="tipo() === 'EQUIPO'" [attr.aria-selected]="tipo() === 'EQUIPO'"
+                (click)="elegirTipo('EQUIPO')">Equipo</button>
+      </div>
+    </div>
+
+    <div class="filtros">
+      @if (tipo() === 'PILOTO') {
+        <app-buscador-piloto [siglas]="siglas()" etiqueta="Cambiar piloto" (elegido)="elegirPiloto($event)" />
+      } @else {
+        <label>Equipo
+          <select [value]="equipoId() ?? ''" (change)="elegirEquipo($any($event.target).value)" [disabled]="!equipos().length">
+            @for (e of equipos(); track e.id) {
+              <option [value]="e.id" [selected]="e.id === equipoId()">{{ e.nombre }}</option>
+            }
+          </select>
+        </label>
+      }
+    </div>
+
+    <app-estado-carga [cargando]="cargando()" [error]="error()"
+                      [vacio]="!cargando() && !error() && !historico() && tipo() === 'PILOTO'"
+                      mensajeVacio="Elegí un piloto para ver su historial." />
+    @if (historico(); as h) {
+      <h3 class="nombre">
+        @if (h.tipo === 'PILOTO') {
+          <a [routerLink]="['/pilotos', h.id]">{{ h.nombre }}</a>
+        } @else {
+          <a [routerLink]="['/equipos', h.id]">{{ h.nombre }}</a>
+        }
+        <span class="suave chico">· {{ h.temporadas.length }} {{ h.temporadas.length === 1 ? 'temporada' : 'temporadas' }} en {{ h.categoria }}</span>
+      </h3>
+      <div class="kpis">
+        <div class="kpi"><div class="valor">{{ h.mejorPosicionCampeonato ?? '—' }}</div><div class="etiqueta">Mejor posición final</div></div>
+        <div class="kpi"><div class="valor">{{ h.puntosTotales }}</div><div class="etiqueta">Puntos totales</div></div>
+        <div class="kpi"><div class="valor">{{ h.victoriasTotales }}</div><div class="etiqueta">Victorias</div></div>
+        <div class="kpi"><div class="valor">{{ h.podiosTotales }}</div><div class="etiqueta">Podios</div></div>
+      </div>
+      @if (h.variacionPuntosPorEvento !== null) {
+        <p class="chico">Variación de puntos por fecha entre su primera y su última temporada:
+          <strong [class.sube]="h.variacionPuntosPorEvento > 0" [class.baja]="h.variacionPuntosPorEvento < 0">
+            {{ h.variacionPuntosPorEvento > 0 ? '+' : '' }}{{ h.variacionPuntosPorEvento }}
+          </strong>
+        </p>
+      }
+
+      @if (h.temporadas.length > 1) {
+        <app-grafico tipo="line" [etiquetas]="etiquetasHistorico()" [series]="seriesHistorico()" [invertirY]="true"
+                     tituloY="Posición final" [alto]="260" descripcion="Posición final en el campeonato de cada temporada" />
+      }
+
+      @if (h.temporadas.length) {
+        <div class="tabla-scroll">
+          <table class="historial">
+            <thead>
+              <tr>
+                <th>Año</th><th class="num" title="Posición final en el campeonato">Pos.</th><th class="num">Pts</th>
+                <th class="num" title="Victorias">V</th><th class="num">Podios</th>
+                @if (conPoles()) { <th class="num">Poles</th> }
+                <th class="num" title="Eventos disputados">Ev.</th><th class="num" title="Promedio de posición">Prom.</th>
+                <th class="num" title="Puntos por evento">Pts/ev.</th><th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of h.temporadas; track t.anio) {
+                <tr>
+                  <td>{{ t.anio }}</td>
+                  <td class="num">{{ t.posicionCampeonato ?? '—' }}<span class="suave chico">/{{ t.participantes }}</span></td>
+                  <td class="num"><strong>{{ t.puntos }}</strong></td>
+                  <td class="num">{{ t.victorias }}</td>
+                  <td class="num">{{ t.podios }}</td>
+                  @if (conPoles()) { <td class="num">{{ t.poles }}</td> }
+                  <td class="num">{{ t.eventosDisputados }}</td>
+                  <td class="num">{{ t.promedioPosicion ?? '—' }}</td>
+                  <td class="num">{{ t.puntosPorEvento ?? '—' }}</td>
+                  <td class="suave chico">{{ t.detalle ?? '' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="suave">No tiene resultados en las temporadas cargadas.</p>
+      }
+    }
+  </section>
+
+  <!-- ------------------------------------------------------------ Comparativa histórica -->
+  <section class="panel" aria-labelledby="t-comparativa-historica">
+    <div class="panel-titulo"><h2 id="t-comparativa-historica">Comparativa histórica entre pilotos</h2></div>
+    <p class="chico">
+      <strong class="nombre-a">{{ piloto()?.nombre ?? '—' }}</strong>
+      <span class="suave"> vs </span>
+      <strong class="nombre-b">{{ rival()?.nombre ?? '—' }}</strong>
+    </p>
+    <div class="filtros">
+      <app-buscador-piloto [siglas]="siglas()" etiqueta="Cambiar piloto A" (elegido)="elegirPiloto($event)" />
+      <app-buscador-piloto [siglas]="siglas()" etiqueta="Cambiar piloto B" (elegido)="elegirRival($event)" />
+    </div>
+    @if (piloto() && rival() && piloto()?.id === rival()?.id) {
+      <p class="aviso">Elegí dos pilotos distintos para comparar.</p>
+    }
+
+    <app-estado-carga [cargando]="cargandoComparativa()" [error]="errorComparativa()" />
+    @if (comparativa(); as c) {
+      @if (c.anios.length) {
+        <div class="kpis">
+          <div class="kpi"><div class="valor">{{ c.temporadasDelanteA }} – {{ c.temporadasDelanteB }}</div><div class="etiqueta">Temporadas terminadas delante</div></div>
+          <div class="kpi"><div class="valor">{{ c.carrerasDelanteA }} – {{ c.carrerasDelanteB }}</div><div class="etiqueta">Carreras terminadas delante</div></div>
+          <div class="kpi"><div class="valor">{{ c.a.victoriasTotales }} – {{ c.b.victoriasTotales }}</div><div class="etiqueta">Victorias</div></div>
+          <div class="kpi"><div class="valor">{{ c.a.podiosTotales }} – {{ c.b.podiosTotales }}</div><div class="etiqueta">Podios</div></div>
+        </div>
+        <app-grafico tipo="line" [etiquetas]="etiquetasComparativa()" [series]="seriesComparativa()" [invertirY]="true"
+                     tituloY="Posición final" [alto]="280" descripcion="Posición final de cada piloto en las temporadas que corrieron" />
+        <p class="suave chico">Cuenta las carreras y temporadas en las que corrieron los dos.</p>
+      } @else {
+        <p class="suave">No coincidieron en ninguna temporada cargada.</p>
+      }
+    }
+  </section>
+</div>

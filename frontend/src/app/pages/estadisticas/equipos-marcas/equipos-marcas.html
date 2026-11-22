@@ -1,0 +1,125 @@
+@if (esTc()) {
+  <p class="aviso chico">En TC la marca del auto todavía no se registra: los datos se agrupan por equipo.</p>
+}
+
+<div class="tablero">
+  <!-- ------------------------------------------------------------ Ranking de marcas -->
+  <section class="panel col-6" aria-labelledby="t-marcas">
+    <div class="panel-titulo"><h2 id="t-marcas">{{ esTc() ? 'Ranking de equipos' : 'Ranking de marcas' }}</h2></div>
+    <app-estado-carga [cargando]="cargandoMarcas()" [error]="errorMarcas()"
+                      [vacio]="!cargandoMarcas() && !errorMarcas() && marcas().length === 0"
+                      mensajeVacio="Todavía no hay resultados en esta temporada." />
+    @if (marcas().length) {
+      <div class="tabla-scroll">
+        <table class="ranking">
+          <thead>
+            <tr>
+              <th>Pos</th><th>{{ esTc() ? 'Equipo' : 'Marca' }}</th><th class="num">Pts</th><th class="num" title="Victorias">V</th>
+              <th class="num">Podios</th><th class="num" title="Mejor resultado">Mejor</th><th class="num">Pilotos</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of marcas(); track m.marca) {
+              <tr>
+                <td class="pos">{{ m.posicion }}</td>
+                <td>{{ m.marca }}
+                  @if (m.equipos.length > 1 || (m.equipos.length === 1 && m.equipos[0] !== m.marca)) {
+                    <div class="suave chico">{{ m.equipos.join(' · ') }}</div>
+                  }
+                </td>
+                <td class="num"><strong>{{ m.puntos }}</strong></td>
+                <td class="num">{{ m.victorias }}</td>
+                <td class="num">{{ m.podios }}</td>
+                <td class="num">{{ m.mejorResultado ?? '—' }}</td>
+                <td class="num">{{ m.pilotos }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <!-- ------------------------------------------------------------ Tendencia de un grupo -->
+  <section class="panel col-6" aria-labelledby="t-tendencia-grupo">
+    <div class="panel-titulo"><h2 id="t-tendencia-grupo">Tendencia</h2></div>
+    <div class="filtros">
+      @if (!esTc()) {
+        <label>Ver
+          <select [value]="tipoTendencia()" (change)="elegirTipoTendencia($any($event.target).value)">
+            <option value="EQUIPO" [selected]="tipoTendencia() === 'EQUIPO'">Un equipo</option>
+            <option value="MARCA" [selected]="tipoTendencia() === 'MARCA'">Una marca</option>
+          </select>
+        </label>
+      }
+      @if (tipoTendencia() === 'EQUIPO') {
+        <label>Equipo
+          <select [value]="equipoId() ?? ''" (change)="elegirEquipo($any($event.target).value)" [disabled]="!equipos().length">
+            @for (e of equipos(); track e.equipoId) {
+              <option [value]="e.equipoId" [selected]="e.equipoId === equipoId()">{{ e.equipo }}</option>
+            }
+          </select>
+        </label>
+      } @else {
+        <label>Marca
+          <select [value]="marca() ?? ''" (change)="elegirMarca($any($event.target).value)" [disabled]="!marcas().length">
+            @for (m of marcas(); track m.marca) {
+              <option [value]="m.marca" [selected]="m.marca === marca()">{{ m.marca }}</option>
+            }
+          </select>
+        </label>
+      }
+    </div>
+
+    <app-estado-carga [cargando]="cargandoTendencia()" [error]="errorTendencia()" />
+    @if (tendencia(); as t) {
+      <div class="kpis">
+        <div class="kpi"><div class="valor">{{ t.promedioPuntos ?? '—' }}</div><div class="etiqueta">Puntos por fecha</div></div>
+        <div class="kpi"><div class="valor">{{ t.victorias }}</div><div class="etiqueta">Victorias</div></div>
+        <div class="kpi"><div class="valor">{{ t.podios }}</div><div class="etiqueta">Podios</div></div>
+        <div class="kpi"><div class="valor">{{ t.pilotos.length }}</div><div class="etiqueta">Pilotos</div></div>
+      </div>
+      <p class="interpretacion" [attr.data-tendencia]="t.interpretacion">
+        <strong>{{ t.interpretacion }}</strong>
+        @if (t.pendiente !== null) {
+          <span class="suave chico">· pendiente {{ t.pendiente }} puntos por fecha (positiva = mejora)</span>
+        }
+      </p>
+      @if (t.pilotos.length) { <p class="suave chico">Pilotos: {{ t.pilotos.join(' · ') }}</p> }
+      @if (seriesTendencia().length && t.fechas.length) {
+        <app-grafico tipo="line" [etiquetas]="etiquetasTendencia()" [detalles]="detallesTendencia()" [series]="seriesTendencia()"
+                     tituloY="Puntos" [alto]="260" descripcion="Puntos por fecha y media móvil del equipo o marca" />
+      }
+    }
+  </section>
+
+  <!-- ------------------------------------------------------------ Evolución por grupos -->
+  <section class="panel" aria-labelledby="t-evolucion-grupos">
+    <div class="panel-titulo">
+      <h2 id="t-evolucion-grupos">Evolución de puntos</h2>
+      @if (!esTc()) {
+        <div class="pestanas mini" role="tablist" aria-label="Agrupar por">
+          <button type="button" role="tab" [class.activa]="tipoEvolucion() === 'EQUIPO'" [attr.aria-selected]="tipoEvolucion() === 'EQUIPO'"
+                  (click)="tipoEvolucion.set('EQUIPO')">Equipos</button>
+          <button type="button" role="tab" [class.activa]="tipoEvolucion() === 'MARCA'" [attr.aria-selected]="tipoEvolucion() === 'MARCA'"
+                  (click)="tipoEvolucion.set('MARCA')">Marcas</button>
+        </div>
+      }
+    </div>
+    <app-estado-carga [cargando]="cargandoEvolucion()" [error]="errorEvolucion()"
+                      [vacio]="!cargandoEvolucion() && !errorEvolucion() && seriesEvolucion().length === 0" mensajeVacio="Sin datos para graficar." />
+    @if (seriesEvolucion().length) {
+      <app-grafico tipo="line" [etiquetas]="etiquetasEvolucion()" [detalles]="detallesEvolucion()" [series]="seriesEvolucion()"
+                   tituloY="Puntos acumulados" [alto]="340" descripcion="Puntos acumulados por equipo o marca, fecha a fecha" />
+      <p class="suave chico">Los 6 con más puntos de la temporada.</p>
+    }
+  </section>
+</div>
+
+@if (equipos().length) {
+  <p class="suave chico">Fichas de equipos:
+    @for (e of equipos().slice(0, 10); track e.equipoId; let ultimo = $last) {
+      <a [routerLink]="['/equipos', e.equipoId]">{{ e.equipo }}</a>@if (!ultimo) { · }
+    }
+  </p>
+}
