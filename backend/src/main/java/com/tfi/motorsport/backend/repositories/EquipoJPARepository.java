@@ -24,4 +24,13 @@ public interface EquipoJPARepository extends JpaRepository<Equipo, Long> {
     List<Equipo> deCategoria(Long categoriaId, Integer anio);
 
     Optional<Equipo> findByIdExterno(String idExterno);
+
+    /** Búsqueda para administración (todos los equipos activos, con o sin participaciones). */
+    @Query("""
+            select e from Equipo e
+            where e.eliminado = false
+              and lower(concat(e.nombre, ' ', coalesce(e.nombreCorto, ''))) like :patron
+            order by e.nombre
+            """)
+    List<Equipo> buscarPorTexto(String patron, org.springframework.data.domain.Pageable pageable);
 }

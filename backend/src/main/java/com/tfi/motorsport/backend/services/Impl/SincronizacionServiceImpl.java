@@ -91,8 +91,9 @@ public class SincronizacionServiceImpl implements ISincronizacionService {
         if (anio > anioMaximo) {
             throw new RuleBusinessException("No se puede sincronizar una temporada posterior a " + anioMaximo);
         }
-        boolean yaEnCurso = trabajos.values().stream().anyMatch(t -> t.categoria().equals(clave) && t.anio() == anio
-                && (CargaSincronizacionDto.EN_COLA.equals(t.estado()) || CargaSincronizacionDto.EN_PROCESO.equals(t.estado())));
+        boolean yaEnCurso = trabajos.values().stream()
+                .anyMatch(t -> t.categoria().equals(clave) && t.anio() == anio && estaActivo(t));
+
         if (yaEnCurso) {
             throw new RuleBusinessException("Ya hay una sincronización de " + clave + " " + anio + " en curso",
                     HttpStatus.CONFLICT);
@@ -194,15 +195,22 @@ public class SincronizacionServiceImpl implements ISincronizacionService {
 
     /** Conserva solo los últimos trabajos para no acumular memoria. */
     private void limpiarHistorial() {
-        if (trabajos.size() <= HISTORIAL_MAXIMO) {
+        int sobrantes = trabajos.size() - HISTORIAL_MAXIMO;
+        if (sobrantes <= 0) {
             return;
         }
         trabajos.values().stream()
+                .filter(trabajo -> !estaActivo(trabajo))
                 .sorted(Comparator.comparing(CargaSincronizacionDto::creado))
-                .limit(trabajos.size() - HISTORIAL_MAXIMO)
+                .limit(sobrantes)
                 .map(CargaSincronizacionDto::id)
                 .toList()
                 .forEach(trabajos::remove);
+    }
+
+    private static boolean estaActivo(CargaSincronizacionDto trabajo) {
+        return CargaSincronizacionDto.EN_COLA.equals(trabajo.estado())
+                || CargaSincronizacionDto.EN_PROCESO.equals(trabajo.estado());
     }
 
     @PreDestroy
