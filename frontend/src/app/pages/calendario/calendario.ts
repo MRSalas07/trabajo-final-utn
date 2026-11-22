@@ -5,10 +5,24 @@ import { EstadoPipe, HoraPipe } from '../../shared/pipe/formato';
 import { CalendarioMes } from '../../shared/calendario-mes/calendario-mes';
 import { CalendarioService } from '../../core/services/calendario.service';
 import { ZonaHorariaService } from '../../core/services/zona-horaria.service';
-import { EventoDto } from '../../core/modelos';
+import { EventoDto, Sesion } from '../../core/modelos';
+import { diaLocal, diasDelEvento } from '../../shared/dias-evento';
 import { mensajeError } from '../../core/errores/error';
 
 const CATEGORIAS = ['F1', 'WRC', 'TC'];
+
+interface EventoDelDia {
+  evento: EventoDto;
+  sesiones: Sesion[];
+  tramos: number;
+  primerDia: boolean;
+}
+
+interface DiaCalendario {
+  clave: string;
+  titulo: string;
+  eventos: EventoDelDia[];
+}
 
 @Component({
   imports: [RouterLink, EstadoCarga, CalendarioMes,HoraPipe, EstadoPipe],
@@ -38,18 +52,21 @@ export class Calendario {
     new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric' }).format(new Date(this.mes().anio, this.mes().mes, 1)),
   );
 
-  /** Agrupa los eventos por día LOCAL del usuario (según la hora de inicio convertida). */
   protected readonly dias = computed(() => {
-    const zona = this.zonaService.zona();
-    const grupos = new Map<string, { clave: string; titulo: string; eventos: EventoDto[] }>();
-    const fmtClave = new Intl.DateTimeFormat('en-CA', { timeZone: zona, year: 'numeric', month: '2-digit', day: '2-digit' });
-    const fmtTitulo = new Intl.DateTimeFormat('es-AR', { timeZone: zona, weekday: 'long', day: 'numeric', month: 'long' });
+    const prefijo = `${this.mes().anio}-${String(this.mes().mes + 1).padStart(2, '0')}-`;
+    const fmtTitulo = new Intl.DateTimeFormat('es-AR', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' });
+    const grupos = new Map<string, DiaCalendario>();
     for (const evento of this.eventos()) {
-      if (!evento.inicio) continue;
-      const fecha = new Date(evento.inicio.utc);
-      const clave = fmtClave.format(fecha);
-      if (!grupos.has(clave)) grupos.set(clave, { clave, titulo: fmtTitulo.format(fecha), eventos: [] });
-      grupos.get(clave)!.eventos.push(evento);
+      const diasEvento = diasDelEvento(evento);
+      for (const clave of diasEvento.filter((dia) => dia.startsWith(prefijo))) {
+        if (!grupos.has(clave)) grupos.set(clave, { clave, titulo: fmtTitulo.format(new Date(`${clave}T12:00:00Z`)), eventos: [] });
+        grupos.get(clave)!.eventos.push({
+          evento,
+          sesiones: evento.sesiones.filter((sesion) => diaLocal(sesion.inicio) === clave),
+          tramos: evento.etapas.filter((etapa) => !etapa.clasificacionGeneral && diaLocal(etapa.inicio) === clave).length,
+          primerDia: clave === diasEvento[0],
+        });
+      }
     }
     return [...grupos.values()].sort((a, b) => a.clave.localeCompare(b.clave));
   });
@@ -106,11 +123,6 @@ export class Calendario {
     const m = abs % 60;
     return (min > 0 ? '+' : '−') + h + (m ? ':' + String(m).padStart(2, '0') : '') + ' h';
   }
-
-  protected tramos(evento: EventoDto): number {
-    return evento.etapas.filter((x) => !x.clasificacionGeneral).length;
-  }
-
 
   private mesActual() {
     const hoy = new Date();

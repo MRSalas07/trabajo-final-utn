@@ -44,4 +44,11 @@ public interface EquipoPilotoJPARepository extends JpaRepository<EquipoPiloto, L
 
     Optional<EquipoPiloto> findByEquipoIdAndPilotoIdAndCategoriaIdAndTemporadaAndRol(
             Long equipoId, Long pilotoId, Long categoriaId, Integer temporada, String rol);
+
+    @Query("""
+            select ep from EquipoPiloto ep join fetch ep.piloto join fetch ep.equipo join fetch ep.categoria c
+            where ep.eliminado = false and c.id = :categoriaId and (:anio is null or ep.temporada = :anio)
+            order by ep.temporada desc, ep.equipo.nombre, ep.numero
+            """)
+    List<EquipoPiloto> listar(Long categoriaId, Integer anio);
 }

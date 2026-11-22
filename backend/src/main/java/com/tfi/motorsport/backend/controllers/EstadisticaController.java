@@ -58,4 +58,10 @@ public class EstadisticaController {
                                           @RequestParam Long a, @RequestParam Long b) {
         return estadisticaService.compararPilotos(siglas, anio, a, b);
     }
+
+    @Operation(summary = "Recalcular el palmarés histórico de una categoría")
+    @PostMapping("/palmares/recalcular")
+    public Map<String, Object> recalcular(@PathVariable String siglas) {
+        return Map.of("categoria", siglas.toUpperCase(), "pilotosActualizados", estadisticaService.recalcularPalmares(siglas));
+    }
 }

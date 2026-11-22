@@ -1,0 +1,166 @@
+<div class="filtros">
+    <label>Categoría
+    <select [ngModel]="categoriaId()" (ngModelChange)="elegirCategoria($event)">
+        @for (categoria of categorias(); track categoria.id) {
+            <option [ngValue]="categoria.id">{{ categoria['siglas'] }} — {{ categoria['nombre'] }}</option>
+        }
+    </select>
+    </label>
+    <label>Año (tripulaciones / participaciones)
+    <input type="number" min="1950" max="2100" [ngModel]="anioFiltro()"
+            (ngModelChange)="anioFiltro.set($event || null)" />
+    </label>
+</div>
+
+<div class="pestanas" role="tablist">
+    @for (pestana of pestanas; track pestana.id) {
+        <button type="button" role="tab" [class.activa]="pestanaActiva() === pestana.id"
+                (click)="pestanaActiva.set(pestana.id)">{{ pestana.texto }}</button>
+    }
+</div>
+@if (errorGeneral()) { 
+    <p class="err">{{ errorGeneral() }}</p> 
+}
+
+@switch (pestanaActiva()) {
+    @case ('calendario') {
+        <app-abm-tabla  titulo="Temporadas" 
+                        nombreRecurso="temporadas"
+                        [columnas]="columnasTemporadas" 
+                        [campos]="camposTemporadas"
+                        [filtros]="{ categoriaId: categoriaId() }" 
+                        [valoresFijos]="{ categoriaId: categoriaId() }"
+                        [habilitado]="!!categoriaId()"
+                        [seleccionable]="true" 
+                        [seleccionadoId]="temporadaId()"
+                        (seleccionado)="elegirTemporada($event)" />
+
+        <app-abm-tabla  titulo="Eventos" 
+                        nombreRecurso="eventos"
+                        [columnas]="columnasEventos" 
+                        [campos]="camposEventos"
+                        [filtros]="{ temporadaId: temporadaId() }" 
+                        [valoresFijos]="{ temporadaId: temporadaId() }"
+                        [habilitado]="!!temporadaId()"
+                        mensajeDeshabilitado="Elija una temporada (botón «Ver ›») para administrar sus eventos."
+                        [seleccionable]="true" 
+                        [seleccionadoId]="eventoId()"
+                        (seleccionado)="elegirEvento($event)" />
+
+        @if (eventoId()) {
+            <div class="grilla-2">
+            <app-abm-tabla  titulo="Sesiones" 
+                            nombreRecurso="sesiones"
+                            [columnas]="columnasSesiones" 
+                            [campos]="camposSesiones"
+                            [filtros]="{ eventoId: eventoId() }" 
+                            [valoresFijos]="{ eventoId: eventoId() }"
+                            [seleccionable]="true" 
+                            [seleccionadoId]="sesionId()"
+                            (seleccionado)="elegirSesion($event)" />
+
+            <app-abm-tabla  titulo="Etapas (rally)" 
+                            nombreRecurso="etapas"
+                            [columnas]="columnasEtapas" 
+                            [campos]="camposEtapas"
+                            [filtros]="{ eventoId: eventoId() }" 
+                            [valoresFijos]="{ eventoId: eventoId() }"
+                            [seleccionable]="true" 
+                            [seleccionadoId]="etapaId()"
+                            (seleccionado)="elegirEtapa($event)" />
+            </div>
+        }
+
+        @if (sesionId()) {
+            <p class="suave chico">Solo se ofrecen los pilotos y equipos que corrieron esta temporada. Si falta alguno,
+                cárguelo primero en la pestaña «Participaciones».</p>
+            <app-abm-tabla  titulo="Resultados de la sesión" 
+                            nombreRecurso="resultados-sesion"
+                            [columnas]="columnasResultadosSesion"   
+                            [campos]="camposResultadosSesion()"
+                            [filtros]="{ sesionId: sesionId() }" 
+                            [valoresFijos]="{ sesionId: sesionId() }" />
+        }
+        @if (etapaId()) {
+            <app-abm-tabla  titulo="Resultados de la etapa" 
+                            nombreRecurso="resultados-etapa"
+                            [columnas]="columnasResultadosEtapa" 
+                            [campos]="camposResultadosEtapa()"
+                            [filtros]="{ etapaId: etapaId() }" 
+                            [valoresFijos]="{ etapaId: etapaId() }" />
+        }
+    }
+
+    @case ('pilotos') {
+        <label class="buscar">Buscar
+            <input type="search" [ngModel]="textoBusquedaPiloto()" (ngModelChange)="textoBusquedaPiloto.set($event)"
+                    placeholder="Apellido o código" />
+        </label>
+        <p class="suave chico">Se muestran hasta {{ topeListado }} pilotos. Use el buscador para encontrar uno en particular.</p>
+        <app-abm-tabla  titulo="Pilotos" 
+                        nombreRecurso="pilotos" 
+                        [columnas]="columnasPilotos" 
+                        [campos]="camposPilotos"
+                        [filtros]="{ q: textoBusquedaPiloto() }" />
+    }
+
+    @case ('equipos') {
+        <label class="buscar">Buscar
+            <input type="search" [ngModel]="textoBusquedaEquipo()" (ngModelChange)="textoBusquedaEquipo.set($event)"
+                    placeholder="Nombre o marca" />
+        </label>
+        <p class="suave chico">Se muestran hasta {{ topeListado }} equipos. Use el buscador para encontrar uno en particular.</p>
+        <app-abm-tabla  titulo="Equipos" 
+                        nombreRecurso="equipos" 
+                        [columnas]="columnasEquipos" 
+                        [campos]="camposEquipos"
+                        [filtros]="{ q: textoBusquedaEquipo() }" />
+    }
+
+    @case ('participaciones') {
+        <p class="suave chico">Qué piloto corrió para qué equipo en cada temporada (se usa en perfiles, listados y en
+            las opciones de los resultados). También se crea automáticamente al sincronizar o cargar tripulaciones.</p>
+        <app-abm-tabla  titulo="Participaciones" 
+                        nombreRecurso="participaciones"
+                        [columnas]="columnasParticipaciones" 
+                        [campos]="camposParticipaciones()"
+                        [filtros]="{ categoriaId: categoriaId(), anio: anioFiltro() }"
+                        [valoresFijos]="{ categoriaId: categoriaId() }" 
+                        [habilitado]="!!categoriaId()"
+                        (cambio)="cargarParticipantesDeLaTemporada()" />
+    }
+
+    @case ('tripulaciones') {
+        <p class="suave chico">Tripulaciones de rally (piloto + copiloto + equipo) por temporada.</p>
+        <app-abm-tabla  titulo="Tripulaciones" 
+                        nombreRecurso="tripulaciones"
+                        [columnas]="columnasTripulaciones" 
+                        [campos]="camposTripulaciones()"
+                        [filtros]="{ categoriaId: categoriaId(), anio: anioFiltro() }"
+                        [valoresFijos]="{ categoriaId: categoriaId() }" 
+                        [habilitado]="!!categoriaId()"
+                        (cambio)="cargarTripulaciones()" />
+    }
+
+    @case ('palmares') {
+        <div class="fila">
+            <p class="suave chico">El palmarés es un dato DERIVADO: se calcula a partir de los resultados. No se edita
+            a mano; se recalcula automáticamente tras cada sincronización o con este botón.</p>
+            <button type="button" class="btn-chico" (click)="recalcularPalmares()">Recalcular palmarés</button>
+        </div>
+        <app-abm-tabla  titulo="Palmarés" 
+                        nombreRecurso="palmares" 
+                        [columnas]="columnasPalmares"
+                        [filtros]="{ categoriaId: categoriaId(), recalculo: contadorRecalculos() }"
+                        [habilitado]="!!categoriaId()" 
+                        [soloLectura]="true" />
+    }
+
+    @case ('categorias') {
+        <app-abm-tabla  titulo="Categorías" 
+                        nombreRecurso="categorias" 
+                        [columnas]="columnasCategorias"
+                        [campos]="camposCategorias" 
+                        (cambio)="cargarCategorias()" />
+    }
+}

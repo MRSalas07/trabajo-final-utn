@@ -60,8 +60,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/estadisticas/**").hasRole("ADMIN")
                         // Perfil del usuario logueado
                         .requestMatchers("/api/usuarios/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/estadisticas/**").hasRole("ADMIN")
                         // El resto de las consultas es público
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .anyRequest().authenticated())

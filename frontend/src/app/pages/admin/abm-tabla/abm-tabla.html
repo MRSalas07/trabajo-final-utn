@@ -1,0 +1,126 @@
+<section class="abm">
+    <div class="seccion-titulo">
+        <h2>{{ titulo() }} <span class="suave chico">({{ filas().length }})</span></h2>
+        @if (!soloLectura() && habilitado()) {
+        <button type="button" class="btn-primario btn-chico" (click)="nuevo()">+ Nuevo</button>
+        }
+    </div>
+
+    @if (!habilitado()) {
+        <p class="suave">{{ mensajeDeshabilitado() }}</p>
+    } @else {
+        @if (formulario(); as formData) {
+            <form class="tarjeta abm-form" (ngSubmit)="guardar()" novalidate>
+                <h3>{{ editandoId() ? 'Modificar' : 'Alta de' }} {{ titulo().toLowerCase() }}</h3>
+                <div class="abm-campos">
+                @for (campo of campos(); track campo.clave) {
+                    @switch (campo.tipo) {
+                        @case ('select') {
+                            <label>{{ campo.etiqueta }}{{ campo.requerido ? ' *' : '' }}
+                            <select [name]="campo.clave" [(ngModel)]="formData[campo.clave]"
+                                    [disabled]="!!campo.soloAlta && !!editandoId()">
+                                @if (!campo.requerido) { <option [ngValue]="null">—</option> }
+                                @for (opcion of campo.opciones ?? []; track opcion.valor) {
+                                <option [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+                                }
+                            </select>
+                            </label>
+                        }
+
+                        @case ('busqueda') {
+                            <label class="campo-busqueda">{{ campo.etiqueta }}{{ campo.requerido ? ' *' : '' }}
+                            <input type="search" autocomplete="off" [name]="campo.clave"
+                                    [value]="textosBusqueda()[campo.clave] ?? ''"
+                                    (input)="escribirBusqueda(campo, $event)"
+                                    (focus)="busquedaAbierta.set(campo.clave)"
+                                    (blur)="busquedaAbierta.set(null)"
+                                    [disabled]="!!campo.soloAlta && !!editandoId()"
+                                    placeholder="Escriba al menos 2 letras" />
+                            @if (busquedaAbierta() === campo.clave && (sugerencias()[campo.clave] ?? []).length) {
+                                <ul class="sugerencias" role="listbox">
+                                @for (opcion of sugerencias()[campo.clave] ?? []; track opcion.valor) {
+                                    <!-- mousedown (y no click) para elegir antes de que el campo pierda el foco -->
+                                    <li role="option" (mousedown)="$event.preventDefault(); elegirSugerencia(campo, opcion)">
+                                    {{ opcion.texto }}
+                                    </li>
+                                }
+                                </ul>
+                            }
+                            @if (campo.ayuda) { 
+                                <small class="suave">{{ campo.ayuda }}</small> 
+                            }
+                            </label>
+                        }
+
+                        @case ('checkbox') {
+                            <label class="check">
+                            <input type="checkbox" [name]="campo.clave" [(ngModel)]="formData[campo.clave]" /> {{ campo.etiqueta }}
+                            </label>
+                        }
+
+                        @default {
+                            <label>{{ campo.etiqueta }}{{ campo.requerido ? ' *' : '' }}
+                            <input [name]="campo.clave" [(ngModel)]="formData[campo.clave]" [type]="tipoInput(campo)"
+                                    [attr.step]="campo.tipo === 'decimal' ? '0.001' : null" [required]="!!campo.requerido"
+                                    [disabled]="!!campo.soloAlta && !!editandoId()" />
+                            @if (campo.ayuda) { 
+                                <small class="suave">{{ campo.ayuda }}</small> 
+                            }
+                            </label>
+                        }
+                    }
+                }
+                </div>
+                @if (errorForm()) { 
+                    <p class="err" role="alert">{{ errorForm() }}</p> 
+                }
+                <div class="fila">
+                <button type="submit" class="btn-primario" [disabled]="guardando()">Guardar</button>
+                <button type="button" (click)="cancelar()">Cancelar</button>
+                </div>
+            </form>
+        }
+
+        @if (mensaje()) { 
+            <p class="aviso chico" role="status">{{ mensaje() }}</p> 
+        }
+        @if (error()) { 
+            <p class="err" role="alert">{{ error() }}</p> 
+        }
+
+        <div class="tabla-scroll abm-lista">
+        <table>
+            <thead>
+            <tr>
+                @for (columna of columnas(); track columna.clave) { 
+                    <th>{{ columna.etiqueta }}</th> 
+                }
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @for (registro of filas(); track registro.id) {
+                <tr [class.sel]="seleccionadoId() === registro.id">
+                @for (columna of columnas(); track columna.clave) {
+                    <td>{{ columna.formato ? columna.formato(registro) : (registro[columna.clave] ?? '') }}</td>
+                }
+                <td class="acciones">
+                    @if (seleccionable()) {
+                        <button type="button" class="btn-chico" (click)="seleccionado.emit(registro)">Ver ›</button>
+                    }
+                    @if (!soloLectura()) {
+                        <button type="button" class="btn-chico" (click)="editar(registro)">Editar</button>
+                        <button type="button" class="btn-chico peligro" (click)="eliminar(registro)">Baja</button>
+                    }
+                </td>
+                </tr>
+            } @empty {
+                <tr>
+                <td [attr.colspan]="columnas().length + 1" class="suave">{{ cargando() ? 'Cargando…' : 'Sin registros.' }}</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        </div>
+    }
+</section>

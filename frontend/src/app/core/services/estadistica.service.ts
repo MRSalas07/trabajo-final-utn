@@ -9,6 +9,7 @@ import {
   ResumenTemporada,
   TendenciaPiloto,
 } from '../modelos';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class EstadisticaService {
@@ -34,5 +35,12 @@ export class EstadisticaService {
   }
   comparar(siglas: string, anio: number, a: number, b: number) {
     return this.http.get<ComparativaPilotos>(`${this.api}/${siglas}/${anio}/comparativa`, { params: { a, b } });
+  }
+
+  recalcularPalmares(siglas: string): Observable<{ categoria: string; pilotosActualizados: number }> {
+    return this.http.post<{ categoria: string; pilotosActualizados: number }>(
+      `${this.api}/${siglas}/palmares/recalcular`,
+      {},
+    );
   }
 }

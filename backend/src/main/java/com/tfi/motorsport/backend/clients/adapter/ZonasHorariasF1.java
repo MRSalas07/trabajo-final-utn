@@ -49,7 +49,13 @@ final class ZonasHorariasF1 {
             Map.entry("hockenheimring", "Europe/Berlin"),
             Map.entry("mugello", "Europe/Rome"),
             Map.entry("sepang", "Asia/Kuala_Lumpur"),
-            Map.entry("galvez", "America/Argentina/Buenos_Aires")
+            Map.entry("galvez", "America/Argentina/Buenos_Aires"),
+            Map.entry("adelaide", "Australia/Adelaide"),
+            Map.entry("dallas", "America/Chicago"),
+            Map.entry("las_vegas", "America/Los_Angeles"),
+            Map.entry("long_beach", "America/Los_Angeles"),
+            Map.entry("riverside", "America/Los_Angeles"),
+            Map.entry("phoenix", "America/Phoenix")
     );
 
     private static final Map<String, String> POR_PAIS = Map.ofEntries(
@@ -79,7 +85,13 @@ final class ZonasHorariasF1 {
             Map.entry("Portugal", "Europe/Lisbon"),
             Map.entry("Turkey", "Europe/Istanbul"),
             Map.entry("Germany", "Europe/Berlin"),
-            Map.entry("Argentina", "America/Argentina/Buenos_Aires")
+            Map.entry("Argentina", "America/Argentina/Buenos_Aires"),
+            Map.entry("India", "Asia/Kolkata"),
+            Map.entry("Korea", "Asia/Seoul"),
+            Map.entry("Morocco", "Africa/Casablanca"),
+            Map.entry("South Africa", "Africa/Johannesburg"),
+            Map.entry("Sweden", "Europe/Stockholm"),
+            Map.entry("Switzerland", "Europe/Zurich")
     );
 
     static String resolver(String circuitId, String pais) {

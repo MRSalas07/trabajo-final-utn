@@ -61,7 +61,7 @@ public class NormalizadorService {
                 log.error("Error guardando evento {}", evento.idExterno(), ex);
             }
         }
-
+        tx.executeWithoutResult(s -> calendario.asignarCampeon(temporadaId, temporada.idExternoCampeon(), ctx));
         Instant fin = Instant.now();
         return new ResumenSincronizacion(categoria.getSiglas(), temporada.anio(), temporada.fuente(),
                 ctx.eventos, ctx.omitidos, ctx.sesiones, ctx.etapas, ctx.resultados,

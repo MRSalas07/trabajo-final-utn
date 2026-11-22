@@ -6,12 +6,15 @@ import com.tfi.motorsport.backend.dtos.categoria.CategoriaUpdateDto;
 import com.tfi.motorsport.backend.dtos.categoria.PerfilCategoriaDto;
 import com.tfi.motorsport.backend.services.ICategoriaService;
 import com.tfi.motorsport.backend.services.ZonaHoraria;
+import com.tfi.motorsport.backend.services.gestion.ICategoriaGestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.List;
 public class CategoriaController {
 
     private final ICategoriaService categoriaService;
+    private final ICategoriaGestionService categoriaGestionService;
 
     @Operation(summary = "Obtener todas las categorías, opcionalmente filtradas por estado")
     @GetMapping
@@ -64,6 +68,13 @@ public class CategoriaController {
     @GetMapping("/{siglas}/perfil")
     public PerfilCategoriaDto perfil(@PathVariable String siglas, @RequestParam(required = false) String zona) {
         return categoriaService.obtenerPerfil(siglas, ZonaHoraria.resolverZonaHoraria(zona));
+    }
+
+    @Operation(summary = "Dar de baja una categoría (baja lógica, ADMIN)")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarCategoria(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        categoriaGestionService.eliminar(id, UsuarioAutenticado.id(jwt));
+        return ResponseEntity.noContent().build();
     }
 
 }

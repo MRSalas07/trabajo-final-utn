@@ -1,0 +1,4 @@
+/* Alinea el botón con la base de los inputs (los labels apilan texto + campo) */
+.fila-sync {
+  align-items: flex-end;
+}

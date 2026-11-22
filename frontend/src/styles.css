@@ -1061,3 +1061,60 @@ a.fila-evento:hover {
 .lista-plana li:last-child {
   border-bottom: none;
 }
+
+
+.err {
+  color: #ffb4b8;
+  font-size: 0.85rem;
+}
+
+.abm {
+  margin-bottom: 1.5rem;
+}
+
+.abm-form {
+  margin-bottom: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.abm-campos {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+}
+
+.abm-campos .check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.abm-lista {
+  max-height: 460px;
+  overflow-y: auto;
+}
+
+.abm-lista td.acciones {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: flex-end;
+}
+
+.abm-lista tr.sel {
+  background: var(--superficie-2);
+  box-shadow: inset 3px 0 0 var(--acento);
+}
+
+.btn-chico.peligro:hover {
+  border-color: var(--vivo);
+  background: rgb(229 9 20 / 0.15);
+  color: #ffb4b8;
+}
+
+/* Celdas con texto largo (ej: lista de equipos de una marca): permiten salto de línea */
+td.envolver {
+  white-space: normal;
+  min-width: 160px;
+}
+

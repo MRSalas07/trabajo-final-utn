@@ -37,7 +37,8 @@
             <li>
                 <span><span class="chip-cat" [attr.data-cat]="resultado.categoria">{{ resultado.categoria }}</span>
                 <a [routerLink]="['/eventos', resultado.eventoId]">{{ resultado.evento }}</a> <span class="suave chico">{{ resultado.fecha | hora: 'dia' }}</span></span>
-                <strong>@if (resultado.estado === 'FINALIZADO') { P{{ resultado.posicion }} } @else { {{ resultado.estado | estado }} }</strong>
+                <strong>@if (resultado.estado === 'FINALIZADO') { P{{ resultado.posicion }} } @else { {{ resultado.estado | estado }} }
+                @if (resultado.sesion === 'SPRINT') { <span class="suave chico">(Sprint)</span> }</strong>
             </li>
             } @empty {
             <li class="suave">Sin resultados.</li>

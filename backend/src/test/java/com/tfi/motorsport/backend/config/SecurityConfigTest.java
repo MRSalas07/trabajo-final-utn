@@ -40,6 +40,18 @@ class SeguridadYErroresTest {
                 .andExpect(jsonPath("$.detalles[0]").exists());
     }
 
+    @Test
+    void recalcularPalmaresSinRolAdminDevuelve403() throws Exception {
+        mvc.perform(post("/api/estadisticas/F1/palmares/recalcular").with(jwt()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void recalcularPalmaresConRolAdminPasaLaSeguridad() throws Exception {
+        mvc.perform(post("/api/estadisticas/XX/palmares/recalcular").with(jwt().authorities(
+                                new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
+    }
 
 
 
