@@ -19,4 +19,18 @@ public interface IEstadisticaService {
 
     ComparativaPilotos compararPilotos(String siglas, int anio, Long pilotoA, Long pilotoB);
 
+    List<FilaMarca> rankingMarcas(String siglas, int anio);
+
+    TendenciaGrupo tendenciaEquipo(String siglas, int anio, Long equipoId);
+
+    TendenciaGrupo tendenciaMarca(String siglas, int anio, String marca);
+
+    /** Puntos acumulados por fecha de los principales equipos o marcas. tipo = EQUIPO | MARCA. */
+    EvolucionGrupos evolucionGrupos(String siglas, int anio, String tipo, int top);
+
+    Historico historicoPiloto(String siglas, Long pilotoId);
+
+    Historico historicoEquipo(String siglas, Long equipoId);
+
+    ComparativaHistorica comparativaHistorica(String siglas, Long pilotoA, Long pilotoB);
 }

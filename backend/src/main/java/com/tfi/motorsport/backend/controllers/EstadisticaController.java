@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ public class EstadisticaController {
         return estadisticaService.campeonatoEquipos(siglas, anio);
     }
 
+    @Operation(summary = "Evolución del campeonato: puntos acumulados y posición de cada piloto fecha a fecha")
     @GetMapping("/{anio}/evolucion")
     public EvolucionCampeonato evolucion(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
                                          @RequestParam(required = false) List<Long> pilotos,
@@ -47,15 +50,19 @@ public class EstadisticaController {
         return estadisticaService.evolucionPilotos(siglas, anio, pilotos, top);
     }
 
+    @Operation(summary = "Tendencia de rendimiento de un piloto en la temporada")
     @GetMapping("/{anio}/tendencia/{pilotoId}")
     public TendenciaPiloto tendencia(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
                                      @PathVariable Long pilotoId) {
         return estadisticaService.tendenciaPiloto(siglas, anio, pilotoId);
     }
 
+    @Operation(summary = "Comparativa entre 2 pilotos de la temporada")
     @GetMapping("/{anio}/comparativa")
-    public ComparativaPilotos comparativa(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
-                                          @RequestParam Long a, @RequestParam Long b) {
+    public ComparativaPilotos comparativa(@PathVariable String siglas,
+                                          @PathVariable @Min(1950) @Max(2100) int anio,
+                                          @RequestParam Long a,
+                                          @RequestParam Long b) {
         return estadisticaService.compararPilotos(siglas, anio, a, b);
     }
 
@@ -64,4 +71,54 @@ public class EstadisticaController {
     public Map<String, Object> recalcular(@PathVariable String siglas) {
         return Map.of("categoria", siglas.toUpperCase(), "pilotosActualizados", estadisticaService.recalcularPalmares(siglas));
     }
+
+    @Operation(summary = "Ranking de marcas de la temporada")
+    @GetMapping("/{anio}/marcas")
+    public List<FilaMarca> marcas(@PathVariable String siglas,
+                                  @PathVariable @Min(1950) @Max(2100) int anio) {
+        return estadisticaService.rankingMarcas(siglas, anio);
+    }
+
+    @Operation(summary = "Tendencia de rendimiento de un equipo (puntos por fecha, media móvil y regresión)")
+    @GetMapping("/{anio}/tendencia-equipo/{equipoId}")
+    public TendenciaGrupo tendenciaEquipo(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
+                                          @PathVariable Long equipoId) {
+        return estadisticaService.tendenciaEquipo(siglas, anio, equipoId);
+    }
+
+    @Operation(summary = "Tendencia de rendimiento de una marca (ej: Toyota, Ford)")
+    @GetMapping("/{anio}/tendencia-marca")
+    public TendenciaGrupo tendenciaMarca(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
+                                         @RequestParam @Size(min = 1, max = 60) String marca) {
+        return estadisticaService.tendenciaMarca(siglas, anio, marca);
+    }
+
+    @Operation(summary = "Comparativa histórica entre dos pilotos a lo largo de todas las temporadas")
+    @GetMapping("/historico/comparativa")
+    public ComparativaHistorica comparativaHistorica(@PathVariable String siglas,
+                                                     @RequestParam("a") Long pilotoA, @RequestParam("b") Long pilotoB) {
+        return estadisticaService.comparativaHistorica(siglas, pilotoA, pilotoB);
+    }
+
+    @Operation(summary = "Evolución de puntos acumulados por equipo o por marca (tipo=EQUIPO|MARCA)")
+    @GetMapping("/{anio}/evolucion-grupos")
+    public EvolucionGrupos evolucionGrupos(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
+                                           @RequestParam(defaultValue = "EQUIPO")
+                                           @Pattern(regexp = "(?i)EQUIPO|MARCA", message = "tipo debe ser EQUIPO o MARCA") String tipo,
+                                           @RequestParam(defaultValue = "6") @Min(1) @Max(20) int top) {
+        return estadisticaService.evolucionGrupos(siglas, anio, tipo, top);
+    }
+
+    @Operation(summary = "Historial temporada por temporada de un piloto en la categoría")
+    @GetMapping("/historico/pilotos/{pilotoId}")
+    public Historico historicoPiloto(@PathVariable String siglas, @PathVariable Long pilotoId) {
+        return estadisticaService.historicoPiloto(siglas, pilotoId);
+    }
+
+    @Operation(summary = "Historial temporada por temporada de un equipo en la categoría")
+    @GetMapping("/historico/equipos/{equipoId}")
+    public Historico historicoEquipo(@PathVariable String siglas, @PathVariable Long equipoId) {
+        return estadisticaService.historicoEquipo(siglas, equipoId);
+    }
+
 }
