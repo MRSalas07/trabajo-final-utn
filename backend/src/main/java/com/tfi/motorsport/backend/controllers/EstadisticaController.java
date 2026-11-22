@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ public class EstadisticaController {
         return estadisticaService.campeonatoEquipos(siglas, anio);
     }
 
+    @Operation(summary = "Evolución del campeonato: puntos acumulados y posición de cada piloto fecha a fecha")
     @GetMapping("/{anio}/evolucion")
     public EvolucionCampeonato evolucion(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
                                          @RequestParam(required = false) List<Long> pilotos,
@@ -54,8 +57,10 @@ public class EstadisticaController {
     }
 
     @GetMapping("/{anio}/comparativa")
-    public ComparativaPilotos comparativa(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
-                                          @RequestParam Long a, @RequestParam Long b) {
+    public ComparativaPilotos comparativa(@PathVariable String siglas,
+                                          @PathVariable @Min(1950) @Max(2100) int anio,
+                                          @RequestParam Long a,
+                                          @RequestParam Long b) {
         return estadisticaService.compararPilotos(siglas, anio, a, b);
     }
 
@@ -64,4 +69,13 @@ public class EstadisticaController {
     public Map<String, Object> recalcular(@PathVariable String siglas) {
         return Map.of("categoria", siglas.toUpperCase(), "pilotosActualizados", estadisticaService.recalcularPalmares(siglas));
     }
+
+    @Operation(summary = "Ranking de marcas de la temporada")
+    @GetMapping("/{anio}/marcas")
+    public List<FilaMarca> marcas(@PathVariable String siglas,
+                                  @PathVariable @Min(1950) @Max(2100) int anio) {
+        return estadisticaService.rankingMarcas(siglas, anio);
+    }
+
+
 }
