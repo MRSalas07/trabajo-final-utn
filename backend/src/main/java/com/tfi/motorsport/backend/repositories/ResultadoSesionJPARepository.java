@@ -32,16 +32,18 @@ public interface ResultadoSesionJPARepository extends JpaRepository<ResultadoSes
                  join r.piloto p join r.equipo eq
             """;
 
-    @Query(SELECT_FILA + " where t.id = :temporadaId and r.eliminado = false")
+    String ACTIVOS = " and r.eliminado = false and s.eliminado = false and e.eliminado = false and t.eliminado = false";
+
+    @Query(SELECT_FILA + " where t.id = :temporadaId" + ACTIVOS)
     List<FilaResultado> filasDeTemporada(Long temporadaId);
 
-    @Query(SELECT_FILA + " where t.categoria.id = :categoriaId and r.eliminado = false")
+    @Query(SELECT_FILA + " where t.categoria.id = :categoriaId" + ACTIVOS)
     List<FilaResultado> filasDeCategoria(Long categoriaId);
 
-    @Query(SELECT_FILA + " where p.id = :pilotoId and r.eliminado = false")
+    @Query(SELECT_FILA + " where p.id = :pilotoId" + ACTIVOS)
     List<FilaResultado> filasDePiloto(Long pilotoId);
 
-    @Query(SELECT_FILA + " where eq.id = :equipoId and r.eliminado = false")
+    @Query(SELECT_FILA + " where eq.id = :equipoId" + ACTIVOS)
     List<FilaResultado> filasDeEquipo(Long equipoId);
 
     List<ResultadoSesion> findBySesionId(Long sesionId);
