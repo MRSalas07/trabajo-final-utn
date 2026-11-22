@@ -100,5 +100,25 @@ public class EstadisticaController {
         return estadisticaService.comparativaHistorica(siglas, pilotoA, pilotoB);
     }
 
+    @Operation(summary = "Evolución de puntos acumulados por equipo o por marca (tipo=EQUIPO|MARCA)")
+    @GetMapping("/{anio}/evolucion-grupos")
+    public EvolucionGrupos evolucionGrupos(@PathVariable String siglas, @PathVariable @Min(1950) @Max(2100) int anio,
+                                           @RequestParam(defaultValue = "EQUIPO")
+                                           @Pattern(regexp = "(?i)EQUIPO|MARCA", message = "tipo debe ser EQUIPO o MARCA") String tipo,
+                                           @RequestParam(defaultValue = "6") @Min(1) @Max(20) int top) {
+        return estadisticaService.evolucionGrupos(siglas, anio, tipo, top);
+    }
+
+    @Operation(summary = "Historial temporada por temporada de un piloto en la categoría")
+    @GetMapping("/historico/pilotos/{pilotoId}")
+    public Historico historicoPiloto(@PathVariable String siglas, @PathVariable Long pilotoId) {
+        return estadisticaService.historicoPiloto(siglas, pilotoId);
+    }
+
+    @Operation(summary = "Historial temporada por temporada de un equipo en la categoría")
+    @GetMapping("/historico/equipos/{equipoId}")
+    public Historico historicoEquipo(@PathVariable String siglas, @PathVariable Long equipoId) {
+        return estadisticaService.historicoEquipo(siglas, equipoId);
+    }
 
 }
