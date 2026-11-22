@@ -8,14 +8,16 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Arma la lista de "últimos resultados" que muestran las fichas de piloto y de equipo.
  *
  * El resultado de un evento es la carrera principal (F1 y TC) o la clasificación general
- * del rally (WRC, etapa "GENERAL"). Clasificaciones, sprints, series y victorias de tramo
- * no cuentan como resultado del evento.
+ * del rally (WRC, etapa "GENERAL"). Clasificaciones, series y victorias de tramo
+ * no cuentan como resultado del evento. Si el piloto corrió el sprint pero no la carrera,
+ * se muestra el resultado del sprint.
  */
 public final class ResultadosRecientes {
 
@@ -40,8 +42,12 @@ public final class ResultadosRecientes {
      *                     false en la del equipo (pueden aparecer sus dos pilotos en el mismo evento)
      */
     public static List<ResultadoRecienteDto> de(List<FilaResultado> filas, boolean unoPorEvento) {
-        Stream<FilaResultado> recientes = filas.stream()
+        Set<String> conResultadoDeEvento = filas.stream()
                 .filter(ResultadosRecientes::esResultadoDeEvento)
+                .map(ResultadosRecientes::clave)
+                .collect(Collectors.toSet());
+        Stream<FilaResultado> recientes = filas.stream()
+                .filter(f -> esResultadoDeEvento(f) || soloCorrioElSprint(f, conResultadoDeEvento))
                 .sorted(MAS_RECIENTE_PRIMERO);
         if (unoPorEvento) {
             Set<Long> eventosVistos = new HashSet<>();
@@ -50,8 +56,16 @@ public final class ResultadosRecientes {
         return recientes.limit(LIMITE).map(ResultadosRecientes::aDto).toList();
     }
 
+    private static boolean soloCorrioElSprint(FilaResultado fila, Set<String> conResultadoDeEvento) {
+        return Catalogo.TipoSesion.SPRINT.equals(fila.tipo()) && !conResultadoDeEvento.contains(clave(fila));
+    }
+
+    private static String clave(FilaResultado fila) {
+        return fila.eventoId() + "-" + fila.pilotoId();
+    }
+
     private static ResultadoRecienteDto aDto(FilaResultado f) {
         return new ResultadoRecienteDto(f.eventoId(), f.eventoNombre(), f.categoria(), f.anio(), f.eventoInicio(),
-                f.posicion(), f.estado(), f.puntos(), f.equipoNombre(), f.nombreCompleto());
+                f.posicion(), f.estado(), f.puntos(), f.equipoNombre(), f.nombreCompleto(), f.tipo());
     }
 }

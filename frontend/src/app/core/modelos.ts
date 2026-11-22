@@ -194,6 +194,7 @@ export interface ResultadoReciente {
     puntos: number | null; 
     equipo: string; 
     piloto: string; 
+    sesion: string;
 }
 
 export interface Piloto {

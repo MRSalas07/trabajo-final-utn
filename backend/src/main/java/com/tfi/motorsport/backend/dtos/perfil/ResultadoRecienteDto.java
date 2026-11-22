@@ -17,6 +17,7 @@ public record ResultadoRecienteDto(
         String estado,
         BigDecimal puntos,
         String equipo,
-        String piloto
+        String piloto,
+        String sesion
 ) {
 }
