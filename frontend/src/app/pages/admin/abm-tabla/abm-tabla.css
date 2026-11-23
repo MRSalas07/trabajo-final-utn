@@ -30,3 +30,15 @@
 .sugerencias li:hover {
     background: var(--borde, #3a3f46);
 }
+
+/* Auditoría: quién y cuándo modificó cada registro */
+td.auditoria {
+    white-space: nowrap;
+    max-width: 18rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+p.auditoria {
+    margin: -0.25rem 0 0.75rem;
+}

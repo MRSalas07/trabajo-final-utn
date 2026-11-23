@@ -34,7 +34,8 @@ export class AbmService {
                 params = params.set(clave, String(valor));
             }
         }
-        const url = this.urlDe(recurso);
+        // Las categorías se listan desde /admin/categorias (incluye la auditoría); se escriben en /categorias
+        const url = recurso === 'categorias' ? `${environment.apiUrl}/admin/categorias` : this.urlDe(recurso);
         return this.httpClient.get<RegistroGenerico[]>(url, { params });
     }
 

@@ -12,6 +12,9 @@
         @if (formulario(); as formData) {
             <form class="tarjeta abm-form" (ngSubmit)="guardar()" novalidate>
                 <h3>{{ editandoId() ? 'Modificar' : 'Alta de' }} {{ titulo().toLowerCase() }}</h3>
+                @if (auditoriaEditando(); as auditoria) {
+                    <p class="auditoria suave chico">{{ textoCreacion(auditoria) }} · {{ textoModificacion(auditoria) }}</p>
+                }
                 <div class="abm-campos">
                 @for (campo of campos(); track campo.clave) {
                     @switch (campo.tipo) {
@@ -95,6 +98,7 @@
                 @for (columna of columnas(); track columna.clave) { 
                     <th>{{ columna.etiqueta }}</th> 
                 }
+                <th>Última modificación</th>
                 <th></th>
             </tr>
             </thead>
@@ -104,6 +108,7 @@
                 @for (columna of columnas(); track columna.clave) {
                     <td>{{ columna.formato ? columna.formato(registro) : (registro[columna.clave] ?? '') }}</td>
                 }
+                <td class="auditoria suave chico" [attr.title]="detalleAuditoria(registro)">{{ textoUltimoCambio(registro) }}</td>
                 <td class="acciones">
                     @if (seleccionable()) {
                         <button type="button" class="btn-chico" (click)="seleccionado.emit(registro)">Ver ›</button>
@@ -116,7 +121,7 @@
                 </tr>
             } @empty {
                 <tr>
-                <td [attr.colspan]="columnas().length + 1" class="suave">{{ cargando() ? 'Cargando…' : 'Sin registros.' }}</td>
+                <td [attr.colspan]="columnas().length + 2" class="suave">{{ cargando() ? 'Cargando…' : 'Sin registros.' }}</td>
                 </tr>
             }
             </tbody>

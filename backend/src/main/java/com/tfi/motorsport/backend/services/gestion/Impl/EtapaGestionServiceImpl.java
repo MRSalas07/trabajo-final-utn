@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.EtapaDtos;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.Catalogo;
@@ -86,6 +87,7 @@ public class EtapaGestionServiceImpl implements IEtapaGestionService {
     private EtapaDtos.Registro registro(Etapa et) {
         return new EtapaDtos.Registro(et.getId(), et.getEvento().getId(), et.getIdExterno(), et.getNumero(), et.getNombre(),
                 et.getDia(), et.getDistancia(), et.getFechaInicio(), et.getFechaFin(), et.getEstado(),
-                Catalogo.ETAPA_GENERAL.equals(et.getIdExterno()));
+                Catalogo.ETAPA_GENERAL.equals(et.getIdExterno()),
+                AuditoriaDto.de(et));
     }
 }

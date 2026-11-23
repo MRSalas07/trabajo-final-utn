@@ -38,7 +38,8 @@ public final class EventoDtos {
 
     public record Registro(Long id, Long temporadaId, Integer anio, String categoria, String idExterno,
                            String nombre, String nombreCorto, Integer numeroFecha, String pais, String ciudad,
-                           String circuito, String zonaHoraria, Instant inicio, Instant fin, String estado) {
+                           String circuito, String zonaHoraria, Instant inicio, Instant fin, String estado,
+                           AuditoriaDto auditoria) {
     }
 }
 

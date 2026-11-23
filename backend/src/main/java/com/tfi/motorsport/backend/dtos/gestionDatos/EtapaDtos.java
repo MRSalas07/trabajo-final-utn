@@ -37,6 +37,7 @@ public final class EtapaDtos {
 
     public record Registro(Long id, Long eventoId, String idExterno, Integer numero, String nombre, Integer dia,
                            BigDecimal distancia, Instant inicio, Instant fin, String estado,
-                           boolean clasificacionGeneral) {
+                           boolean clasificacionGeneral,
+                           AuditoriaDto auditoria) {
     }
 }

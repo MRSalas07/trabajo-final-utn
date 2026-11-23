@@ -48,20 +48,21 @@ public class CategoriaController {
         return ResponseEntity.ok(categoriaService.obtenerCategoria(id));
     }
 
-    @Operation(summary = "Crear una nueva categoría")
+    @Operation(summary = "Crear una nueva categoría (ADMIN, queda registrado quién la creó)")
     @PostMapping
     public ResponseEntity<CategoriaDto> crearCategoria(
-            @Valid @RequestBody CategoriaCreateDto dto) {
-        CategoriaDto categoria = categoriaService.crearCategoria(dto);
+            @Valid @RequestBody CategoriaCreateDto dto, @AuthenticationPrincipal Jwt jwt) {
+        CategoriaDto categoria = categoriaGestionService.crear(dto, UsuarioAutenticado.id(jwt));
         return ResponseEntity.status(HttpStatus.CREATED).body(categoria);
     }
 
-    @Operation(summary = "Actualizar una categoría")
+    @Operation(summary = "Actualizar una categoría (ADMIN, queda registrado quién la modificó)")
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaDto> actualizarCategoria(
             @PathVariable Long id,
-            @Valid @RequestBody CategoriaUpdateDto dto) {
-        return ResponseEntity.ok(categoriaService.modificarCategoria(id, dto));
+            @Valid @RequestBody CategoriaUpdateDto dto,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(categoriaGestionService.modificar(id, dto, UsuarioAutenticado.id(jwt)));
     }
 
     @Operation(summary = "Perfil de una categoría: temporadas, líder, último ganador y próximo evento")

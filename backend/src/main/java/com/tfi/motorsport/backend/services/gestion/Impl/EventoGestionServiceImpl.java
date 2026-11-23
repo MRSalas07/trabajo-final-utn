@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.EventoDtos;
 import com.tfi.motorsport.backend.model.Catalogo.EstadoEvento;
 import com.tfi.motorsport.backend.model.Evento;
@@ -76,6 +77,7 @@ public class EventoGestionServiceImpl implements IEventoGestionService {
         Temporada t = e.getTemporada();
         return new EventoDtos.Registro(e.getId(), t.getId(), t.getAnio(), t.getCategoria().getSiglas(), e.getIdExterno(),
                 e.getNombre(), e.getNombreCorto(), e.getNumeroFecha(), e.getPais(), e.getCiudad(), e.getCircuito(),
-                e.getZonaHoraria(), e.getFechaInicio(), e.getFechaFin(), e.getEstado());
+                e.getZonaHoraria(), e.getFechaInicio(), e.getFechaFin(), e.getEstado(),
+                AuditoriaDto.de(e));
     }
 }

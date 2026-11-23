@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.TemporadaDtos;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.Categoria;
@@ -83,6 +84,7 @@ public class TemporadaGestionServiceImpl implements ITemporadaGestionService {
 
     private TemporadaDtos.Registro registro(Temporada t) {
         return new TemporadaDtos.Registro(t.getId(), t.getCategoria().getId(), t.getCategoria().getSiglas(), t.getAnio(),
-                t.getNombre(), t.getFechaInicio(), t.getFechaFin());
+                t.getNombre(), t.getFechaInicio(), t.getFechaFin(),
+                AuditoriaDto.de(t));
     }
 }

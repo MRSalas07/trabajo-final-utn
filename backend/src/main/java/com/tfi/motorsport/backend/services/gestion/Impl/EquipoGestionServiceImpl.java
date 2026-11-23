@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.EquipoDtos;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.Equipo;
@@ -75,6 +76,7 @@ public class EquipoGestionServiceImpl implements IEquipoGestionService {
 
     private EquipoDtos.Registro registro(Equipo e) {
         return new EquipoDtos.Registro(e.getId(), e.getIdExterno(), e.getNombre(), e.getNombreCorto(), e.getNacionalidad(),
-                e.getLogoUrl(), e.getFechaFundacion(), e.getSede());
+                e.getLogoUrl(), e.getFechaFundacion(), e.getSede(),
+                AuditoriaDto.de(e));
     }
 }

@@ -32,7 +32,8 @@ public final class ParticipacionDtos {
 
     public record Registro(Long id, Long equipoId, String equipo, Long pilotoId, String piloto,
                            Long categoriaId, String categoria, Integer temporada, Integer numero,
-                           String rol, LocalDate fechaDesde, LocalDate fechaHasta, String marca) {
+                           String rol, LocalDate fechaDesde, LocalDate fechaHasta, String marca,
+                           AuditoriaDto auditoria) {
     }
 }
 

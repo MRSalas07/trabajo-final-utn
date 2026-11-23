@@ -4,6 +4,7 @@ import com.tfi.motorsport.backend.dtos.categoria.CategoriaCreateDto;
 import com.tfi.motorsport.backend.dtos.categoria.CategoriaDto;
 import com.tfi.motorsport.backend.dtos.categoria.CategoriaUpdateDto;
 import com.tfi.motorsport.backend.services.ICategoriaService;
+import com.tfi.motorsport.backend.services.gestion.ICategoriaGestionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.List;
 
@@ -28,6 +30,12 @@ import static org.mockito.Mockito.*;
 class CategoriaControllerTest {
     @Mock
     private ICategoriaService categoriaService;
+
+    @Mock
+    private ICategoriaGestionService categoriaGestionService;
+
+    /** Token del administrador que hace la operación (id 7): queda en la auditoría. */
+    private static final Jwt ADMIN = Jwt.withTokenValue("token").header("alg", "none").subject("7").build();
 
     @InjectMocks
     private CategoriaController controller;
@@ -79,14 +87,15 @@ class CategoriaControllerTest {
     void crearCategoria_devuelve201ConLaCategoriaCreada() {
         // Arrange
         CategoriaCreateDto dto = new CategoriaCreateDto("Fórmula 1", "F1", "Máxima categoría", "Internacional", null);
-        when(categoriaService.crearCategoria(dto)).thenReturn(F1);
+        when(categoriaGestionService.crear(dto, 7L)).thenReturn(F1);
 
         // Act
-        ResponseEntity<CategoriaDto> respuesta = controller.crearCategoria(dto);
+        ResponseEntity<CategoriaDto> respuesta = controller.crearCategoria(dto, ADMIN);
 
-        // Assert
+        // Assert: se crea a través de la gestión, que registra quién la creó
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody()).isEqualTo(F1);
+        verify(categoriaGestionService).crear(dto, 7L);
     }
 
     @Test
@@ -94,13 +103,14 @@ class CategoriaControllerTest {
         // Arrange
         CategoriaUpdateDto dto = new CategoriaUpdateDto("Formula One", "F1", null, null, null, false);
         CategoriaDto modificada = new CategoriaDto(1L, "Formula One", "F1", null, null, null, false);
-        when(categoriaService.modificarCategoria(1L, dto)).thenReturn(modificada);
+        when(categoriaGestionService.modificar(1L, dto, 7L)).thenReturn(modificada);
 
         // Act
-        ResponseEntity<CategoriaDto> respuesta = controller.actualizarCategoria(1L, dto);
+        ResponseEntity<CategoriaDto> respuesta = controller.actualizarCategoria(1L, dto, ADMIN);
 
         // Assert
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isEqualTo(modificada);
+        verify(categoriaGestionService).modificar(1L, dto, 7L);
     }
 }

@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.TripulacionDtos;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.Catalogo;
@@ -105,6 +106,7 @@ public class TripulacionGestionServiceImpl implements ITripulacionGestionService
     private TripulacionDtos.Registro registro(Tripulacion t) {
         return new TripulacionDtos.Registro(t.getId(), t.getCategoria().getId(), t.getCategoria().getSiglas(), t.getTemporada(),
                 t.getPiloto().getId(), nombre(t.getPiloto()), t.getCopiloto().getId(), nombre(t.getCopiloto()),
-                t.getEquipo().getId(), t.getEquipo().getNombre(), t.getNumero());
+                t.getEquipo().getId(), t.getEquipo().getNombre(), t.getNumero(),
+                AuditoriaDto.de(t));
     }
 }

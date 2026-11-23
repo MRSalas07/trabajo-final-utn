@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.ResultadoSesionDtos;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.Catalogo;
@@ -115,6 +116,7 @@ public class ResultadoSesionGestionServiceImpl implements IResultadoSesionGestio
     private ResultadoSesionDtos.Registro registro(ResultadoSesion r) {
         return new ResultadoSesionDtos.Registro(r.getId(), r.getSesion().getId(), r.getPiloto().getId(), nombre(r.getPiloto()),
                 r.getEquipo().getId(), r.getEquipo().getNombre(), r.getPosicion(), r.getNumero(), r.getPuntos(),
-                r.getTiempo(), r.getDiferencia(), r.getVueltas(), r.getMejorVuelta(), r.getEstado(), r.getMotivoAbandono());
+                r.getTiempo(), r.getDiferencia(), r.getVueltas(), r.getMejorVuelta(), r.getEstado(), r.getMotivoAbandono(),
+                AuditoriaDto.de(r));
     }
 }

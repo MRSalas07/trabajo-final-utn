@@ -37,6 +37,7 @@ public final class SesionDtos {
 
     public record Registro(Long id, Long eventoId, String idExterno, String nombre, String tipo, Integer numero,
                            Instant inicio, Instant fin, Integer vueltasProgramadas, BigDecimal distancia,
-                           String estado) {
+                           String estado,
+                           AuditoriaDto auditoria) {
     }
 }
