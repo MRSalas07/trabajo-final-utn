@@ -38,8 +38,9 @@ export class Admin {
   protected readonly vista = signal<'datos' | 'sync'>('datos');
 
   constructor() {
-    this.syncServices.obtenerFuentes().subscribe((fuente) => {
-      this.fuentes.set(fuente);
+    this.syncServices.obtenerFuentes().subscribe({
+      next: (fuente) => this.fuentes.set(fuente),
+      error: (e) => this.mensaje.set(`No se pudieron consultar las fuentes de datos: ${mensajeError(e)}`),
     });
     this.seguimientoService.consultar();
   }

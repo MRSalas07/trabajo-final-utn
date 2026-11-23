@@ -37,6 +37,8 @@ export class Inicio {
 
   protected readonly ultimo = computed(() => this.recientesEventos()[0] ?? null);
   protected readonly tiempos = signal<ResultadoSesion[]>([]);
+  protected readonly errorTiempos = signal<string | null>(null);
+  protected readonly errorRecientes = signal<string | null>(null);
 
   protected readonly mes = signal(this.mesActual());
   protected readonly eventosMes = signal<EventoDto[]>([]);
@@ -70,8 +72,9 @@ export class Inicio {
       const ultimo= this.ultimo();
       untracked(() => {
         const carrera = ultimo?.sesiones.find((s) => s.tipo === 'CARRERA' && s.cantidadResultados > 0);
-        if (carrera) this.resultadoService.resultadosSesion(carrera.id).subscribe((t) => {
-          this.tiempos.set(t.resultados.slice(0, 8));
+        if (carrera) this.resultadoService.resultadosSesion(carrera.id).subscribe({
+          next: (t) => { this.tiempos.set(t.resultados.slice(0, 8)); this.errorTiempos.set(null); },
+          error: (e) => { this.tiempos.set([]); this.errorTiempos.set(mensajeError(e)); },
         });
       });
     });
@@ -121,8 +124,9 @@ export class Inicio {
         this.error.set(mensajeError(error)); this.cargando.set(false); 
       },
     });
-    this.eventoService.recientes(4).subscribe((response) => {
-      this.recientesEventos.set(response)
+    this.eventoService.recientes(4).subscribe({
+      next: (response) => { this.recientesEventos.set(response); this.errorRecientes.set(null); },
+      error: (e) => this.errorRecientes.set(mensajeError(e)),
     });
   }
 
