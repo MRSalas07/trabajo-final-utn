@@ -10,7 +10,7 @@ Motor: PostgreSQL. El backend no crea tablas: las **valida** al iniciar (`ddl-au
 | `datos_iniciales.sql` | Las tres categorías (F1, WRC y TC) y el usuario administrador local. Se puede ejecutar más de una vez. |
 | `datos_ejemplo/seed_tc_2025.sql` | Opcional: temporada 2025 de Turismo Carretera relevada a mano. Se puede ejecutar más de una vez. |
 | `migraciones/001_indices_unicos.sql` | Solo para bases creadas con un `schema.sql` anterior al 20/11/2026. Una base nueva no la necesita. |
-| `migraciones/002_campeon_temporada.sql` | Solo para bases creadas antes del 22/11/2026 (agrega `temporada.id_piloto_campeon`). Una base nueva no la necesita. Si tu base es anterior, ejecutala o el backend no arranca. |
+| `migraciones/002_campeon_temporada.sql` | Solo para bases creadas antes del 22/11/2026 (agrega `temporada.id_piloto_campeon`). Una base nueva no la necesita. Si tu base es anterior, ejecutala o el backend no arranca. También sirve si la base pasó por `ddl-auto=update`: no duplica la clave foránea. |
 | `respaldos/exportar_temporada.sql` | Exporta una temporada a JSON (respaldo de F1/WRC y formato de carga de TC). |
 | `respaldos/*.json` | Temporadas exportadas, listas para importar desde `/admin`. |
 
@@ -71,6 +71,15 @@ curl -X POST http://localhost:8080/api/admin/importaciones \
 ```
 
 La importación es idempotente: se puede repetir, o hacer sobre una base que ya tiene esos datos, sin duplicar nada.
+
+## Cambios al esquema
+
+El backend arranca con `ddl-auto=validate`: si una entidad JPA usa una columna que no existe, no levanta. Para agregar una columna o tabla:
+
+1. Sumarla en `schema.sql`, así las bases nuevas ya la traen.
+2. Crear una migración numerada en `migraciones/` (por ejemplo `003_...sql`) que la agregue a las bases existentes. Tiene que ser idempotente (`IF NOT EXISTS`) para poder correrla más de una vez.
+3. Cambiar la entidad y anotar la migración en la tabla de arriba.
+4. Ejecutar la migración en cada base existente (las locales y la de la nube) antes de levantar el backend nuevo.
 
 ## Formato del JSON (TemporadaNorm)
 
