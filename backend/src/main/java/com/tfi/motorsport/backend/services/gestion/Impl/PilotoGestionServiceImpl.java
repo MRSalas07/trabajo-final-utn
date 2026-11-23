@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.PilotoDtos;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.Piloto;
@@ -87,6 +88,7 @@ public class PilotoGestionServiceImpl implements IPilotoGestionService {
     private PilotoDtos.Registro registro(Piloto p) {
         return new PilotoDtos.Registro(p.getId(), p.getIdExterno(), p.getNombre(), p.getApellido(), p.getFechaNacimiento(),
                 p.getNacionalidad(), p.getPais(), p.getCodigoPiloto(), p.getNumeroActual(), p.getFotoUrl(),
-                p.getFechaInicioCarrera(), p.getFechaFinCarrera());
+                p.getFechaInicioCarrera(), p.getFechaFinCarrera(),
+                AuditoriaDto.de(p));
     }
 }

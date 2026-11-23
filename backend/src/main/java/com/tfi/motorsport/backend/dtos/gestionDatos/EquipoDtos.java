@@ -29,6 +29,7 @@ public final class EquipoDtos {
     }
 
     public record Registro(Long id, String idExterno, String nombre, String nombreCorto, String nacionalidad,
-                           String logoUrl, LocalDate fechaFundacion, String sede) {
+                           String logoUrl, LocalDate fechaFundacion, String sede,
+                           AuditoriaDto auditoria) {
     }
 }

@@ -1,5 +1,7 @@
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { AbmService, Filtros, NombreRecurso, RegistroGenerico } from '../../../core/services/abm.service';
+import { ZonaHorariaService } from '../../../core/services/zona-horaria.service';
+import { Auditoria } from '../../../core/modelos';
 import { mensajeError } from '../../../core/errores/error';
 import { FormsModule } from '@angular/forms';
 import { catchError, debounceTime, map, Observable, of, Subject, switchMap } from 'rxjs';
@@ -53,6 +55,7 @@ export interface ColumnaAbm {
 export class AbmTabla {
 
   private readonly abmService = inject(AbmService);
+  private readonly zonaService = inject(ZonaHorariaService);
 
   readonly titulo = input.required<string>();
   readonly nombreRecurso = input.required<NombreRecurso>(); 
@@ -81,6 +84,17 @@ export class AbmTabla {
   protected readonly editandoId = signal<number | null>(null);
   protected readonly errorForm = signal<string | null>(null);
   protected readonly guardando = signal(false);
+  /** Auditoría del registro que se está editando (se muestra arriba del formulario). */
+  protected readonly auditoriaEditando = signal<Auditoria | null>(null);
+
+  /** Fechas de la auditoría en la zona horaria elegida por el usuario. */
+  private readonly formatoFecha = computed(() => {
+    try {
+      return new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short', timeZone: this.zonaService.zona() });
+    } catch {
+      return new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+    }
+  });
 
   protected readonly textosBusqueda = signal<Record<string, string>>({});
   protected readonly sugerencias = signal<Record<string, OpcionAbm[]>>({});
@@ -138,6 +152,7 @@ export class AbmTabla {
     } 
     this.limpiarBusquedas({});
     this.editandoId.set(null);
+    this.auditoriaEditando.set(null);
     this.errorForm.set(null);
     this.formulario.set(valoresIniciales);
   }
@@ -156,6 +171,7 @@ export class AbmTabla {
     }
     this.limpiarBusquedas(textosIniciales);
     this.editandoId.set(registro.id);
+    this.auditoriaEditando.set(this.auditoriaDe(registro));
     this.errorForm.set(null);
     this.formulario.set(formData);
     setTimeout(() => document.querySelector('.abm-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
@@ -216,6 +232,44 @@ export class AbmTabla {
       },
       error: (errorHttp) => this.error.set(mensajeError(errorHttp)),
     });
+  }
+
+  // ---------------------------------------------------------------- auditoría
+
+  protected auditoriaDe(registro: RegistroGenerico): Auditoria | null {
+    return (registro['auditoria'] as Auditoria | undefined) ?? null;
+  }
+
+  /** Columna "Última modificación": quién y cuándo (si nunca se modificó, el alta). */
+  protected textoUltimoCambio(registro: RegistroGenerico): string {
+    const auditoria = this.auditoriaDe(registro);
+    if (!auditoria) return '';
+    const quien = auditoria.actualizadoPor ?? auditoria.creadoPor;
+    const cuando = auditoria.fechaActualizacion ?? auditoria.fechaCreacion;
+    return `${this.usuario(quien)} · ${this.fecha(cuando)}`;
+  }
+
+  /** Detalle completo (tooltip de la columna y encabezado del formulario de edición). */
+  protected textoCreacion(auditoria: Auditoria): string {
+    return `Creado por ${this.usuario(auditoria.creadoPor)} el ${this.fecha(auditoria.fechaCreacion)}`;
+  }
+
+  protected textoModificacion(auditoria: Auditoria): string {
+    return `Última modificación: ${this.usuario(auditoria.actualizadoPor)} el ${this.fecha(auditoria.fechaActualizacion)}`;
+  }
+
+  protected detalleAuditoria(registro: RegistroGenerico): string {
+    const auditoria = this.auditoriaDe(registro);
+    return auditoria ? `${this.textoCreacion(auditoria)}. ${this.textoModificacion(auditoria)}.` : '';
+  }
+
+  /** Sin usuario = lo cargó el sistema (sincronización con las APIs, importación de JSON o scripts SQL). */
+  private usuario(email: string | null): string {
+    return email ?? 'Sistema';
+  }
+
+  private fecha(iso: string | null): string {
+    return iso ? this.formatoFecha().format(new Date(iso)) : '—';
   }
 
   protected tipoInput(campo: CampoAbm): string {

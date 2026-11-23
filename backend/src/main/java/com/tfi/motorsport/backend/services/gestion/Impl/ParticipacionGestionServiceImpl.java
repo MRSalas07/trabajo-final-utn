@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.ParticipacionDtos;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.Catalogo;
@@ -113,6 +114,7 @@ public class ParticipacionGestionServiceImpl implements IParticipacionGestionSer
     private ParticipacionDtos.Registro registro(EquipoPiloto ep) {
         return new ParticipacionDtos.Registro(ep.getId(), ep.getEquipo().getId(), ep.getEquipo().getNombre(),
                 ep.getPiloto().getId(), nombre(ep.getPiloto()), ep.getCategoria().getId(), ep.getCategoria().getSiglas(),
-                ep.getTemporada(), ep.getNumero(), ep.getRol(), ep.getFechaDesde(), ep.getFechaHasta(), ep.getMarca());
+                ep.getTemporada(), ep.getNumero(), ep.getRol(), ep.getFechaDesde(), ep.getFechaHasta(), ep.getMarca(),
+                AuditoriaDto.de(ep));
     }
 }

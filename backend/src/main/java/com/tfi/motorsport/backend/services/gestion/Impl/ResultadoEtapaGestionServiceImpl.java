@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.ResultadoEtapaDtos;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.model.Catalogo.EstadoResultado;
@@ -96,6 +97,7 @@ public class ResultadoEtapaGestionServiceImpl implements IResultadoEtapaGestionS
         Tripulacion t = r.getTripulacion();
         return new ResultadoEtapaDtos.Registro(r.getId(), r.getEtapa().getId(), t.getId(),
                 nombre(t.getPiloto()) + " / " + nombre(t.getCopiloto()), r.getPosicion(), r.getTiempo(),
-                r.getDiferencia(), r.getPuntos(), r.getEstado(), r.getMotivoAbandono());
+                r.getDiferencia(), r.getPuntos(), r.getEstado(), r.getMotivoAbandono(),
+                AuditoriaDto.de(r));
     }
 }

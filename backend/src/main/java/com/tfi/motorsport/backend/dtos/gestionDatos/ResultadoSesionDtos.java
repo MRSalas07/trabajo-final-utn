@@ -38,7 +38,8 @@ public final class ResultadoSesionDtos {
     public record Registro(Long id, Long sesionId, Long pilotoId, String piloto, Long equipoId,
                            String equipo, Integer posicion, Integer numero, BigDecimal puntos,
                            BigDecimal tiempo, BigDecimal diferencia, Integer vueltas,
-                           BigDecimal mejorVuelta, String estado, String motivoAbandono) {
+                           BigDecimal mejorVuelta, String estado, String motivoAbandono,
+                           AuditoriaDto auditoria) {
     }
 }
 

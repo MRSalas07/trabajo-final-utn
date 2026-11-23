@@ -35,6 +35,7 @@ public final class PilotoDtos {
 
     public record Registro(Long id, String idExterno, String nombre, String apellido, LocalDate fechaNacimiento,
                            String nacionalidad, String pais, String codigo, Integer numero, String fotoUrl,
-                           LocalDate fechaInicioCarrera, LocalDate fechaFinCarrera) {
+                           LocalDate fechaInicioCarrera, LocalDate fechaFinCarrera,
+                           AuditoriaDto auditoria) {
     }
 }

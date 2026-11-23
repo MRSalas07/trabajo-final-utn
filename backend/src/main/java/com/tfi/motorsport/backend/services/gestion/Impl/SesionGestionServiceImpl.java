@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.SesionDtos;
 import com.tfi.motorsport.backend.model.Catalogo.EstadoEvento;
 import com.tfi.motorsport.backend.model.Sesion;
@@ -70,6 +71,7 @@ public class SesionGestionServiceImpl implements ISesionGestionService {
     private SesionDtos.Registro registro(Sesion s) {
         return new SesionDtos.Registro(s.getId(), s.getEvento().getId(), s.getIdExterno(), s.getNombre(), s.getTipo(),
                 s.getNumero(), s.getFechaInicio(), s.getFechaFin(), s.getVueltasProgramadas(), s.getDistancia(),
-                s.getEstado());
+                s.getEstado(),
+                AuditoriaDto.de(s));
     }
 }

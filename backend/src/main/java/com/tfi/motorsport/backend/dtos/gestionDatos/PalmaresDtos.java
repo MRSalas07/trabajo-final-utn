@@ -13,6 +13,7 @@ public final class PalmaresDtos {
 
     public record Registro(Long id, Long pilotoId, String piloto, String categoria, Integer carreras,
                            Integer victorias, Integer podios, Integer poles, Integer campeonatos,
-                           BigDecimal puntosTotales, Integer abandonos) {
+                           BigDecimal puntosTotales, Integer abandonos,
+                           AuditoriaDto auditoria) {
     }
 }

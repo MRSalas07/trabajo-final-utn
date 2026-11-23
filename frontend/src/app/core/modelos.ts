@@ -356,3 +356,12 @@ export interface ComparativaHistorica {
   carrerasDelanteA: number; carrerasDelanteB: number;
   temporadasDelanteA: number; temporadasDelanteB: number;
 }
+
+// ---------- Panel de administración: auditoría (espejo de AuditoriaDto.java) ----------
+/** Quién creó y modificó por última vez un registro. Usuario null = lo cargó el sistema (sincronización, importación o scripts). */
+export interface Auditoria {
+  creadoPor: string | null;
+  fechaCreacion: string | null;
+  actualizadoPor: string | null;
+  fechaActualizacion: string | null;
+}

@@ -24,6 +24,7 @@ public final class TripulacionDtos {
 
     public record Registro(Long id, Long categoriaId, String categoria, Integer temporada, Long pilotoId,
                            String piloto, Long copilotoId, String copiloto, Long equipoId, String equipo,
-                           Integer numero) {
+                           Integer numero,
+                           AuditoriaDto auditoria) {
     }
 }
