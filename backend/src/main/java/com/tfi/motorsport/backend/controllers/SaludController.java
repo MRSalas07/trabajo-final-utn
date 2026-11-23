@@ -21,13 +21,14 @@ public class SaludController {
 
     private final AppProperties props;
 
-    public record Salud(String estado, Instant hora, boolean wrcSyncAutomatico) {
+    /** telemetria: si el módulo de telemetría F1 está habilitado (el frontend muestra u oculta su página). */
+    public record Salud(String estado, Instant hora, boolean telemetria, boolean wrcAutomatico) {
     }
 
     @Operation(summary = "Estado del servicio y módulos habilitados")
     @GetMapping("/api/salud")
     public Salud salud() {
 
-        return new Salud("OK", Instant.now(),props.integracion().wrc().habilitado());
+        return new Salud("OK", Instant.now(), props.telemetria().habilitada(), props.integracion().wrc().habilitado());
     }
 }
