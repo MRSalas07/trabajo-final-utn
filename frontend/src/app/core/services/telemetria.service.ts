@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EstadoTransmision, SesionTelemetria, TelemetriaSesion } from '../modelos';
+import { EstadoTransmision, InfoVivo, SesionTelemetria, TelemetriaSesion } from '../modelos';
 
 /** Lo que va llegando de una transmisión abierta. */
 export type EventoTransmision =
@@ -62,6 +62,18 @@ export class TelemetriaService {
     else if (opciones.inicioMin) params.set('inicioMin', String(opciones.inicioMin));
     if (opciones.piloto) params.set('piloto', String(opciones.piloto));
     return `${this.api}/transmisiones/repeticion?${params}`;
+  }
+
+  /** Dirección del stream EN VIVO de la sesión en curso (el backend necesita la suscripción de OpenF1). */
+  urlVivo(piloto?: number | null): string {
+    const params = new URLSearchParams({ sessionKey: 'latest' });
+    if (piloto) params.set('piloto', String(piloto));
+    return `${this.api}/transmisiones/vivo?${params}`;
+  }
+
+  /** Si hay una sesión en curso y si el backend puede transmitirla en vivo. */
+  infoVivo(): Observable<InfoVivo> {
+    return this.http.get<InfoVivo>(`${this.api}/vivo/estado`);
   }
 
   /**

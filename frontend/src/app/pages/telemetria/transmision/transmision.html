@@ -57,7 +57,7 @@
 }
 @if (fase() === 'FINALIZADA') {
   <div class="aviso aviso-accion">
-    <span>Terminó la sesión. La torre queda con la clasificación final.</span>
+    <span>{{ esVivo() ? (estado()?.aviso ?? 'La sesión terminó.') : 'Terminó la sesión. La torre queda con la clasificación final.' }}</span>
     <button type="button" class="btn-chico" (click)="detener()">Volver</button>
   </div>
 }

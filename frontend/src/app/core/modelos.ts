@@ -488,3 +488,13 @@ export interface EstadoTransmision {
   trazado: [number, number][] | null;
   aviso: string | null;
 }
+/** Estado del modo en vivo (GET /telemetria/vivo/estado). El backend lo guarda un minuto. */
+export interface InfoVivo {
+  /** El backend tiene configurada la suscripción de OpenF1 (OPENF1_USUARIO y OPENF1_PASSWORD). */
+  credenciales: boolean;
+  /** La sesión más reciente según OpenF1 (la que se corre ahora o la última), o null si OpenF1 no respondió. */
+  ultimaSesion: SesionTelemetria | null;
+  /** Hay una sesión en curso: desde media hora antes de que empiece hasta media hora después de que termine. */
+  enVentanaVivo: boolean;
+  mensaje: string;
+}

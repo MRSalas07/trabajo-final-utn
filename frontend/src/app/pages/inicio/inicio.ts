@@ -13,9 +13,10 @@ import { HoraPipe, TiempoPipe } from '../../shared/pipe/formato';
 import { CalendarioMes } from '../../shared/calendario-mes/calendario-mes';
 import { SaludServices } from '../../core/services/salud.service';
 import { EstadisticaService } from '../../core/services/estadistica.service';
+import { PanelVivo } from '../telemetria/panel-vivo/panel-vivo';
 
 @Component({
-  imports: [RouterLink,EstadoCarga, FilaEvento, HoraPipe, TiempoPipe, CalendarioMes],
+  imports: [RouterLink,EstadoCarga, FilaEvento, HoraPipe, TiempoPipe, CalendarioMes, PanelVivo],
   selector: 'app-inicio',
   styleUrl: './inicio.css',
   templateUrl: './inicio.html',
@@ -48,6 +49,10 @@ export class Inicio {
   protected readonly cargandoCampeonato = signal(false);
   protected readonly errorCampeonato = signal<string | null>(null);
   private pedidoCampeonato = 0;
+
+  /** Panel de telemetría F1 (MVP 7): solo si el backend tiene el módulo habilitado. */
+  protected readonly telemetria = signal(false);
+
   protected readonly hoy = computed(() =>
     new Intl.DateTimeFormat('en-CA', { timeZone: this.zonaService.zona(), year: 'numeric', month: '2-digit', day: '2-digit' }).format(
       new Date(this.ahora()),
@@ -76,6 +81,10 @@ export class Inicio {
     });
     interval(60_000).pipe(takeUntilDestroyed()).subscribe(() => {
       this.ahora.set(Date.now())
+    });
+    this.serviceSalud.probarSalud().subscribe({
+      next: (salud) => this.telemetria.set(salud.telemetria === true),
+      error: () => this.telemetria.set(false),
     });
   }
 
