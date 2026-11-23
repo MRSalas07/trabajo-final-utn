@@ -1,0 +1,126 @@
+<app-estado-carga [cargando]="cargando() && !datos()" [error]="error()" />
+@if (error()) {
+  <p class="centrado"><button type="button" class="btn-chico" (click)="reintentar()">Reintentar</button></p>
+}
+@if (cargando() && !datos()) {
+  <p class="suave chico centrado">
+    La primera consulta de una sesión tarda unos segundos: el servidor le pide los datos a OpenF1 y los guarda un rato.
+  </p>
+}
+
+@if (datos(); as d) {
+  @if (d.aviso) {
+    <p class="aviso">{{ d.aviso }}</p>
+  } @else if (!chips().length) {
+    <p class="suave">OpenF1 no tiene pilotos ni tiempos para esta sesión.</p>
+  } @else {
+    <div class="tablero">
+      <!-- ------------------------------------------------------------ Pilotos -->
+      <section class="panel" aria-labelledby="t-pilotos">
+        <div class="panel-titulo">
+          <h2 id="t-pilotos">Pilotos a comparar</h2>
+          <span class="suave chico">
+            @if (cargando()) { <span class="spinner" aria-hidden="true"></span> }
+            {{ seleccionados().length }} de {{ maximo }}
+          </span>
+        </div>
+        <div class="chips" role="group" aria-label="Pilotos de la sesión">
+          @for (c of chips(); track c.numero) {
+            <button type="button" class="chip-piloto" [class.activo]="c.activo" [attr.aria-pressed]="c.activo"
+                    [disabled]="c.activo ? seleccionados().length === 1 : seleccionados().length >= maximo"
+                    [title]="c.nombre ? c.nombre + (c.equipo ? ' · ' + c.equipo : '') : c.acronimo"
+                    (click)="alternar(c.numero)">
+              <span class="punto" [style.background]="c.color"></span>
+              @if (c.posicion !== null) { <span class="chip-pos">{{ c.posicion }}</span> }
+              {{ c.acronimo }}
+            </button>
+          }
+        </div>
+        <p class="suave chico ayuda">
+          Ordenados por posición final. Tocá un piloto para sumarlo o quitarlo (hasta {{ maximo }}).
+          @if (eleccionPropia()) {
+            <button type="button" class="enlace" (click)="restablecer()">Volver a los mejor ubicados</button>
+          }
+        </p>
+      </section>
+
+      <!-- ------------------------------------------------------------ Tiempos por vuelta -->
+      <section class="panel" aria-labelledby="t-vueltas">
+        <div class="panel-titulo">
+          <h2 id="t-vueltas">Tiempos por vuelta</h2>
+          <label class="opcion">
+            <input type="checkbox" [checked]="ocultarLentas()" (change)="ocultarLentas.set($any($event.target).checked)" />
+            Ocultar vueltas lentas
+          </label>
+        </div>
+        @let vueltas = graficoVueltas();
+        @if (vueltas.series.length) {
+          <app-grafico tipo="line" [etiquetas]="vueltas.etiquetas" [detalles]="vueltas.detalles" [series]="vueltas.series"
+                       formatoY="tiempo" tituloY="Tiempo de vuelta" tituloX="Vuelta" [puntos]="vueltas.etiquetas.length <= 40"
+                       [alto]="340" descripcion="Tiempo de cada vuelta de los pilotos elegidos" />
+          <p class="suave chico">
+            No incluye las vueltas de salida de boxes.
+            @if (ocultarLentas()) {
+              Se ocultan las que superan en un 7 % a la mejor vuelta del gráfico (entrada a boxes, auto de seguridad, vueltas lentas de práctica).
+            }
+          </p>
+        } @else {
+          <p class="suave">OpenF1 no tiene tiempos de vuelta de los pilotos elegidos.</p>
+        }
+      </section>
+
+      <!-- ------------------------------------------------------------ Posiciones -->
+      <section class="panel" aria-labelledby="t-posiciones">
+        <div class="panel-titulo">
+          <h2 id="t-posiciones">Posiciones durante la sesión</h2>
+        </div>
+        @let posiciones = graficoPosiciones();
+        @if (posiciones.series.length) {
+          <app-grafico tipo="line" [etiquetas]="posiciones.etiquetas" [detalles]="posiciones.detalles" [series]="posiciones.series"
+                       [invertirY]="true" tituloY="Posición" tituloX="Minuto de la sesión" [puntos]="false"
+                       [alto]="340" descripcion="Posición de los pilotos elegidos minuto a minuto" />
+          <p class="suave chico">La posición que informa OpenF1 en cada minuto desde el inicio de la sesión.</p>
+        } @else {
+          <p class="suave">OpenF1 no tiene posiciones de los pilotos elegidos.</p>
+        }
+      </section>
+
+      <!-- ------------------------------------------------------------ Resumen -->
+      <section class="panel" aria-labelledby="t-resumen">
+        <div class="panel-titulo">
+          <h2 id="t-resumen">Resumen</h2>
+        </div>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th title="Posición final">Pos</th>
+                <th>Piloto</th>
+                <th>Equipo</th>
+                <th class="num">Mejor vuelta</th>
+                <th class="num" title="Número de la vuelta más rápida">Vuelta</th>
+                <th class="num" title="Vueltas con tiempo, sin las salidas de boxes">Cronometradas</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (f of resumen(); track f.numero) {
+                <tr [class.podio-1]="f.posicion === 1" [class.podio-2]="f.posicion === 2" [class.podio-3]="f.posicion === 3">
+                  <td class="pos">{{ f.posicion ?? '—' }}</td>
+                  <td>
+                    <span class="muestra" [class.punteada]="f.punteada" [style.border-top-color]="f.color"></span>
+                    <strong>{{ f.acronimo }}</strong> <span class="suave">{{ f.nombre }}</span>
+                  </td>
+                  <td>{{ f.equipo ?? '—' }}</td>
+                  <td class="num" [class.record]="f.mejor !== null && f.mejor === mejorVuelta()">{{ f.mejor | tiempo }}</td>
+                  <td class="num">{{ f.vueltaMejor ?? '—' }}</td>
+                  <td class="num">{{ f.cronometradas }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="suave chico">En violeta, la mejor vuelta entre los pilotos elegidos.</p>
+      </section>
+    </div>
+  }
+}

@@ -2,7 +2,7 @@ import { inject,Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ZonaHorariaService } from './zona-horaria.service';
-import { Categoria, PerfilCategoria } from '../modelos';
+import { Categoria, PerfilCategoria, Salud } from '../modelos';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -13,9 +13,10 @@ export class SaludServices {
     private readonly apiUrl = environment.apiUrl;
     private readonly zonas = inject(ZonaHorariaService);
 
-    probarSalud() {
+    /** Estado del backend y de los módulos opcionales (telemetría F1, sincronización automática de WRC). */
+    probarSalud(): Observable<Salud> {
         const url = `${this.apiUrl}/salud`;
-        return this.http.get(url);
+        return this.http.get<Salud>(url);
     }
 
     categorias(): Observable<Categoria[]> {
