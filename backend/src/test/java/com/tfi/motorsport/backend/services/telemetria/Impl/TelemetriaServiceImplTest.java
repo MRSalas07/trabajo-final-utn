@@ -109,6 +109,16 @@ class TelemetriaServiceImplTest {
     }
 
     @Test
+    void sesiones_omiteLasCanceladas() {
+        when(openF1.get("sessions?year=2026")).thenReturn(json("""
+                [{'session_key': 11, 'session_name': 'Race', 'date_start': '2026-03-08T04:00:00+00:00'},
+                 {'session_key': 12, 'session_name': 'Race', 'date_start': '2026-04-12T15:00:00+00:00', 'is_cancelled': true}]
+                """));
+
+        assertThat(service.sesiones(2026)).extracting(SesionTelemetria::sessionKey).containsExactly(11);
+    }
+
+    @Test
     void sesiones_anioSinDatosEnOpenF1_lanza400SinConsultar() {
         int proximoAnio = Year.now(ZoneOffset.UTC).getValue() + 1;
 
@@ -192,6 +202,20 @@ class TelemetriaServiceImplTest {
         assertThat(analisis.vueltas()).isEmpty();
         assertThat(analisis.posiciones()).isEmpty();
         verify(openF1, never()).get("laps?session_key=9900");
+    }
+
+    @Test
+    void sesion_terminadaHaceMenosDeMediaHora_avisaQueLosDatosTodaviaNoSonLibres() {
+        String inicio = Instant.now().minus(Duration.ofMinutes(130)).toString();
+        String fin = Instant.now().minus(Duration.ofMinutes(10)).toString();
+        when(openF1.get("sessions?session_key=9901")).thenReturn(json("""
+                [{'session_key': 9901, 'session_name': 'Race', 'date_start': '%s', 'date_end': '%s'}]
+                """.formatted(inicio, fin)));
+
+        TelemetriaSesion analisis = service.sesion(9901, null);
+
+        assertThat(analisis.aviso()).contains("menos de 30 minutos");
+        verify(openF1, never()).get("laps?session_key=9901");
     }
 
     @Test

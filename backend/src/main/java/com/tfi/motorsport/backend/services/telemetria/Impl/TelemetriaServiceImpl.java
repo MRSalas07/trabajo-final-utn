@@ -11,6 +11,7 @@ import com.tfi.motorsport.backend.handlers.exceptions.ResourceNotFoundException;
 import com.tfi.motorsport.backend.handlers.exceptions.RuleBusinessException;
 import com.tfi.motorsport.backend.services.telemetria.CacheTemporal;
 import com.tfi.motorsport.backend.services.telemetria.ITelemetriaService;
+import com.tfi.motorsport.backend.services.telemetria.transmision.DatosOpenF1;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
@@ -38,8 +39,8 @@ import java.util.TreeMap;
  * Diseño desacoplado: solo se crea si app.telemetria.habilitada=true, no escribe en la base
  * (consulta, transforma y guarda un rato en memoria) y no usa el resto de los servicios.
  *
- * OpenF1 da gratis los datos históricos desde 2023. Durante una sesión en curso sus datos requieren
- * suscripción paga, por eso el análisis es de sesiones terminadas.
+ * OpenF1 da gratis los datos históricos desde 2023. Desde 30 minutos antes hasta 30 minutos después
+ * de una sesión sus datos son solo para suscriptores, por eso el análisis es de sesiones ya liberadas.
  */
 @Service
 @ConditionalOnProperty(prefix = "app.telemetria", name = "habilitada", havingValue = "true")
@@ -49,8 +50,6 @@ public class TelemetriaServiceImpl implements ITelemetriaService {
     public static final int PRIMER_ANIO = 2023;
     /** Pilotos por gráfico de vueltas: con más líneas se vuelve ilegible. */
     public static final int MAX_PILOTOS_VUELTAS = 6;
-    /** Si OpenF1 no informa el fin de una sesión, se la da por terminada 4 horas después de empezar. */
-    private static final Duration DURACION_MAXIMA_SESION = Duration.ofHours(4);
 
     private final OpenF1Cliente cliente;
     private final CacheTemporal cache = new CacheTemporal(Duration.ofMinutes(30), 300);
@@ -68,7 +67,9 @@ public class TelemetriaServiceImpl implements ITelemetriaService {
         return cache.obtener("sesiones-" + anio, () -> {
             Instant ahora = Instant.now();
             return FormatJson.lista(cliente.get("sessions?year=" + anio)).stream()
-                    .map(TelemetriaServiceImpl::aSesion)
+                    // OpenF1 conserva las fechas canceladas (ej: 2026) marcadas con is_cancelled
+                    .filter(s -> !FormatJson.booleano(s, "is_cancelled"))
+                    .map(DatosOpenF1::sesion)
                     .filter(s -> s.sessionKey() != null && s.inicio() != null && s.inicio().isBefore(ahora))
                     .sorted(Comparator.comparing(SesionTelemetria::inicio).reversed())
                     .toList();
@@ -80,12 +81,12 @@ public class TelemetriaServiceImpl implements ITelemetriaService {
         SesionTelemetria sesion = cache.obtener("sesion-" + sessionKey, () ->
                 FormatJson.lista(cliente.get("sessions?session_key=" + sessionKey)).stream()
                         .findFirst()
-                        .map(TelemetriaServiceImpl::aSesion)
+                        .map(DatosOpenF1::sesion)
                         .orElseThrow(() -> new ResourceNotFoundException("No existe la sesión " + sessionKey + " en OpenF1")));
-        if (!terminada(sesion)) {
+        String motivo = DatosOpenF1.motivoSinDatosLibres(sesion, Instant.now());
+        if (motivo != null) {
             return new TelemetriaSesion(sesion, List.of(), List.of(), List.of(),
-                    "La sesión todavía no terminó: el análisis se habilita al finalizar "
-                            + "(durante la sesión, los datos de OpenF1 requieren suscripción paga).");
+                    motivo + " El análisis se habilita cuando OpenF1 libera los datos (media hora después del final).");
         }
 
         Map<Integer, PilotoTelemetria> porNumero = new LinkedHashMap<>();
@@ -177,21 +178,6 @@ public class TelemetriaServiceImpl implements ITelemetriaService {
                 .limit(MAX_PILOTOS_VUELTAS)
                 .map(SeriePosiciones::numero)
                 .toList();
-    }
-
-    private static boolean terminada(SesionTelemetria sesion) {
-        Instant ahora = Instant.now();
-        if (sesion.fin() != null) {
-            return sesion.fin().isBefore(ahora);
-        }
-        return sesion.inicio() != null && sesion.inicio().plus(DURACION_MAXIMA_SESION).isBefore(ahora);
-    }
-
-    private static SesionTelemetria aSesion(JsonNode s) {
-        return new SesionTelemetria(FormatJson.aInt(s, "session_key"), FormatJson.aString(s, "session_name"),
-                FormatJson.aString(s, "session_type"), FormatJson.instantUtc(FormatJson.aString(s, "date_start")),
-                FormatJson.instantUtc(FormatJson.aString(s, "date_end")), FormatJson.aString(s, "country_name"),
-                FormatJson.aString(s, "circuit_short_name"), FormatJson.aString(s, "location"));
     }
 
     private static String acronimo(Integer numero, PilotoTelemetria piloto) {

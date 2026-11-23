@@ -57,12 +57,23 @@ public class ClientHttpExternal {
     }
 
     public JsonNode get(String ruta) {
+        return get(ruta, null);
+    }
+
+    /** Igual que {@link #get(String)}, con un token "Bearer" para las APIs que requieren autenticación. */
+    public JsonNode get(String ruta, String tokenBearer) {
         int intento = 0;
         while (true) {
             intento++;
             try {
                 esperarTurno();
-                String cuerpo = restClient.get().uri(ruta).retrieve().body(String.class);
+                String cuerpo = restClient.get().uri(ruta)
+                        .headers(h -> {
+                            if (tokenBearer != null) {
+                                h.setBearerAuth(tokenBearer);
+                            }
+                        })
+                        .retrieve().body(String.class);
                 return parsear(ruta, cuerpo);
             } catch (RestClientResponseException ex) {
                 HttpStatusCode estado = ex.getStatusCode();
@@ -126,6 +137,10 @@ public class ClientHttpExternal {
         if (codigo == 429) {
             return new IntegrationExternalException(proveedor, Tipo.LIMITE_USO,
                     "Se superó el límite de consultas del proveedor. Intente más tarde.", ex);
+        }
+        if (codigo == 401 || codigo == 403) {
+            return new IntegrationExternalException(proveedor, Tipo.NO_AUTORIZADO,
+                    "El proveedor rechazó la autorización de '" + ruta + "' (HTTP " + codigo + ")", ex);
         }
         if (codigo == 404) {
             return new IntegrationExternalException(proveedor, Tipo.ERROR_PROVEEDOR,
