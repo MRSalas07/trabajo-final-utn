@@ -13,12 +13,13 @@ import tools.jackson.databind.json.JsonMapper;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Módulo de telemetría HABILITADO (con OpenF1 simulado): sus endpoints existen, son públicos,
- * validan los parámetros y /api/salud lo informa.
+ * Módulo de telemetría HABILITADO (con OpenF1 simulado): sus endpoints existen, son públicos
+ * (incluidos los controles de una transmisión), validan los parámetros y /api/salud lo informa.
  */
 @SpringBootTest(properties = "app.telemetria.habilitada=true")
 @AutoConfigureMockMvc
@@ -52,5 +53,25 @@ class TelemetriaControllerTest {
         mvc.perform(get("/api/telemetria/sesiones/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void controlesDeUnaTransmisionInexistente_devuelve404SinPedirToken() throws Exception {
+        mvc.perform(put("/api/telemetria/transmisiones/no-existe").param("piloto", "44"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void velocidadFueraDeRango_devuelve400() throws Exception {
+        mvc.perform(put("/api/telemetria/transmisiones/no-existe").param("velocidad", "20"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void estadoDelVivoSinSuscripcion() throws Exception {
+        mvc.perform(get("/api/telemetria/vivo/estado"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.credenciales").value(false))
+                .andExpect(jsonPath("$.enVentanaVivo").value(false));
     }
 }
