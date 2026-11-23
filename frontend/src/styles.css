@@ -390,6 +390,13 @@ h3 {
   }
 }
 
+/* Entre 1000 y 1199 px las seis secciones y el selector de zona entran justo: se achica el relleno */
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .subnav a {
+    padding: 0 0.6rem;
+  }
+}
+
 @media (max-width: 520px) {
   .logo-texto {
     font-size: 1.1rem;

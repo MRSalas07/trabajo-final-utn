@@ -26,6 +26,8 @@ export interface SerieGrafico {
   punteada?: boolean;
   /** Rellena el área bajo la línea. */
   relleno?: boolean;
+  /** Línea en escalones: cada valor se mantiene hasta el siguiente (por ejemplo, la posición en pista). */
+  escalonada?: boolean;
 }
 
 /**
@@ -56,6 +58,11 @@ export class Grafico {
   /** Eje Y invertido: para posiciones, donde 1 es lo mejor y va arriba. */
   readonly invertirY = input(false);
   readonly tituloY = input('');
+  readonly tituloX = input('');
+  /** 'tiempo': los valores son segundos y se muestran como m:ss (eje) y m:ss.mmm (tooltip), por ejemplo tiempos de vuelta. */
+  readonly formatoY = input<'numero' | 'tiempo'>('numero');
+  /** Dibuja un punto en cada dato de las líneas. Con series largas conviene apagarlo. */
+  readonly puntos = input(true);
   readonly alto = input(320);
   /** Descripción accesible del gráfico (lectores de pantalla). */
   readonly descripcion = input('Gráfico');
@@ -87,6 +94,8 @@ export class Grafico {
     const textoSuave = estilos.getPropertyValue('--texto-suave').trim() || '#a7adb5';
     const grilla = 'rgba(255, 255, 255, 0.08)';
     const detalles = this.detalles();
+    const enTiempo = this.formatoY() === 'tiempo';
+    const conPuntos = tipo === 'line' && this.puntos();
     const datasets = this.series().map((s) => ({
       label: s.nombre,
       data: s.valores,
@@ -94,9 +103,11 @@ export class Grafico {
       backgroundColor: s.relleno || tipo === 'bar' ? s.color + '55' : s.color,
       borderDash: s.punteada ? [6, 4] : [],
       borderWidth: 2,
-      pointRadius: tipo === 'line' ? 3 : 0,
+      pointRadius: conPuntos ? 3 : 0,
       pointHoverRadius: 5,
-      tension: 0.25,
+      // 'before': la línea sigue horizontal con el valor anterior y sube o baja al llegar al nuevo dato
+      stepped: s.escalonada ? 'before' : false,
+      tension: s.escalonada ? 0 : 0.25,
       fill: !!s.relleno,
       spanGaps: true,
     }));
@@ -119,14 +130,28 @@ export class Grafico {
             callbacks: {
               title: (items: { dataIndex: number; label: string }[]) =>
                 items.length ? (detalles[items[0].dataIndex] ?? items[0].label) : '',
+              ...(enTiempo && {
+                label: (item: { dataset: { label?: string }; parsed: { y: number | null } }) =>
+                  `${item.dataset.label ?? ''}: ${minutosSegundos(item.parsed.y, 3)}`,
+              }),
             },
           },
         },
         scales: {
-          x: { ticks: { color: textoSuave }, grid: { color: grilla } },
+          x: {
+            ticks: { color: textoSuave },
+            grid: { color: grilla },
+            title: { display: !!this.tituloX(), text: this.tituloX(), color: textoSuave },
+          },
           y: {
             reverse: this.invertirY(),
-            ticks: { color: textoSuave, precision: 0 },
+            ticks: {
+              color: textoSuave,
+              precision: 0,
+              ...(enTiempo && {
+                callback: (valor: number | string) => (typeof valor === 'number' ? minutosSegundos(valor, 0) : valor),
+              }),
+            },
             grid: { color: grilla },
             title: { display: !!this.tituloY(), text: this.tituloY(), color: textoSuave },
           },
@@ -134,4 +159,13 @@ export class Grafico {
       },
     } as unknown as ChartConfiguration;
   }
+}
+
+/** Segundos en formato de cronómetro: 92.345 -> "1:32.345" (3 decimales) o "1:32" (sin decimales). */
+function minutosSegundos(segundos: number | null, decimales: number): string {
+  if (segundos === null || !Number.isFinite(segundos)) return '—';
+  const total = Number(segundos.toFixed(decimales));
+  const minutos = Math.floor(total / 60);
+  const resto = (total - minutos * 60).toFixed(decimales);
+  return minutos ? `${minutos}:${resto.padStart(decimales ? decimales + 3 : 2, '0')}` : resto;
 }

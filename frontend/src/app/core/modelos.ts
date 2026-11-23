@@ -365,3 +365,41 @@ export interface Auditoria {
   actualizadoPor: string | null;
   fechaActualizacion: string | null;
 }
+
+// ---------- MVP 7: telemetría F1 con datos de OpenF1 (espejo de TelemetriaDtos.java) ----------
+/** Una sesión de F1 en OpenF1 (práctica, clasificación, sprint o carrera). inicio/fin: instantes UTC (ISO 8601). */
+export interface SesionTelemetria {
+  sessionKey: number;
+  /** Nombre en OpenF1: "Race", "Qualifying", "Sprint", "Practice 1"... */
+  nombre: string | null;
+  /** Tipo en OpenF1: "Race", "Qualifying" o "Practice" (la sprint es de tipo "Race"). */
+  tipo: string | null;
+  inicio: string | null;
+  fin: string | null;
+  pais: string | null;
+  circuito: string | null;
+  ubicacion: string | null;
+}
+/** color: el del equipo en hexadecimal ("#3671C6"), o null si OpenF1 no lo informa. */
+export interface PilotoTelemetria {
+  numero: number; nombre: string | null; acronimo: string | null; equipo: string | null; color: string | null;
+}
+/** Tiempos de vuelta de un piloto: vueltas[i] -> tiempos[i] en segundos (sin las vueltas de salida de boxes). */
+export interface SerieVueltas {
+  numero: number; acronimo: string; color: string | null; vueltas: number[]; tiempos: number[];
+}
+/** Posición durante la sesión: minutos[i] desde el inicio -> posiciones[i]. Solo trae los cambios, en orden. */
+export interface SeriePosiciones {
+  numero: number; acronimo: string; color: string | null; minutos: number[]; posiciones: number[];
+}
+/**
+ * Análisis de una sesión terminada. vueltas: solo los pilotos pedidos (hasta 6; por defecto, los mejor ubicados).
+ * posiciones: todos los pilotos. aviso: por qué todavía no hay datos (la sesión no terminó o OpenF1 no los liberó), o null.
+ */
+export interface TelemetriaSesion {
+  sesion: SesionTelemetria;
+  pilotos: PilotoTelemetria[];
+  vueltas: SerieVueltas[];
+  posiciones: SeriePosiciones[];
+  aviso: string | null;
+}
