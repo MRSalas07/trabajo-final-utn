@@ -1,0 +1,48 @@
+@if (url(); as direccion) {
+  <app-transmision [url]="direccion" (detenida)="detener()" />
+} @else {
+  <section class="panel" aria-labelledby="t-repeticion">
+    <div class="panel-titulo"><h2 id="t-repeticion">Repetición de la sesión</h2></div>
+    <p class="suave chico">
+      Reproduce la sesión como si fuera en vivo: torre de tiempos, autos en el circuito, telemetría del piloto
+      que elijas, dirección de carrera y clima, con los datos históricos de OpenF1. Se puede pausar y
+      cambiar la velocidad en cualquier momento.
+    </p>
+
+    @if (!liberada()) {
+      <p class="aviso">OpenF1 todavía no liberó los datos de esta sesión: se liberan media hora después de que termina.</p>
+    }
+
+    <div class="filtros">
+      <label>Velocidad
+        <select (change)="elegirVelocidad($any($event.target).value)">
+          @for (v of velocidades; track v) {
+            <option [value]="v" [selected]="v === velocidad()">{{ v }}x</option>
+          }
+        </select>
+      </label>
+      <label>Empezar desde
+        <select (change)="elegirDesde($any($event.target).value)">
+          <option value="inicio" [selected]="desde() === 'inicio'">El principio</option>
+          <option value="minuto" [selected]="desde() === 'minuto'">Un minuto</option>
+          <option value="vuelta" [selected]="desde() === 'vuelta'">Una vuelta</option>
+        </select>
+      </label>
+      @if (desde() === 'minuto') {
+        <label>Minuto
+          <input type="number" min="0" max="300" step="1" [value]="minuto()" (change)="elegirMinuto($any($event.target).value)" />
+        </label>
+      }
+      @if (desde() === 'vuelta') {
+        <label>Vuelta
+          <input type="number" min="1" max="100" step="1" [value]="vuelta()" (change)="elegirVuelta($any($event.target).value)" />
+        </label>
+      }
+      <button type="button" class="btn-primario" (click)="iniciar()" [disabled]="!liberada()">Iniciar repetición</button>
+    </div>
+    <p class="suave chico">
+      Al empezar, el servidor descarga los datos de la sesión de OpenF1 y puede tardar unos segundos.
+      La repetición se corta si elegís otra sesión o cerrás la página.
+    </p>
+  </section>
+}

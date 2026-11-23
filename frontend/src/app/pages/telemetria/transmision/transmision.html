@@ -1,0 +1,123 @@
+<!-- ------------------------------------------------------------ Barra de estado y controles -->
+<div class="barra" [attr.data-pista]="estado()?.estadoPista ?? 'VERDE'">
+  <div class="barra-info">
+    <span class="modo" [class.vivo]="esVivo()">{{ esVivo() ? 'En vivo' : 'Repetición' }}</span>
+    <strong class="titulo">{{ titulo() }}</strong>
+    @if (estado(); as e) {
+      @if (e.vuelta) { <span class="dato">Vuelta <strong>{{ e.vuelta }}</strong></span> }
+      @if (e.minuto !== null && e.minuto >= 0) { <span class="dato">Minuto <strong>{{ e.minuto }}</strong></span> }
+      <span class="dato reloj" title="Hora de la sesión en tu zona horaria">{{ reloj() }}</span>
+      <span class="pista">{{ textoPista() }}</span>
+    }
+  </div>
+  <div class="barra-controles">
+    @if (!esVivo()) {
+      <button type="button" class="btn-chico" (click)="alternarPausa()" [disabled]="!puedeControlar()">
+        {{ pausada() ? '▶ Seguir' : '❚❚ Pausa' }}
+      </button>
+      <label class="control">Velocidad
+        <select (change)="cambiarVelocidad($any($event.target).value)" [disabled]="!puedeControlar()">
+          @for (v of velocidades; track v) {
+            <option [value]="v" [selected]="v === estado()?.velocidad">{{ v }}x</option>
+          }
+        </select>
+      </label>
+    }
+    <button type="button" class="btn-chico" (click)="detener()">{{ esVivo() ? 'Salir' : 'Detener' }}</button>
+  </div>
+</div>
+
+@if (!terminada() && !errorServidor()) {
+  <p class="fase suave chico" aria-live="polite">
+    @if (cargando()) { <span class="spinner" aria-hidden="true"></span> }
+    {{ textoFase() }}
+  </p>
+}
+
+<!-- ------------------------------------------------------------ Avisos -->
+@if (errorServidor(); as mensaje) {
+  <div class="estado error aviso-accion" role="alert">
+    <span>⚠ {{ mensaje }}</span>
+    <button type="button" class="btn-chico" (click)="detener()">Volver</button>
+  </div>
+}
+@if (conexion() === 'cortada') {
+  <div class="aviso aviso-accion" role="alert">
+    <span>Se cortó la conexión con el servidor.</span>
+    <button type="button" class="btn-chico" (click)="reanudar()">
+      Reanudar{{ !esVivo() && estado()?.minuto ? ' desde el minuto ' + estado()?.minuto : '' }}
+    </button>
+  </div>
+}
+@if (fase() === 'ERROR') {
+  <div class="estado error aviso-accion" role="alert">
+    <span>⚠ {{ estado()?.aviso ?? 'No se pudo transmitir la sesión.' }}</span>
+    <button type="button" class="btn-chico" (click)="detener()">Volver</button>
+  </div>
+}
+@if (fase() === 'FINALIZADA') {
+  <div class="aviso aviso-accion">
+    <span>Terminó la sesión. La torre queda con la clasificación final.</span>
+    <button type="button" class="btn-chico" (click)="detener()">Volver</button>
+  </div>
+}
+@if (errorControl(); as mensaje) {
+  <p class="err" role="alert">No se pudo aplicar el cambio: {{ mensaje }}</p>
+}
+
+<!-- ------------------------------------------------------------ Tablero -->
+@if (estado() && fase() !== 'ERROR') {
+  <div class="tablero-transmision">
+    <section class="panel area-torre" aria-labelledby="t-torre">
+      <div class="panel-titulo"><h2 id="t-torre">Torre de tiempos</h2></div>
+      @if (torre().length) {
+        <app-torre-tiempos [filas]="torre()" [foco]="numeroFoco()" (elegir)="seguir($event)" />
+        <p class="suave chico">Tocá un piloto para ver su telemetría; tocalo de nuevo para volver al líder.</p>
+      } @else {
+        <p class="suave chico">Todavía no hay posiciones.</p>
+      }
+    </section>
+
+    <section class="panel area-mapa" aria-labelledby="t-mapa">
+      <div class="panel-titulo"><h2 id="t-mapa">Circuito</h2></div>
+      <app-mapa-pista [trazado]="trazado()" [puntos]="mapa()" [foco]="numeroFoco()" [animar]="animarMapa()" />
+    </section>
+
+    <section class="panel area-foco" aria-labelledby="t-foco">
+      <div class="panel-titulo"><h2 id="t-foco">Telemetría del auto</h2></div>
+      <app-panel-foco [foco]="foco()" [pilotos]="torre()" [seguido]="seguido()" (elegir)="seguir($event)" />
+    </section>
+
+    <section class="panel area-control" aria-labelledby="t-control">
+      <div class="panel-titulo"><h2 id="t-control">Dirección de carrera</h2></div>
+      @if (mensajes().length) {
+        <ul class="mensajes">
+          @for (m of mensajes(); track $index) {
+            <li>
+              <span class="bandera" [attr.data-bandera]="m.bandera" [title]="m.bandera ?? m.categoria ?? ''"></span>
+              <span class="cuando suave">{{ m.hora | hora:'hora':zona() }}@if (m.vuelta) { <span>· V{{ m.vuelta }}</span> }</span>
+              <span>{{ m.mensaje }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="suave chico">Sin mensajes todavía.</p>
+      }
+    </section>
+
+    <section class="panel area-clima" aria-labelledby="t-clima">
+      <div class="panel-titulo"><h2 id="t-clima">Clima</h2></div>
+      @if (clima(); as c) {
+        <div class="kpis">
+          <div class="kpi"><div class="valor">{{ c.aire ?? '—' }}°</div><div class="etiqueta">Aire (°C)</div></div>
+          <div class="kpi"><div class="valor">{{ c.pista ?? '—' }}°</div><div class="etiqueta">Pista (°C)</div></div>
+          <div class="kpi"><div class="valor">{{ c.humedad ?? '—' }}%</div><div class="etiqueta">Humedad</div></div>
+          <div class="kpi"><div class="valor">{{ c.viento ?? '—' }}</div><div class="etiqueta">Viento (m/s)</div></div>
+          <div class="kpi" [class.lluvia]="c.lluvia"><div class="valor">{{ c.lluvia ? 'Sí' : 'No' }}</div><div class="etiqueta">Lluvia</div></div>
+        </div>
+      } @else {
+        <p class="suave chico">Sin datos del clima todavía.</p>
+      }
+    </section>
+  </div>
+}

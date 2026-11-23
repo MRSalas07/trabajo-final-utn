@@ -403,3 +403,88 @@ export interface TelemetriaSesion {
   posiciones: SeriePosiciones[];
   aviso: string | null;
 }
+
+// ---------- MVP 7: transmisión de telemetría por SSE (espejo de TransmisionDtos.java) ----------
+export type ModoTransmision = 'VIVO' | 'REPETICION';
+/** Estado de la pista: VERDE, AMARILLA, SC (auto de seguridad), VSC (virtual), ROJA o CUADROS. */
+export type EstadoPista = 'VERDE' | 'AMARILLA' | 'SC' | 'VSC' | 'ROJA' | 'CUADROS';
+/** Fase de la transmisión. FINALIZADA y ERROR son finales: el servidor cierra la conexión. */
+export type FaseTransmision = 'CARGANDO' | 'EN_CURSO' | 'PAUSADA' | 'ESPERANDO_DATOS' | 'FINALIZADA' | 'ERROR';
+
+/** Fila de la torre de tiempos. posicion 99 = todavía sin posición. Tiempos en segundos. */
+export interface FilaTorre {
+  posicion: number;
+  numero: number;
+  acronimo: string | null;
+  nombre: string | null;
+  equipo: string | null;
+  color: string | null;
+  /** Diferencia con el líder: "+12.345", "+1 VUELTA" o "Líder". */
+  gap: string | null;
+  /** Diferencia con el auto de adelante (null para el líder). */
+  intervalo: string | null;
+  ultimaVuelta: number | null;
+  mejorVuelta: number | null;
+  vueltas: number | null;
+  /** Compuesto según OpenF1: SOFT, MEDIUM, HARD, INTERMEDIATE o WET. */
+  neumatico: string | null;
+  edadNeumatico: number | null;
+  enBoxes: boolean;
+  /** Tiene la vuelta más rápida de la sesión hasta el momento. */
+  vueltaRapida: boolean;
+}
+/** Mensaje de la dirección de carrera (en inglés, tal como lo publica la FIA). */
+export interface MensajeControl {
+  hora: string | null; vuelta: number | null; bandera: string | null; categoria: string | null; mensaje: string | null;
+}
+/** Temperaturas en °C, humedad en % y viento en m/s. */
+export interface ClimaSesion {
+  aire: number | null; pista: number | null; humedad: number | null; lluvia: boolean; viento: number | null;
+}
+/** Telemetría del piloto seguido: la última muestra y unos 30 s de traza (OpenF1 la mide a ~3.7 Hz). */
+export interface FocoTelemetria {
+  numero: number;
+  acronimo: string | null;
+  color: string | null;
+  velocidad: number | null;
+  rpm: number | null;
+  marcha: number | null;
+  acelerador: number | null;
+  freno: number | null;
+  drs: boolean;
+  trazaVelocidad: (number | null)[];
+  trazaAcelerador: (number | null)[];
+  trazaFreno: (number | null)[];
+}
+/** Posición de un auto en la pista (coordenadas de OpenF1). */
+export interface PuntoMapa {
+  numero: number; acronimo: string | null; color: string | null; x: number; y: number;
+}
+/** La "foto" de la sesión que llega una vez por segundo, igual en vivo y en repetición. */
+export interface EstadoTransmision {
+  /** Id del espectador: sirve para los controles (PUT /transmisiones/{id}). */
+  id: string;
+  modo: ModoTransmision;
+  sessionKey: number | null;
+  sesion: string | null;
+  circuito: string | null;
+  pais: string | null;
+  /** Instante de la sesión que se está mostrando (reloj virtual en la repetición). */
+  hora: string | null;
+  inicioSesion: string | null;
+  /** Minutos desde el inicio de la sesión. */
+  minuto: number | null;
+  /** Vuelta en curso del líder. */
+  vuelta: number | null;
+  estadoPista: EstadoPista;
+  estado: FaseTransmision;
+  velocidad: number;
+  torre: FilaTorre[];
+  mensajes: MensajeControl[];
+  clima: ClimaSesion | null;
+  foco: FocoTelemetria | null;
+  mapa: PuntoMapa[];
+  /** Contorno del circuito [x, y]: llega solo cuando cambia (si viene null, se conserva el anterior). */
+  trazado: [number, number][] | null;
+  aviso: string | null;
+}
