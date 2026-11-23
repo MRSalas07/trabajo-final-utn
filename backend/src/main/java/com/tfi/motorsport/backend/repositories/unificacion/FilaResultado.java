@@ -35,6 +35,13 @@ public record FilaResultado(
         BigDecimal puntos,
         String estado
 ) {
+    /** Copia de la fila con otra marca (la de la participación del piloto, ver MarcasPorParticipacion). */
+    public FilaResultado conMarca(String marca) {
+        return new FilaResultado(eventoId, numeroFecha, eventoNombre, eventoInicio, temporadaId, anio, categoria,
+                pilotoId, pilotoNombre, pilotoApellido, pilotoCodigo, equipoId, equipoNombre, marca,
+                tipo, posicion, puntos, estado);
+    }
+
     public String nombreCompleto() {
         return ((pilotoNombre != null ? pilotoNombre + " " : "") + (pilotoApellido != null ? pilotoApellido : "")).trim();
     }

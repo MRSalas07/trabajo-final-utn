@@ -31,6 +31,8 @@ final class ContextoNormalizacion {
     final Map<String, Long> equipos = new HashMap<>();
     /** Participaciones (equipo-piloto-rol) ya registradas en esta ejecución. */
     final Set<String> participaciones = new HashSet<>();
+    /** Marca ya aplicada a cada participación (equipo-piloto-rol) en esta ejecución. */
+    final Map<String, String> marcas = new HashMap<>();
 
     int eventos, omitidos, sesiones, etapas, resultados, pilotosNuevos, equiposNuevos;
 

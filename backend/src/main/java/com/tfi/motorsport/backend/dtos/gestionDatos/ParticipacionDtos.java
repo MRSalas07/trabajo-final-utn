@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
@@ -23,13 +24,15 @@ public final class ParticipacionDtos {
             @Min(0) @Max(999) Integer numero,
             @Pattern(regexp = "PILOTO|COPILOTO|RESERVA") String rol,
             LocalDate fechaDesde,
-            LocalDate fechaHasta
+            LocalDate fechaHasta,
+            // Marca/motor del piloto esa temporada (TC: Ford, Chevrolet, Toyota...). Vacía = la del equipo
+            @Size(max = 40, message = "La marca admite hasta 40 caracteres") String marca
     ) {
     }
 
     public record Registro(Long id, Long equipoId, String equipo, Long pilotoId, String piloto,
                            Long categoriaId, String categoria, Integer temporada, Integer numero,
-                           String rol, LocalDate fechaDesde, LocalDate fechaHasta) {
+                           String rol, LocalDate fechaDesde, LocalDate fechaHasta, String marca) {
     }
 }
 
