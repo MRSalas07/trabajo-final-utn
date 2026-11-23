@@ -7,15 +7,18 @@ import { mensajeError } from '../../core/errores/error';
 import { EstadoCarga } from '../../shared/estado-carga/estado-carga';
 import { HoraPipe } from '../../shared/pipe/formato';
 import { AnalisisSesion } from './analisis-sesion/analisis-sesion';
+import { Repeticion } from './repeticion/repeticion';
 import { PRIMER_ANIO_OPENF1, agruparSesiones, lugarSesion, nombreSesion, sesionPorDefecto } from './sesiones';
+
+type Vista = 'analisis' | 'repeticion';
 
 /**
  * Telemetría F1 (MVP 7, módulo plus con datos de OpenF1).
  * Primero consulta /api/salud: si el backend no tiene la telemetría habilitada, muestra el aviso y no
- * hace más pedidos. Si la tiene, se elige temporada y sesión y se muestra su análisis.
+ * hace más pedidos. Si la tiene, se elige temporada y sesión y se ve su análisis o su repetición.
  */
 @Component({
-  imports: [EstadoCarga, HoraPipe, AnalisisSesion],
+  imports: [EstadoCarga, HoraPipe, AnalisisSesion, Repeticion],
   selector: 'app-telemetria',
   styleUrl: './telemetria.css',
   templateUrl: './telemetria.html',
@@ -41,6 +44,7 @@ export class Telemetria {
   protected readonly cargandoSesiones = signal(false);
   protected readonly errorSesiones = signal<string | null>(null);
   private readonly elegida = signal<number | null>(null);
+  protected readonly vista = signal<Vista>('analisis');
 
   protected readonly grupos = computed(() => agruparSesiones(this.sesiones(), this.zona()));
   protected readonly sesion = computed<SesionTelemetria | null>(() => {

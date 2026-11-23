@@ -3,7 +3,7 @@
   <span class="chip-cat" data-cat="F1">F1</span>
 </div>
 <p class="suave chico intro">
-  Análisis de las sesiones de Fórmula 1 desde 2023 con datos de
+  Análisis y repetición de las sesiones de Fórmula 1 desde 2023 con datos de
   <a href="https://openf1.org" target="_blank" rel="noopener">OpenF1</a>, una API abierta y no oficial.
   OpenF1 libera los datos de cada sesión media hora después de que termina.
 </p>
@@ -43,6 +43,19 @@
       <h2>{{ nombre() }} <span class="suave">· {{ lugar() }}</span></h2>
       <p class="suave chico">{{ s.inicio | hora:'fecha':zona() }} · {{ s.inicio | hora:'hora':zona() }} h</p>
     </div>
-    <app-analisis-sesion [sesion]="s" />
+
+    <div class="pestanas" role="tablist" aria-label="Vista de la sesión">
+      <button type="button" role="tab" [class.activa]="vista() === 'analisis'" [attr.aria-selected]="vista() === 'analisis'"
+              (click)="vista.set('analisis')">Análisis</button>
+      <button type="button" role="tab" [class.activa]="vista() === 'repeticion'" [attr.aria-selected]="vista() === 'repeticion'"
+              (click)="vista.set('repeticion')">Repetición</button>
+    </div>
+    <!-- Las dos vistas quedan creadas: al cambiar de pestaña, la repetición sigue corriendo y el análisis conserva su elección -->
+    <div [hidden]="vista() !== 'analisis'">
+      <app-analisis-sesion [sesion]="s" />
+    </div>
+    <div [hidden]="vista() !== 'repeticion'">
+      <app-repeticion [sesion]="s" />
+    </div>
   }
 }

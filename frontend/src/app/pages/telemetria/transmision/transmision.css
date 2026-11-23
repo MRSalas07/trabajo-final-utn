@@ -1,0 +1,66 @@
+:host { display: block; }
+
+/* ------------------------------------------------------------ barra de estado */
+.barra {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem 1rem;
+  padding: 0.7rem 0.9rem; background: var(--superficie); border: 1px solid var(--borde-suave);
+  border-left: 6px solid var(--ok); border-radius: var(--radio);
+}
+.barra[data-pista='AMARILLA'], .barra[data-pista='SC'], .barra[data-pista='VSC'] { border-left-color: var(--oro); }
+.barra[data-pista='ROJA'] { border-left-color: var(--vivo); }
+.barra[data-pista='CUADROS'] { border-left-color: var(--texto); }
+.barra-info, .barra-controles { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.9rem; }
+.barra-controles { gap: 0.5rem; }
+.modo {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 0.15rem 0.5rem; border-radius: 4px; background: var(--superficie-3);
+}
+.modo.vivo { background: var(--vivo); color: #fff; animation: latido 1.6s infinite; }
+.titulo { font-size: 1.05rem; }
+.dato { color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.dato strong { color: var(--texto); }
+.pista {
+  font-size: 0.75rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 999px;
+  background: rgb(46 204 113 / 0.15); color: var(--ok);
+}
+[data-pista='AMARILLA'] .pista, [data-pista='SC'] .pista, [data-pista='VSC'] .pista { background: rgb(245 197 24 / 0.15); color: var(--oro); }
+[data-pista='ROJA'] .pista { background: rgb(229 9 20 / 0.2); color: #ff6b72; }
+[data-pista='CUADROS'] .pista { background: var(--superficie-3); color: var(--texto); }
+.control { flex-direction: row; align-items: center; gap: 0.4rem; }
+.control select { min-height: 34px; padding: 0.2rem 0.45rem; }
+
+.fase { margin: 0.55rem 0 0.75rem; min-height: 1.2em; }
+.aviso-accion { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem; margin-bottom: 0.75rem; text-align: left; }
+
+/* ------------------------------------------------------------ tablero: en el celular todo en una columna */
+.tablero-transmision {
+  display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'mapa' 'foco' 'torre' 'control' 'clima';
+}
+@media (min-width: 1100px) {
+  .tablero-transmision { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: 'torre mapa' 'torre foco' 'control clima'; }
+}
+.area-torre { grid-area: torre; }
+.area-mapa { grid-area: mapa; }
+.area-foco { grid-area: foco; }
+.area-control { grid-area: control; }
+.area-clima { grid-area: clima; }
+.panel { gap: 0.6rem; }
+.panel-titulo { margin: 0; }
+.panel p { margin: 0; }
+
+/* ------------------------------------------------------------ dirección de carrera */
+.mensajes { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; max-height: 300px; overflow-y: auto; }
+.mensajes li { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 0.55rem; align-items: baseline; font-size: 0.82rem; }
+.cuando { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bandera { width: 10px; height: 10px; border-radius: 2px; background: var(--borde); align-self: center; }
+.bandera[data-bandera='GREEN'], .bandera[data-bandera='CLEAR'] { background: var(--ok); }
+.bandera[data-bandera='YELLOW'], .bandera[data-bandera='DOUBLE YELLOW'] { background: var(--oro); }
+.bandera[data-bandera='RED'] { background: var(--vivo); }
+.bandera[data-bandera='BLUE'] { background: var(--cat-tc); }
+.bandera[data-bandera='CHEQUERED'] { background: repeating-conic-gradient(#fff 0 25%, #111 0 50%) 50% / 5px 5px; }
+.bandera[data-bandera='BLACK AND WHITE'] { background: linear-gradient(135deg, #fff 50%, #111 50%); }
+
+/* ------------------------------------------------------------ clima */
+.kpi .valor { font-size: 1.3rem; }
+.kpi.lluvia { background: rgb(47 124 246 / 0.18); }

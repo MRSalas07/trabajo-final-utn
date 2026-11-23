@@ -1,0 +1,19 @@
+@if (caja(); as c) {
+  <svg class="mapa" [attr.viewBox]="c.viewBox" role="img" aria-label="Posición de los autos en el circuito">
+    <path class="trazado" [attr.d]="camino()" [attr.stroke-width]="c.linea" />
+    @for (p of autos(); track p.numero) {
+      <g class="auto" [class.animado]="animar()" [class.foco]="p.numero === foco()"
+         [style.transform]="p.transform">
+        <title>{{ p.acronimo ?? p.numero }}</title>
+        <circle [attr.r]="p.numero === foco() ? c.auto * 1.6 : c.auto" [attr.fill]="p.color ?? '#9aa6b5'" />
+        @if (p.numero === foco()) {
+          <text [attr.y]="-c.auto * 2.6" [attr.font-size]="c.texto" [attr.stroke-width]="c.texto * 0.18" text-anchor="middle">
+            {{ p.acronimo ?? p.numero }}
+          </text>
+        }
+      </g>
+    }
+  </svg>
+} @else {
+  <p class="vacio suave chico">Todavía no hay posiciones en la pista.</p>
+}

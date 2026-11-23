@@ -20,7 +20,12 @@ const NOMBRES: Record<string, string> = {
 
 /** Nombre de la sesión en castellano ("Practice 2" -> "Práctica 2"); si no se conoce, el de OpenF1. */
 export function nombreSesion(sesion: SesionTelemetria): string {
-  const nombre = sesion.nombre ?? sesion.tipo ?? 'Sesión';
+  return traducirSesion(sesion.nombre ?? sesion.tipo);
+}
+
+/** Traduce el nombre de sesión que usa OpenF1 ("Race", "Practice 1", "Day 2"...). */
+export function traducirSesion(nombreOpenF1: string | null): string {
+  const nombre = nombreOpenF1 ?? 'Sesión';
   const traducido = NOMBRES[nombre];
   if (traducido) return traducido;
   const practica = /^Practice (\d)$/.exec(nombre);
