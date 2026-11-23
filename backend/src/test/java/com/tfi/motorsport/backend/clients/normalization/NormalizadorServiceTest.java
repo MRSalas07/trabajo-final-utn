@@ -64,7 +64,7 @@ class NormalizadorServiceTest {
     private static ResultadoNorm resultado(String piloto, String apellido, int posicion, String puntos) {
         return new ResultadoNorm(new PilotoNorm(piloto, "Piloto", apellido, null, null, null, null, null),
                 new EquipoNorm("eq-" + piloto, "Equipo " + apellido, null, null),
-                posicion, null, new BigDecimal(puntos), null, null, null, null, "FINALIZADO", null);
+                posicion, null, new BigDecimal(puntos), null, null, null, null, "FINALIZADO", null, null);
     }
 
     private static EventoNorm evento(String idExterno, String nombre, String puntosGanador) {

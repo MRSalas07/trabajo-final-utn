@@ -30,8 +30,9 @@ export class EquiposMarcas {
   private readonly clave = computed(() => `${this.siglas()}-${this.anio()}`);
 
   /**
-   * En TC la "marca" sale de equipo.nombre_corto, que hoy guarda el nombre del equipo
-   * (la marca del auto no se registra todavía): se avisa en pantalla.
+   * En TC la marca es el motor de cada piloto y se carga en su participación (Admin → Participaciones):
+   * un mismo equipo puede correr autos de distintas marcas. El backend la toma de ahí; si la temporada
+   * no tiene marcas cargadas, agrupa por equipo. En pantalla se aclara.
    */
   protected readonly esTc = computed(() => this.siglas().toUpperCase() === 'TC');
 

@@ -174,7 +174,7 @@ class CalendarioPersistidor {
             res.setEstado(valorODefecto(r.estado(), Catalogo.EstadoResultado.FINALIZADO));
             res.setMotivoAbandono(recortar(r.motivoAbandono()));
             resultadoSesionRepo.save(res);
-            participantes.registrarParticipacion(equipoId, pilotoId, r.numero(), Catalogo.ROL_PILOTO, ctx);
+            participantes.registrarParticipacion(equipoId, pilotoId, r.numero(), Catalogo.ROL_PILOTO, r.marca(), ctx);
             ctx.resultados++;
         }
     }

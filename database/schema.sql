@@ -2,7 +2,8 @@
 -- Esquema relacional basado en diagramaUML.md
 --
 -- Crea la base COMPLETA en su estado actual: incluye lo que agregan las migraciones
--- 001 (evento.zona_horaria e indices unicos) y 002 (campeon de cada temporada).
+-- 001 (evento.zona_horaria e indices unicos), 002 (campeon de cada temporada) y
+-- 003 (marca en la participacion).
 -- Se ejecuta UNA VEZ sobre una base vacia. Orden: schema.sql -> datos_iniciales.sql
 -- (ver database/README.md).
 --
@@ -161,6 +162,10 @@ CREATE TABLE equipo_x_piloto (
     numero INTEGER,
     nro_piloto INTEGER,
     rol VARCHAR,
+    -- Marca/motor con el que corrio el piloto esa temporada (TC: Ford, Chevrolet, Dodge, Torino, Toyota...).
+    -- Va en la participacion y no en el equipo porque en TC un equipo puede correr autos de distintas marcas.
+    -- NULL = la marca es la del equipo (equipo.nombre_corto), como en F1 y WRC.
+    marca VARCHAR(40),
     fecha_desde DATE,
     fecha_hasta DATE,
     "fechaCreacion" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

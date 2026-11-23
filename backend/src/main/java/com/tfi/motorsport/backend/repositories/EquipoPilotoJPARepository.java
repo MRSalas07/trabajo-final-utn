@@ -1,6 +1,7 @@
 package com.tfi.motorsport.backend.repositories;
 
 import com.tfi.motorsport.backend.model.EquipoPiloto;
+import com.tfi.motorsport.backend.repositories.unificacion.MarcaParticipacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -11,6 +12,19 @@ import java.util.Optional;
 
 @Repository
 public interface EquipoPilotoJPARepository extends JpaRepository<EquipoPiloto, Long> {
+
+    /**
+     * Marcas cargadas en las participaciones activas de una categoría (TC). Con {@code anio} en null
+     * trae todas las temporadas (para el histórico).
+     */
+    @Query("""
+            select new com.tfi.motorsport.backend.repositories.unificacion.MarcaParticipacion(
+                ep.piloto.id, ep.equipo.id, ep.temporada, ep.marca)
+            from EquipoPiloto ep
+            where ep.categoria.id = :categoriaId and ep.marca is not null and ep.eliminado = false
+              and (:anio is null or ep.temporada = :anio)
+            """)
+    List<MarcaParticipacion> marcasDeCategoria(Long categoriaId, Integer anio);
 
     /** Trayectoria de un piloto: de la participación más reciente a la más antigua. */
     @Query("""
