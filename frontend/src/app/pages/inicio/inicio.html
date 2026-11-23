@@ -77,5 +77,15 @@
       }
    </div>
 </section>
+
+@if (telemetria()) {
+<section class="panel col-6" aria-labelledby="t-telemetria">
+   <div class="panel-titulo">
+      <h2 id="t-telemetria">Telemetría F1</h2>
+      <a routerLink="/telemetria">Abrir</a>
+   </div>
+   <app-panel-vivo ubicacion="portada" />
+</section>
+}
 </div>
 

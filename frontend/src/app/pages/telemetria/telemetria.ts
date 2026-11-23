@@ -1,4 +1,5 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { Router } from '@angular/router';
 import { SesionTelemetria } from '../../core/modelos';
 import { SaludServices } from '../../core/services/salud.service';
 import { TelemetriaService } from '../../core/services/telemetria.service';
@@ -7,18 +8,21 @@ import { mensajeError } from '../../core/errores/error';
 import { EstadoCarga } from '../../shared/estado-carga/estado-carga';
 import { HoraPipe } from '../../shared/pipe/formato';
 import { AnalisisSesion } from './analisis-sesion/analisis-sesion';
+import { PanelVivo } from './panel-vivo/panel-vivo';
 import { Repeticion } from './repeticion/repeticion';
 import { PRIMER_ANIO_OPENF1, agruparSesiones, lugarSesion, nombreSesion, sesionPorDefecto } from './sesiones';
+import { Transmision } from './transmision/transmision';
 
 type Vista = 'analisis' | 'repeticion';
 
 /**
  * Telemetría F1 (MVP 7, módulo plus con datos de OpenF1).
  * Primero consulta /api/salud: si el backend no tiene la telemetría habilitada, muestra el aviso y no
- * hace más pedidos. Si la tiene, se elige temporada y sesión y se ve su análisis o su repetición.
+ * hace más pedidos. Si la tiene, muestra si hay una sesión en curso (para seguirla en vivo) y, para las
+ * sesiones terminadas, se elige temporada y sesión y se ve su análisis o su repetición.
  */
 @Component({
-  imports: [EstadoCarga, HoraPipe, AnalisisSesion, Repeticion],
+  imports: [EstadoCarga, HoraPipe, AnalisisSesion, Repeticion, PanelVivo, Transmision],
   selector: 'app-telemetria',
   styleUrl: './telemetria.css',
   templateUrl: './telemetria.html',
@@ -26,7 +30,14 @@ type Vista = 'analisis' | 'repeticion';
 export class Telemetria {
   private readonly saludService = inject(SaludServices);
   private readonly telemetriaService = inject(TelemetriaService);
+  private readonly router = inject(Router);
   protected readonly zona = inject(ZonaHorariaService).zona;
+
+  // Query param (withComponentInputBinding): /telemetria?vivo=1 abre la transmisión en vivo (enlace de la portada)
+  readonly vivo = input<string>();
+  /** Se está mirando la sesión en curso: la transmisión en vivo reemplaza a la vista de sesiones. */
+  protected readonly enVivo = signal(false);
+  protected readonly urlVivo = this.telemetriaService.urlVivo();
 
   /** null mientras se consulta /api/salud. */
   protected readonly habilitada = signal<boolean | null>(null);
@@ -77,6 +88,21 @@ export class Telemetria {
       if (this.habilitada() !== true) return;
       untracked(() => this.cargarSesiones(anio));
     });
+
+    // Desde la portada: abre el vivo apenas se confirma que la telemetría está habilitada
+    effect(() => {
+      if (this.vivo() && this.habilitada() === true) untracked(() => this.enVivo.set(true));
+    });
+  }
+
+  protected verVivo(): void {
+    this.enVivo.set(true);
+  }
+
+  protected salirVivo(): void {
+    this.enVivo.set(false);
+    // Sin ?vivo=1 en la dirección: si recarga la página, no vuelve a abrir el vivo
+    if (this.vivo()) this.router.navigate(['/telemetria'], { replaceUrl: true });
   }
 
   protected elegirAnio(valor: string): void {

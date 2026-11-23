@@ -3,7 +3,7 @@
   <span class="chip-cat" data-cat="F1">F1</span>
 </div>
 <p class="suave chico intro">
-  Análisis y repetición de las sesiones de Fórmula 1 desde 2023 con datos de
+  Sesiones en vivo, análisis y repeticiones de Fórmula 1 (desde 2023) con datos de
   <a href="https://openf1.org" target="_blank" rel="noopener">OpenF1</a>, una API abierta y no oficial.
   OpenF1 libera los datos de cada sesión media hora después de que termina.
 </p>
@@ -12,7 +12,14 @@
   <app-estado-carga [cargando]="!errorSalud()" [error]="errorSalud()" />
 } @else if (!habilitada()) {
   <p class="aviso">La telemetría de F1 es un módulo opcional y no está habilitada en este servidor.</p>
+} @else if (enVivo()) {
+  <app-transmision [url]="urlVivo" (detenida)="salirVivo()" />
 } @else {
+  <section class="panel en-vivo" aria-label="Sesión en curso">
+    <app-panel-vivo (ver)="verVivo()" />
+  </section>
+
+  <h2 class="subtitulo">Sesiones terminadas</h2>
   <div class="filtros">
     <label>Temporada
       <select [value]="anio()" (change)="elegirAnio($any($event.target).value)">
