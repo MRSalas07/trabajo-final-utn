@@ -16,7 +16,8 @@ export class Login {
 
   private readonly router = inject(Router);
 
-  private readonly zonaService = inject(ZonaHorariaService)
+  // protected: la plantilla muestra la zona horaria que se va a guardar en el perfil
+  protected readonly zonaService = inject(ZonaHorariaService)
 
   readonly volver = input<string>();
   readonly expirada = input<string>();
