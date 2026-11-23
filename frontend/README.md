@@ -1,59 +1,63 @@
-# MotorsportFrontend
+# Motorsport Analytics — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.7.
+SPA en Angular 22 que consume la API REST del backend. La visión general del proyecto, la API y cómo levantar todo están en el [README principal](../README.md).
 
-## Development server
+## Cómo correrlo
 
-To start a local development server, run:
-
-```bash
-ng serve
+```sh
+npm install
+npm start          # ng serve: http://localhost:4200
+npm run build      # build de producción en dist/
+npm run watch      # build de desarrollo que se regenera al guardar
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Necesita el backend levantado. La dirección de la API se configura por entorno:
 
-## Code scaffolding
+| Archivo | Cuándo se usa | `apiUrl` |
+|---|---|---|
+| `src/environments/environment.development.ts` | `npm start` (`ng serve`) | `http://localhost:8080/api` |
+| `src/environments/environment.ts` | `npm run build` (producción) | Cambiarla por la URL del backend desplegado antes de publicar. |
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Estructura
 
-```bash
-ng generate component component-name
+```text
+src/app/
+  app.config.ts         router (carga diferida, parámetros de la URL como inputs), HttpClient con interceptor, idioma es-AR
+  app.routes.ts         una ruta por pantalla; /cuenta pide sesión y /admin pide rol ADMIN
+  app.ts / app.html     cabecera, menú de secciones y selector de zona horaria
+  core/
+    modelos.ts          interfaces de los DTOs del backend
+    services/           un servicio HTTP por área (eventos, pilotos, estadísticas, telemetría…)
+    interceptores/      agrega el token JWT y cierra la sesión si vence
+    guards/             authGuard y adminGuard
+    errores/            mensajeError(): texto legible a partir de un error HTTP
+  shared/               gráfico (Chart.js), íconos SVG propios, estados de carga, calendario del mes, pipes de hora y tiempos
+  pages/                una carpeta por pantalla
+src/styles.css          estilos globales: variables de color, paneles y grilla de 12 columnas
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+| Ruta | Pantalla |
+|---|---|
+| `/` | Portada: próximos y últimos eventos, calendario del mes, tiempos de la última carrera, campeonatos y telemetría F1 |
+| `/calendario` | Calendario mensual y descarga `.ics` de una temporada |
+| `/categorias`, `/categorias/:siglas` | Categorías y ficha de cada una (temporadas, campeonato y fechas) |
+| `/eventos/:id` | Detalle de un evento con sus resultados |
+| `/pilotos`, `/pilotos/:id` | Listado con búsqueda y ficha de piloto |
+| `/equipos`, `/equipos/:id` | Listado y ficha de equipo |
+| `/estadisticas` | Campeonatos, evolución, tendencias, comparativas, marcas e histórico |
+| `/telemetria` | Telemetría F1: estado del vivo, análisis y repetición de sesiones (`?vivo=1` abre la transmisión en vivo) |
+| `/login`, `/cuenta` | Ingreso, registro y zona horaria del usuario |
+| `/admin` | Sincronización, importación y ABM (solo `ADMIN`) |
 
-```bash
-ng generate --help
-```
+## Convenciones
 
-## Building
+- **Componentes standalone y signals.** La app no usa zone.js: el estado de cada pantalla vive en `signal()` y `computed()`, y los pedidos que dependen de otros datos se disparan desde `effect()`.
+- **Respuestas viejas.** Cuando un pedido puede quedar desactualizado (por ejemplo, al cambiar rápido de temporada), se numera y solo se aplica la última respuesta.
+- **Horarios.** Se muestran en la zona elegida en la cabecera (`ZonaHorariaService` y el pipe `hora`); los servicios mandan `?zona=` cuando el backend convierte horarios.
+- **Errores y cargas.** `mensajeError()` arma el texto del error y `<app-estado-carga>` muestra carga, error o vacío.
+- **Gráficos.** `<app-grafico>` envuelve Chart.js. El backend hace los cálculos; el frontend solo los dibuja.
+- **Telemetría.** Las transmisiones llegan por Server-Sent Events con `EventSource` (`TelemetriaService.transmitir`), que no puede mandar el token: esas rutas son públicas en el backend. La página consulta `/api/salud` y solo muestra el módulo si está habilitado.
 
-To build the project run:
+## Pruebas
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Todavía no hay tests del frontend.
