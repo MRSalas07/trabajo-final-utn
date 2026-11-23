@@ -26,7 +26,7 @@ public interface ResultadoSesionJPARepository extends JpaRepository<ResultadoSes
     String SELECT_FILA = """
             select new com.tfi.motorsport.backend.repositories.unificacion.FilaResultado(
                 e.id, e.numeroFecha, coalesce(e.nombreCorto, e.nombre), e.fechaInicio, t.id, t.anio, c.siglas,
-                p.id, p.nombre, p.apellido, p.codigoPiloto, eq.id, eq.nombre,
+                p.id, p.nombre, p.apellido, p.codigoPiloto, eq.id, eq.nombre, eq.nombreCorto,
                 s.tipo, r.posicion, r.puntos, r.estado)
             from ResultadoSesion r join r.sesion s join s.evento e join e.temporada t join t.categoria c
                  join r.piloto p join r.equipo eq

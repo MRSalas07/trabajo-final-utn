@@ -139,4 +139,107 @@ public final class EstadisticaDto {
             List<BigDecimal> diferenciaPuntos
     ) {
     }
+    /** Ranking de marcas o fabricantes de una temporada (Toyota, Hyundai, Ford, Chevrolet...). */
+    public record FilaMarca(
+            int posicion,
+            String marca,
+            BigDecimal puntos,
+            int victorias,
+            int podios,
+            int eventosConResultados,
+            Integer mejorResultado,
+            List<String> equipos,
+            int pilotos
+    ) {
+    }
+
+    /** Puntos de un equipo o marca en una fecha. */
+    public record PuntoGrupo(
+            Integer numeroFecha,
+            String evento,
+            BigDecimal puntos,
+            BigDecimal puntosAcumulados,
+            /** Mejor posición final de alguno de sus pilotos en esa fecha. */
+            Integer mejorPosicion,
+            /** Media móvil de 3 fechas de los puntos obtenidos. */
+            BigDecimal mediaMovilPuntos
+    ) {
+    }
+
+    /**
+     * Tendencia de rendimiento de un equipo o de una marca en una temporada.
+     * pendiente: regresión lineal de los puntos por fecha. Positiva = suma cada vez más = MEJORA.
+     */
+    public record TendenciaGrupo(
+            String tipo,
+            String clave,
+            String nombre,
+            Integer anio,
+            List<PuntoGrupo> fechas,
+            BigDecimal promedioPuntos,
+            BigDecimal pendiente,
+            String interpretacion,
+            int victorias,
+            int podios,
+            List<String> pilotos
+    ) {
+    }
+
+    public record SerieGrupo(String clave, String nombre, List<BigDecimal> puntosAcumulados, List<BigDecimal> puntosPorFecha) {
+    }
+
+    /** Evolución ronda a ronda de varios equipos o marcas. */
+    public record EvolucionGrupos(String tipo, List<Ronda> rondas, List<SerieGrupo> series) {
+    }
+
+    /** Resultado de un piloto o equipo en una temporada (fila de su historial). */
+    public record TemporadaHistorica(
+            Integer anio,
+            Integer posicionCampeonato,
+            int participantes,
+            BigDecimal puntos,
+            int victorias,
+            int podios,
+            int poles,
+            int eventosDisputados,
+            BigDecimal promedioPosicion,
+            BigDecimal puntosPorEvento,
+            /** Equipo (si es un piloto) o pilotos (si es un equipo). */
+            String detalle
+    ) {
+    }
+
+    /** Historial temporada por temporada de un piloto o equipo dentro de una categoría. */
+    public record Historico(
+            String tipo,
+            Long id,
+            String nombre,
+            String categoria,
+            List<TemporadaHistorica> temporadas,
+            BigDecimal puntosTotales,
+            int victoriasTotales,
+            int podiosTotales,
+            Integer mejorPosicionCampeonato,
+            /** Variación de puntos por evento entre la primera y la última temporada (en %). */
+            BigDecimal variacionPuntosPorEvento
+    ) {
+    }
+
+    /** Dos pilotos comparados a lo largo de todas las temporadas cargadas de la categoría. */
+    public record ComparativaHistorica(
+            String categoria,
+            List<Integer> anios,
+            Historico a,
+            Historico b,
+            /** Posición en el campeonato de cada piloto por año (null = no corrió ese año). */
+            List<Integer> posicionesA,
+            List<Integer> posicionesB,
+            List<BigDecimal> puntosA,
+            List<BigDecimal> puntosB,
+            int carrerasDelanteA,
+            int carrerasDelanteB,
+            int temporadasDelanteA,
+            int temporadasDelanteB
+    ) {
+    }
 }

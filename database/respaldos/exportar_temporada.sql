@@ -106,6 +106,7 @@ SELECT jsonb_pretty(jsonb_strip_nulls(jsonb_build_object(
     'anio', t.anio,
     'nombre', t.nombre,
     'fuente', 'RESPALDO_JSON',
+    'idExternoCampeon', (SELECT pc.id_externo FROM piloto pc WHERE pc.id_piloto = t.id_piloto_campeon),
     'eventos', coalesce((
         SELECT jsonb_agg(jsonb_build_object(
             'idExterno', e.id_externo, 'nombre', e.nombre, 'nombreCorto', e.nombre_corto,

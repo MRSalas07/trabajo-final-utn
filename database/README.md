@@ -9,7 +9,8 @@ Motor: PostgreSQL. El backend no crea tablas: las **valida** al iniciar (`ddl-au
 | `schema.sql` | Esquema completo en su estado actual: tablas, `evento.zona_horaria` e índices únicos. Se ejecuta una vez, sobre una base vacía. |
 | `datos_iniciales.sql` | Las tres categorías (F1, WRC y TC) y el usuario administrador local. Se puede ejecutar más de una vez. |
 | `datos_ejemplo/seed_tc_2025.sql` | Opcional: temporada 2025 de Turismo Carretera relevada a mano. Se puede ejecutar más de una vez. |
-| `migraciones/001_indices_unicos.sql` | Solo para bases creadas con un `schema.sql` anterior a noviembre de 2026. Una base nueva no la necesita. |
+| `migraciones/001_indices_unicos.sql` | Solo para bases creadas con un `schema.sql` anterior al 20/11/2026. Una base nueva no la necesita. |
+| `migraciones/002_campeon_temporada.sql` | Solo para bases creadas antes del 22/11/2026 (agrega `temporada.id_piloto_campeon`). Una base nueva no la necesita. Si tu base es anterior, ejecutala o el backend no arranca. |
 | `respaldos/exportar_temporada.sql` | Exporta una temporada a JSON (respaldo de F1/WRC y formato de carga de TC). |
 | `respaldos/*.json` | Temporadas exportadas, listas para importar desde `/admin`. |
 
@@ -76,7 +77,7 @@ La importación es idempotente: se puede repetir, o hacer sobre una base que ya 
 Es el modelo normalizado del backend (`clients/normalization/ModeloNormalizado.java`). Resumen:
 
 ```text
-temporada: siglasCategoria*, anio*, nombre, fuente, eventos*[]
+temporada: siglasCategoria*, anio*, nombre, fuente, idExternoCampeon (id_externo del piloto campeón), eventos*[]
   evento: idExterno*, nombre*, nombreCorto, numeroFecha, pais, ciudad, circuito, zonaHoraria (IANA),
           inicio* (ISO-8601 UTC, ej. "2025-03-16T04:00:00Z"), fin, estado, sesiones[], etapas[]
     sesion (circuito): idExterno*, nombre*, tipo*, numero, inicio, fin, vueltasProgramadas, distancia, estado, resultados[]

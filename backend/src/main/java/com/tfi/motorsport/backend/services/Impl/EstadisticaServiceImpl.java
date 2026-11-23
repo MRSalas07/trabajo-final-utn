@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.tfi.motorsport.backend.model.Catalogo.*;
+import com.tfi.motorsport.backend.services.estadisticas.AnalisisEquiposYMarcas;
+import com.tfi.motorsport.backend.services.estadisticas.AnalisisHistorico;
 import com.tfi.motorsport.backend.services.estadisticas.MotorEstadistico;
 import com.tfi.motorsport.backend.services.estadisticas.MotorEstadistico.*;
 
@@ -35,6 +37,7 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
     private final ResultadoEtapaJPARepository resultadoEtapaRepo;
     private final CategoriaJPARepository categoriaRepo;
     private final PalmaresJPARepository palmaresRepo;
+    private final EquipoJPARepository equipoRepo;
 
     @Override
     public List<FilaCampeonatoPiloto> campeonatoPilotos(String siglas, int anio) {
@@ -137,6 +140,87 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
         return participacionesPorPiloto.size();
     }
 
+    @Override
+    public List<FilaMarca> rankingMarcas(String siglas, int anio) {
+        Temporada temporada = buscarTemporada(siglas, anio);
+        return AnalisisEquiposYMarcas.rankingMarcas(consolidarParticipacionesDe(temporada));
+    }
+
+    @Override
+    public TendenciaGrupo tendenciaEquipo(String siglas, int anio, Long equipoId) {
+        verificarQueExistaElEquipo(equipoId);
+        Temporada temporada = buscarTemporada(siglas, anio);
+        TendenciaGrupo tendencia = AnalisisEquiposYMarcas.tendencia(consolidarParticipacionesDe(temporada),
+                AnalisisEquiposYMarcas.TIPO_EQUIPO, String.valueOf(equipoId));
+        if (tendencia.fechas().isEmpty()) {
+            throw new ResourceNotFoundException("El equipo no tiene resultados en " + siglas.toUpperCase() + " " + anio);
+        }
+        return tendencia;
+    }
+
+    @Override
+    public TendenciaGrupo tendenciaMarca(String siglas, int anio, String marca) {
+        if (marca == null || marca.isBlank()) {
+            throw new RuleBusinessException("Indique la marca (ej: Toyota)");
+        }
+        Temporada temporada = buscarTemporada(siglas, anio);
+        TendenciaGrupo tendencia = AnalisisEquiposYMarcas.tendencia(consolidarParticipacionesDe(temporada),
+                AnalisisEquiposYMarcas.TIPO_MARCA, marca);
+        if (tendencia.fechas().isEmpty()) {
+            throw new ResourceNotFoundException("La marca '" + marca + "' no tiene resultados en "
+                    + siglas.toUpperCase() + " " + anio);
+        }
+        return tendencia;
+    }
+
+    @Override
+    public EvolucionGrupos evolucionGrupos(String siglas, int anio, String tipo, int top) {
+        String tipoNormalizado = tipo == null ? AnalisisEquiposYMarcas.TIPO_EQUIPO : tipo.trim().toUpperCase();
+        if (!AnalisisEquiposYMarcas.TIPO_EQUIPO.equals(tipoNormalizado)
+                && !AnalisisEquiposYMarcas.TIPO_MARCA.equals(tipoNormalizado)) {
+            throw new RuleBusinessException("El tipo debe ser EQUIPO o MARCA");
+        }
+        int topAcotado = Math.max(1, Math.min(top, TOP_MAXIMO));
+        Temporada temporada = buscarTemporada(siglas, anio);
+        return AnalisisEquiposYMarcas.evolucion(consolidarParticipacionesDe(temporada), tipoNormalizado, topAcotado);
+    }
+
+    @Override
+    public Historico historicoPiloto(String siglas, Long pilotoId) {
+        verificarQueExistaElPiloto(pilotoId);
+        Categoria categoria = buscarCategoria(siglas);
+        Historico historico = AnalisisHistorico.historicoPiloto(
+                consolidarParticipacionesDeCategoria(categoria), pilotoId, categoria.getSiglas());
+        if (historico.temporadas().isEmpty()) {
+            throw new ResourceNotFoundException("El piloto no tiene resultados en " + categoria.getSiglas());
+        }
+        return historico;
+    }
+
+    @Override
+    public Historico historicoEquipo(String siglas, Long equipoId) {
+        verificarQueExistaElEquipo(equipoId);
+        Categoria categoria = buscarCategoria(siglas);
+        Historico historico = AnalisisHistorico.historicoEquipo(
+                consolidarParticipacionesDeCategoria(categoria), equipoId, categoria.getSiglas());
+        if (historico.temporadas().isEmpty()) {
+            throw new ResourceNotFoundException("El equipo no tiene resultados en " + categoria.getSiglas());
+        }
+        return historico;
+    }
+
+    @Override
+    public ComparativaHistorica comparativaHistorica(String siglas, Long pilotoA, Long pilotoB) {
+        if (Objects.equals(pilotoA, pilotoB)) {
+            throw new RuleBusinessException("Seleccione dos pilotos distintos para comparar");
+        }
+        verificarQueExistaElPiloto(pilotoA);
+        verificarQueExistaElPiloto(pilotoB);
+        Categoria categoria = buscarCategoria(siglas);
+        return AnalisisHistorico.compararPilotos(consolidarParticipacionesDeCategoria(categoria),
+                pilotoA, pilotoB, categoria.getSiglas());
+    }
+
 
 
     private List<Participacion> consolidarParticipacionesDe(Temporada t) {
@@ -227,5 +311,11 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
                 .map(Temporada::getCampeon)
                 .map(campeon -> campeon.getId())
                 .orElse(null);
+    }
+
+    private void verificarQueExistaElEquipo(Long equipoId) {
+        if (equipoId == null || !equipoRepo.existsById(equipoId)) {
+            throw new ResourceNotFoundException("el equipo", equipoId);
+        }
     }
 }

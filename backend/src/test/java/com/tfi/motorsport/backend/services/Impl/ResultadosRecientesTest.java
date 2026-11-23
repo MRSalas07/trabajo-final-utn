@@ -19,7 +19,7 @@ class ResultadosRecientesTest {
 
     private static FilaResultado fila(long eventoId, long pilotoId, String inicio, String tipo, Integer posicion) {
         return new FilaResultado(eventoId, 1, "Evento " + eventoId, Instant.parse(inicio), 1L, 2025, "F1",
-                pilotoId, "Lando", "Norris", "NOR", 10L, "McLaren", tipo, posicion, BigDecimal.ONE, "FINALIZADO");
+                pilotoId, "Lando", "Norris", "NOR", 10L, "McLaren",null, tipo, posicion, BigDecimal.ONE, "FINALIZADO");
     }
 
     @Test
