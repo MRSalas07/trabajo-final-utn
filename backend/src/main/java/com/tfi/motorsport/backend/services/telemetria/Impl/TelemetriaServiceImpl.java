@@ -151,7 +151,9 @@ public class TelemetriaServiceImpl implements ITelemetriaService {
         if (enVivo) {
             instante = ahora;
         } else if (vuelta != null && totalVueltas > 0) {
-            instante = CalculadoraFoto.finDeVuelta(datos.vueltas(), Math.min(vuelta, totalVueltas));
+            // Sin datos para ubicar el final de esa vuelta, se muestra el final de la sesión (antes que un error)
+            Instant finVuelta = CalculadoraFoto.finDeVuelta(datos.vueltas(), Math.min(vuelta, totalVueltas));
+            instante = finVuelta != null ? finVuelta : ultimo;
         } else if (instantePedido != null) {
             // La repetición pide un instante exacto: se lo acota a los datos que existen
             instante = instantePedido.isBefore(primero) ? primero : instantePedido.isAfter(ultimo) ? ultimo : instantePedido;

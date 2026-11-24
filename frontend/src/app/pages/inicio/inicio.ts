@@ -17,7 +17,6 @@ import { EstadisticaService } from '../../core/services/estadistica.service';
 @Component({
   imports: [RouterLink,EstadoCarga, FilaEvento, HoraPipe, TiempoPipe, CalendarioMes],
   selector: 'app-inicio',
-  styleUrl: './inicio.css',
   templateUrl: './inicio.html',
 })
 export class Inicio {

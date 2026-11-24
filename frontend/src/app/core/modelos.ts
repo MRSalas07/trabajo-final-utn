@@ -260,11 +260,6 @@ export interface CargaSincronizacion {
     resumen: ResumenSincronizacion | null; 
     error: string | null;
 }
-export interface FuenteDisponible { 
-    categoria: string; 
-    proveedor: string; 
-    habilitada: boolean; 
-}
 
 // ---------- MVP 4: estadísticas (espejo de EstadisticaDto.java) ----------
 export interface FilaCampeonatoPiloto {

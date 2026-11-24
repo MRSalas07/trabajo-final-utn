@@ -23,12 +23,9 @@ export class CalendarioService {
         return `${this.apiUrl}/calendario/eventos/${id}.ics`;
     }
 
-    urlIcsTemporada(siglas: string, anio: number): string { 
-        return `${this.apiUrl}/calendario/${siglas}/${anio}.ics`; 
-    }
-
+    /** El .ics de toda la temporada: se pide con HttpClient para poder avisar si todavía no hay datos (404). */
     descargarIcsTemporada(siglas: string, anio: number): Observable<Blob> {
-        return this.http.get(this.urlIcsTemporada(siglas, anio), { responseType: 'blob' });
+        return this.http.get(`${this.apiUrl}/calendario/${siglas}/${anio}.ics`, { responseType: 'blob' });
     }
 
     private enviarConZona(params: Record<string, string | number | undefined | null> = {}): HttpParams {

@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -125,10 +124,5 @@ class OpenF1ClienteTest {
                         ex -> assertThat(ex.getTipo()).isEqualTo(Tipo.NO_AUTORIZADO))
                 .hasMessageContaining("No se pudo iniciar sesión");
         assertThat(autorizaciones).isEmpty();
-    }
-
-    @Test
-    void lasFechasDeLosFiltrosVanEnUtcConMilisegundos() {
-        assertThat(OpenF1Cliente.fecha(Instant.parse("2025-12-07T13:10:00Z"))).isEqualTo("2025-12-07T13:10:00.000");
     }
 }

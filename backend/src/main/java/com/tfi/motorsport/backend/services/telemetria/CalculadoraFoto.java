@@ -73,12 +73,20 @@ public final class CalculadoraFoto {
         return vueltas.stream().filter(Vuelta::terminada).mapToInt(Vuelta::vuelta).max().orElse(0);
     }
 
-    /** Cuándo terminó la vuelta N el primero que la completó (el líder), o null si nadie la completó. */
+    /**
+     * Cuándo terminó la vuelta N el primero que la completó (el líder), o null si nadie la completó.
+     * Si nadie tiene tiempo en esa vuelta (en carrera OpenF1 no informa el de la vuelta 1, que se larga desde
+     * la grilla), terminó cuando el primero empezó la siguiente.
+     */
     public static Instant finDeVuelta(List<Vuelta> vueltas, int numeroVuelta) {
         return vueltas.stream()
                 .filter(v -> v.vuelta() == numeroVuelta && v.terminada())
                 .map(Vuelta::fecha)
                 .min(Comparator.naturalOrder())
+                .or(() -> vueltas.stream()
+                        .filter(v -> v.vuelta() == numeroVuelta + 1)
+                        .map(Vuelta::inicio)
+                        .min(Comparator.naturalOrder()))
                 .orElse(null);
     }
 
@@ -103,16 +111,23 @@ public final class CalculadoraFoto {
 
     /** Vueltas que completó el líder hasta el instante (la vuelta que se informa en la foto). */
     public static int vueltasHasta(List<Vuelta> vueltas, Instant instante) {
-        int maxima = 0;
+        return completadasPorPiloto(vueltas, instante).values().stream().mapToInt(Integer::intValue).max().orElse(0);
+    }
+
+    /**
+     * Vueltas que completó cada piloto hasta el instante: las que tienen tiempo y también las que dejó atrás al
+     * empezar la siguiente, aunque no tengan tiempo (en carrera OpenF1 informa la vuelta 1 sin tiempo).
+     */
+    private static Map<Integer, Integer> completadasPorPiloto(List<Vuelta> vueltas, Instant instante) {
+        Map<Integer, Integer> completadas = new HashMap<>();
         for (Vuelta vuelta : vueltas) {
-            if (vuelta.fecha().isAfter(instante)) {
-                break;
-            }
-            if (vuelta.terminada()) {
-                maxima = Math.max(maxima, vuelta.vuelta());
+            if (vuelta.terminada() && !vuelta.fecha().isAfter(instante)) {
+                completadas.merge(vuelta.numero(), vuelta.vuelta(), Math::max);
+            } else if (!vuelta.inicio().isAfter(instante)) {
+                completadas.merge(vuelta.numero(), vuelta.vuelta() - 1, Math::max);
             }
         }
-        return maxima;
+        return completadas;
     }
 
     /**
@@ -181,6 +196,7 @@ public final class CalculadoraFoto {
                 }
             }
         }
+        Map<Integer, Integer> vueltasCompletadas = completadasPorPiloto(datos.vueltas(), instante);
         Map<Integer, Integer> paradas = paradasHasta(datos.pits(), instante);
         Map<Integer, BigDecimal> mejorAMostrar = tanda != null ? mejorDeLaTanda : mejorVuelta;
         BigDecimal vueltaRapida = mejorAMostrar.values().stream().min(Comparator.naturalOrder()).orElse(null);
@@ -189,7 +205,7 @@ public final class CalculadoraFoto {
         for (Piloto piloto : datos.pilotos()) {
             int numero = piloto.numero();
             Vuelta ultima = ultimaVuelta.get(numero);
-            int completadas = ultima != null ? ultima.vuelta() : 0;
+            int completadas = vueltasCompletadas.getOrDefault(numero, 0);
             Stint stint = stintEnVuelta(datos.stints(), numero, completadas + 1);
             // El líder no tiene diferencia (OpenF1 a veces le manda +0.000)
             Intervalo diferencias = Integer.valueOf(1).equals(posicion.get(numero)) ? null : intervalo.get(numero);
@@ -199,7 +215,7 @@ public final class CalculadoraFoto {
                     piloto.color(),
                     diferencias != null ? diferencias.gap() : null,
                     diferencias != null ? diferencias.intervalo() : null,
-                    ultima != null ? completadas : null,
+                    completadas > 0 ? completadas : null,
                     ultima != null ? ultima.duracion() : null,
                     mejor,
                     mejorAMostrar.containsKey(numero) && mejorAMostrar.get(numero).compareTo(vueltaRapida) == 0,

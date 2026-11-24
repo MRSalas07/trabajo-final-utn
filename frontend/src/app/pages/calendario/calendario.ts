@@ -33,7 +33,7 @@ interface DiaCalendario {
 })
 export class Calendario {
 
-  protected readonly calendarioService = inject(CalendarioService);  
+  protected readonly calendarioService = inject(CalendarioService);
   private readonly notificacionService = inject(NotificacionService);
   protected readonly zonaService = inject(ZonaHorariaService);
   protected readonly categorias = CATEGORIAS;
@@ -105,7 +105,7 @@ export class Calendario {
     });
   }
 
-    private guardarArchivo(archivo: Blob, nombre: string): void {
+  private guardarArchivo(archivo: Blob, nombre: string): void {
     const url = URL.createObjectURL(archivo);
     const enlace = document.createElement('a');
     enlace.href = url;

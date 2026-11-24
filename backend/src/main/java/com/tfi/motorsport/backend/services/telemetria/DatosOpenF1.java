@@ -78,11 +78,11 @@ public final class DatosOpenF1 {
     }
 
     /** tanda: 1, 2 o 3 en la clasificación (qualifying_phase de OpenF1); null en el resto de las sesiones. */
-    public record Control(Instant fecha, Integer vuelta, String bandera, String categoria, String mensaje,
-                          String alcance, Integer tanda) implements ConFecha {
+    public record Control(Instant fecha, Integer vuelta, String bandera, String mensaje, Integer tanda)
+            implements ConFecha {
 
-        public Control(Instant fecha, Integer vuelta, String bandera, String categoria, String mensaje, String alcance) {
-            this(fecha, vuelta, bandera, categoria, mensaje, alcance, null);
+        public Control(Instant fecha, Integer vuelta, String bandera, String mensaje) {
+            this(fecha, vuelta, bandera, mensaje, null);
         }
     }
 
@@ -91,16 +91,15 @@ public final class DatosOpenF1 {
     }
 
     /** duracion: segundos desde que entró hasta que salió de la calle de boxes. */
-    public record Pit(Instant fecha, int numero, Integer vuelta, BigDecimal duracion) implements ConFecha {
+    public record Pit(Instant fecha, int numero, BigDecimal duracion) implements ConFecha {
 
-        public Pit(Instant fecha, int numero, Integer vuelta) {
-            this(fecha, numero, vuelta, null);
+        public Pit(Instant fecha, int numero) {
+            this(fecha, numero, null);
         }
     }
 
-    public record Stint(int numero, int vueltaInicio, Integer vueltaFin, String compuesto, Integer edadInicial) {
+    public record Stint(int numero, int vueltaInicio, String compuesto, Integer edadInicial) {
     }
-
 
     // ------------------------------------------------------------------ conversión desde JSON
 
@@ -182,8 +181,7 @@ public final class DatosOpenF1 {
         return convertir(arreglo, n -> {
             Instant fecha = fecha(n, "date");
             return fecha == null ? null : new Control(fecha, FormatJson.aInt(n, "lap_number"),
-                    FormatJson.aString(n, "flag"), FormatJson.aString(n, "category"),
-                    FormatJson.aString(n, "message"), FormatJson.aString(n, "scope"),
+                    FormatJson.aString(n, "flag"), FormatJson.aString(n, "message"),
                     FormatJson.aInt(n, "qualifying_phase"));
         }, Comparator.comparing(Control::fecha));
     }
@@ -207,7 +205,7 @@ public final class DatosOpenF1 {
             Instant fecha = fecha(n, "date");
             Integer numero = FormatJson.aInt(n, "driver_number");
             return fecha == null || numero == null ? null
-                    : new Pit(fecha, numero, FormatJson.aInt(n, "lap_number"), FormatJson.aDecimal(n, "pit_duration"));
+                    : new Pit(fecha, numero, FormatJson.aDecimal(n, "pit_duration"));
         }, Comparator.comparing(Pit::fecha));
     }
 
@@ -216,8 +214,7 @@ public final class DatosOpenF1 {
             Integer numero = FormatJson.aInt(n, "driver_number");
             Integer inicio = FormatJson.aInt(n, "lap_start");
             return numero == null || inicio == null ? null
-                    : new Stint(numero, inicio, FormatJson.aInt(n, "lap_end"), FormatJson.aString(n, "compound"),
-                    FormatJson.aInt(n, "tyre_age_at_start"));
+                    : new Stint(numero, inicio, FormatJson.aString(n, "compound"), FormatJson.aInt(n, "tyre_age_at_start"));
         }, Comparator.comparing(Stint::vueltaInicio));
     }
 

@@ -80,10 +80,13 @@ export class FotoSesion {
       });
     });
 
-    // En vivo: una foto nueva cada 5 s. onCleanup frena el intervalo si deja de estar en vivo o se sale de la página
+    // En vivo: una foto nueva cada 5 s (si la anterior ya llegó). onCleanup frena el intervalo si deja de estar
+    // en vivo o se sale de la página
     effect((onCleanup) => {
       if (!this.enVivo()) return;
-      const intervalo = setInterval(() => this.cargarFoto({}), REFRESCO_VIVO_MS);
+      const intervalo = setInterval(() => {
+        if (!this.cargando()) this.cargarFoto({});
+      }, REFRESCO_VIVO_MS);
       onCleanup(() => clearInterval(intervalo));
     });
 
@@ -140,6 +143,9 @@ export class FotoSesion {
   }
 
   private avanzar(): void {
+    // Si la foto anterior todavía no llegó, se espera al próximo segundo: si el servidor tarda más de un segundo,
+    // los pedidos no se acumulan ni se descartan sus respuestas (la repetición quedaría quieta)
+    if (this.cargando()) return;
     if (this.enElFinal()) {
       this.reproduciendo.set(false);
       return;
