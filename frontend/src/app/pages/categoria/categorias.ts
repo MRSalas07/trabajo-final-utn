@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { EstadoCarga } from '../../shared/estado-carga/estado-carga';
 import {Categoria } from '../../core/modelos';
 import { SaludServices } from '../../core/services/salud.service';

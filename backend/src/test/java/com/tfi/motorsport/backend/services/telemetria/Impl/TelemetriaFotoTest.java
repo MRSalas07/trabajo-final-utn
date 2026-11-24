@@ -59,7 +59,19 @@ class TelemetriaFotoTest {
                 """));
     }
 
+    /** Vueltas con tiempo: Verstappen termina primero la vuelta 1 y Norris gana la carrera en la 2. */
+    private static final String VUELTAS = """
+            [{'driver_number': 1, 'lap_number': 1, 'date_start': '2024-03-02T15:00:00+00:00', 'lap_duration': 95.0},
+             {'driver_number': 4, 'lap_number': 1, 'date_start': '2024-03-02T15:00:00+00:00', 'lap_duration': 96.0},
+             {'driver_number': 4, 'lap_number': 2, 'date_start': '2024-03-02T15:01:36+00:00', 'lap_duration': 89.0},
+             {'driver_number': 1, 'lap_number': 2, 'date_start': '2024-03-02T15:01:35+00:00', 'lap_duration': 92.0}]
+            """;
+
     private void datosDeLaCarrera() {
+        datosDeLaCarrera(VUELTAS);
+    }
+
+    private void datosDeLaCarrera(String vueltas) {
         when(openF1.get("drivers" + FILTRO)).thenReturn(json("""
                 [{'driver_number': 1, 'full_name': 'Max VERSTAPPEN', 'name_acronym': 'VER', 'team_name': 'Red Bull Racing', 'team_colour': '3671C6', 'headshot_url': 'https://media.formula1.com/ver.png'},
                  {'driver_number': 4, 'full_name': 'Lando NORRIS', 'name_acronym': 'NOR', 'team_name': 'McLaren', 'team_colour': 'FF8000'}]
@@ -72,12 +84,7 @@ class TelemetriaFotoTest {
                  {'driver_number': 1, 'date': '2024-03-02T15:02:30+00:00', 'position': 2}]
                 """));
         when(openF1.get("intervals" + FILTRO)).thenReturn(json("[]"));
-        when(openF1.get("laps" + FILTRO)).thenReturn(json("""
-                [{'driver_number': 1, 'lap_number': 1, 'date_start': '2024-03-02T15:00:00+00:00', 'lap_duration': 95.0},
-                 {'driver_number': 4, 'lap_number': 1, 'date_start': '2024-03-02T15:00:00+00:00', 'lap_duration': 96.0},
-                 {'driver_number': 4, 'lap_number': 2, 'date_start': '2024-03-02T15:01:36+00:00', 'lap_duration': 89.0},
-                 {'driver_number': 1, 'lap_number': 2, 'date_start': '2024-03-02T15:01:35+00:00', 'lap_duration': 92.0}]
-                """));
+        when(openF1.get("laps" + FILTRO)).thenReturn(json(vueltas));
         when(openF1.get("stints" + FILTRO)).thenReturn(json("[]"));
         when(openF1.get("pit" + FILTRO)).thenReturn(json("[]"));
         when(openF1.get("race_control" + FILTRO)).thenReturn(json("[]"));
@@ -98,6 +105,24 @@ class TelemetriaFotoTest {
         assertThat(foto.tanda()).isNull();
         assertThat(foto.filas()).extracting(FilaFoto::acronimo).containsExactly("VER", "NOR");
         assertThat(foto.aviso()).isNull();
+    }
+
+    @Test
+    void fotoEnLaVuelta1SinTiempo_esCuandoElLiderEmpiezaLaVuelta2() {
+        // En carrera OpenF1 informa la vuelta 1 sin tiempo: terminó cuando el líder empezó la 2
+        sesionTerminada();
+        datosDeLaCarrera("""
+                [{'driver_number': 1, 'lap_number': 1, 'date_start': '2024-03-02T15:00:00+00:00'},
+                 {'driver_number': 4, 'lap_number': 1, 'date_start': '2024-03-02T15:00:00+00:00'},
+                 {'driver_number': 4, 'lap_number': 2, 'date_start': '2024-03-02T15:01:36+00:00', 'lap_duration': 89.0},
+                 {'driver_number': 1, 'lap_number': 2, 'date_start': '2024-03-02T15:01:35+00:00', 'lap_duration': 92.0}]
+                """);
+
+        FotoSesion foto = service.foto(CARRERA, 1, null, List.of());
+
+        assertThat(foto.instante()).isEqualTo(FIN_VUELTA_1);
+        assertThat(foto.vuelta()).isEqualTo(1);
+        assertThat(foto.totalVueltas()).isEqualTo(2);
     }
 
     @Test

@@ -126,11 +126,11 @@ El desarrollo se organiza en MVPs: cada uno termina con algo que se puede probar
 
 | Componente | Tecnología | Rol |
 |---|---|---|
-| **Backend** | Java 21 + Spring Boot 4.1.2 | API REST, lógica de negocio, persistencia con Spring Data JPA, seguridad con Spring Security y JWT, validación, tareas programadas, Server-Sent Events y documentación OpenAPI (Swagger). |
+| **Backend** | Java 21 + Spring Boot 4.1.2 | API REST, lógica de negocio, persistencia con Spring Data JPA, seguridad con Spring Security y JWT, validación, tareas programadas y documentación OpenAPI (Swagger). |
 | **Frontend** | Angular 22 + TypeScript | SPA responsiva con componentes standalone y signals (sin zone.js); consume la API con `HttpClient` y dibuja los gráficos con Chart.js. |
 | **Base de datos** | PostgreSQL | Almacenamiento relacional de usuarios, categorías, temporadas, eventos, sesiones, etapas, pilotos, equipos, participaciones, tripulaciones, resultados y palmarés. |
 | **Fuentes de datos** | Jolpica (F1), API de wrc.com (WRC), JSON (TC), OpenF1 (telemetría F1) | Sincronización e importación de temporadas; telemetría sin pasar por la base. |
-| **Pruebas** | JUnit + H2 en memoria | 288 tests del backend sin necesidad de PostgreSQL. |
+| **Pruebas** | JUnit + H2 en memoria | 285 tests del backend sin necesidad de PostgreSQL. |
 | **Despliegue** | PaaS a definir (Render / Railway / Vercel) | Pendiente. |
 
 ## Arquitectura

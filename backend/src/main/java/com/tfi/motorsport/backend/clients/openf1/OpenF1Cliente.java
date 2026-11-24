@@ -22,8 +22,6 @@ import tools.jackson.databind.json.JsonMapper;
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Cliente de OpenF1 (https://openf1.org), la fuente de la telemetría F1 del MVP 7.
@@ -51,9 +49,6 @@ public class OpenF1Cliente {
     private static final int TIMEOUT_LECTURA_MINIMO_MS = 60_000;
     /** El token se renueva 2 minutos antes de vencer. */
     private static final long MARGEN_RENOVACION_SEG = 120;
-    /** Formato de fecha de los filtros de OpenF1 (ej: date>=2025-12-07T13:10:00.000). */
-    private static final DateTimeFormatter FORMATO_FILTRO =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneOffset.UTC);
 
     private final AppProperties.Telemetria cfg;
     private final JsonMapper jsonMapper;
@@ -109,11 +104,6 @@ public class OpenF1Cliente {
     /** true si están configurados el usuario y la contraseña de la suscripción (habilitan el modo en vivo). */
     public boolean credencialesConfiguradas() {
         return cfg.credencialesVivo();
-    }
-
-    /** Fecha para los filtros de OpenF1, en UTC y con milisegundos. */
-    public static String fecha(Instant instante) {
-        return FORMATO_FILTRO.format(instante);
     }
 
     private JsonNode consultar(String ruta, String tokenBearer) {

@@ -154,7 +154,6 @@ public class GlobalExceptionHandler {
                 List.of("Ocurrió un error inesperado. Intente nuevamente más tarde."));
     }
 
-
     /** Errores de las APIs externas: se informa el proveedor pero no detalles internos. */
     @ExceptionHandler(IntegrationExternalException.class)
     public ResponseEntity<ErrorDto> handleIntegracion(IntegrationExternalException ex) {

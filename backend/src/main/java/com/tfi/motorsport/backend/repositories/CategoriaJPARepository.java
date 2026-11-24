@@ -10,8 +10,6 @@ import java.util.Optional;
 @Repository
 public interface CategoriaJPARepository extends JpaRepository<Categoria, Long> {
 
-    List<Categoria> findAllByActivo(Boolean activo);
-
     List<Categoria> findAllByEliminadoFalseOrderByIdAsc();
 
     List<Categoria> findAllByActivoAndEliminadoFalseOrderByIdAsc(Boolean activo);

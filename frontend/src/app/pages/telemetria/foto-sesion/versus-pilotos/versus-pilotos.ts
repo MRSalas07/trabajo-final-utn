@@ -35,9 +35,9 @@ export class VersusPilotos {
 
   protected readonly renglones = computed<Renglon[]>(() => {
     const { a, b } = this.versus();
-    const sectores: Renglon[] = [0, 1, 2].flatMap((indice) => [
-      { etiqueta: `Última · S${indice + 1}`, a: sectorDe(a.ultimaVuelta, indice), b: sectorDe(b.ultimaVuelta, indice), formato: 'tiempo', gana: 'menor', sector: indice },
-    ]);
+    const sectores: Renglon[] = [0, 1, 2].map((indice) => ({
+      etiqueta: `Última · S${indice + 1}`, a: sectorDe(a.ultimaVuelta, indice), b: sectorDe(b.ultimaVuelta, indice), formato: 'tiempo', gana: 'menor', sector: indice,
+    }));
     const mejoresSectores: Renglon[] = [0, 1, 2].map((indice) => ({
       etiqueta: `Mejor S${indice + 1}`, a: a.mejoresSectores[indice], b: b.mejoresSectores[indice], formato: 'tiempo', gana: 'menor', sector: indice,
     }));

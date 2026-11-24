@@ -1,7 +1,6 @@
 import { inject,Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { ZonaHorariaService } from './zona-horaria.service';
 import { Pagina, PerfilPiloto, PilotoResumen } from '../modelos';
 import { Observable } from 'rxjs';
 
@@ -17,7 +16,6 @@ export interface Filtros{
 export class PilotoService {
     private readonly http = inject(HttpClient);
     private readonly apiUrl = environment.apiUrl;
-    private readonly zonaService = inject(ZonaHorariaService);
 
     buscarPilotos(filtros: Filtros) {
         let params = new HttpParams();

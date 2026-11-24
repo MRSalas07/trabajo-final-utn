@@ -53,10 +53,10 @@ class CalculadoraFotoTest {
                 List.of(vuelta(1, 1, 95, "95.000"), vuelta(4, 1, 96, "96.500"),
                         vuelta(4, 2, 185, "89.000"), vuelta(1, 2, 186, "91.000"),
                         vuelta(4, 3, 275, "90.000"), vuelta(1, 3, 276, null)),
-                List.of(new Stint(1, 1, 2, "MEDIUM", 0), new Stint(4, 1, null, "SOFT", 3), new Stint(1, 3, null, "HARD", 0)),
-                List.of(new Pit(segundo(190), 1, 2)),
-                List.of(new Control(segundo(10), 1, "GREEN", "Flag", "GREEN LIGHT - PIT EXIT OPEN", "Track"),
-                        new Control(segundo(150), 2, "YELLOW", "Flag", "YELLOW IN TRACK SECTOR 4", "Sector")),
+                List.of(new Stint(1, 1, "MEDIUM", 0), new Stint(4, 1, "SOFT", 3), new Stint(1, 3, "HARD", 0)),
+                List.of(new Pit(segundo(190), 1)),
+                List.of(new Control(segundo(10), 1, "GREEN", "GREEN LIGHT - PIT EXIT OPEN"),
+                        new Control(segundo(150), 2, "YELLOW", "YELLOW IN TRACK SECTOR 4")),
                 List.of(new ClimaMuestra(segundo(0), new BigDecimal("24.1"), new BigDecimal("36.0"), 50, false, BigDecimal.ONE),
                         new ClimaMuestra(segundo(120), new BigDecimal("24.5"), new BigDecimal("37.2"), 48, true, BigDecimal.TWO)));
     }
@@ -70,6 +70,21 @@ class CalculadoraFotoTest {
         assertThat(CalculadoraFoto.finDeVuelta(vueltas, 9)).isNull();
         assertThat(CalculadoraFoto.vueltasHasta(vueltas, segundo(190))).isEqualTo(2);
         assertThat(CalculadoraFoto.ultimoInstante(carrera())).isEqualTo(segundo(276));
+    }
+
+    @Test
+    void laVuelta1SinTiempo_terminaCuandoElPrimeroEmpiezaLaVuelta2() {
+        // Como en OpenF1: la vuelta 1 de una carrera viene sin tiempo (se larga desde la grilla).
+        // Verstappen empieza la vuelta 2 en el segundo 95 (186 - 91) y Norris en el 96.5 (188 - 91.5)
+        List<Vuelta> vueltas = List.of(vuelta(1, 1, 0, null), vuelta(4, 1, 0, null),
+                vuelta(1, 2, 186, "91.000"), vuelta(4, 2, 188, "91.500"));
+        DatosSesion datos = new DatosSesion(PILOTOS, List.of(), List.of(), vueltas, List.of(), List.of(),
+                List.of(), List.of());
+
+        assertThat(CalculadoraFoto.finDeVuelta(vueltas, 1)).isEqualTo(segundo(95));
+        assertThat(CalculadoraFoto.vueltasHasta(vueltas, segundo(90))).isEqualTo(0);
+        assertThat(CalculadoraFoto.vueltasHasta(vueltas, segundo(100))).isEqualTo(1);
+        assertThat(CalculadoraFoto.filas(datos, segundo(100))).extracting(FilaFoto::vueltas).containsExactly(1, 1);
     }
 
     @Test
@@ -141,8 +156,8 @@ class CalculadoraFotoTest {
     void enClasificacionCadaTandaEmpiezaDeCero() {
         DatosSesion datos = carrera();
         List<Control> tandas = List.of(
-                new Control(segundo(0), null, "GREEN", "Flag", "GREEN LIGHT - PIT EXIT OPEN", "Track", 1),
-                new Control(segundo(180), null, "GREEN", "Flag", "GREEN LIGHT - PIT EXIT OPEN", "Track", 2));
+                new Control(segundo(0), null, "GREEN", "GREEN LIGHT - PIT EXIT OPEN", 1),
+                new Control(segundo(180), null, "GREEN", "GREEN LIGHT - PIT EXIT OPEN", 2));
         DatosSesion clasificacion = new DatosSesion(datos.pilotos(), datos.posiciones(), List.of(), datos.vueltas(),
                 datos.stints(), datos.pits(), tandas, datos.clima());
 
@@ -169,7 +184,7 @@ class CalculadoraFotoTest {
                         new BigDecimal("41.0"), new BigDecimal("19.5"), 232, 252, 305),
                 new Vuelta(segundo(275), 4, 3, new BigDecimal("90.000"), false, null, null, null, null, null, null));
         return new DatosSesion(datos.pilotos(), datos.posiciones(), datos.intervalos(), vueltas, datos.stints(),
-                List.of(new Pit(segundo(190), 1, 2, new BigDecimal("24.5"))), datos.controles(), datos.clima());
+                List.of(new Pit(segundo(190), 1, new BigDecimal("24.5"))), datos.controles(), datos.clima());
     }
 
     @Test
