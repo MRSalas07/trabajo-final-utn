@@ -69,11 +69,10 @@ public record AppProperties(
      *
      * intervaloMs y limiteMinuto respetan el cupo del plan gratuito (3 consultas/s y 30/min).
      * usuario y password son los de la suscripción paga de OpenF1: habilitan el modo en vivo y el
-     * cupo limiteMinutoSuscripcion. maxRepeticiones limita las repeticiones simultáneas (cuidan el cupo).
+     * cupo limiteMinutoSuscripcion.
      */
     public record Telemetria(boolean habilitada, String urlBase, long intervaloMs, int limiteMinuto,
-                             String tokenUrl, String usuario, String password, int limiteMinutoSuscripcion,
-                             int maxRepeticiones, long vivoIntervaloRapidoMs, long vivoIntervaloLentoMs) {
+                             String tokenUrl, String usuario, String password, int limiteMinutoSuscripcion) {
 
         /** true si están configurados el usuario y la contraseña de la suscripción de OpenF1. */
         public boolean credencialesVivo() {

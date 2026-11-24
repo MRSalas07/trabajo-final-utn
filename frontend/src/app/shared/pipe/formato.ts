@@ -4,7 +4,7 @@ import {Horario} from '../../core/modelos'
 @Pipe({name : 'hora'})
 export class HoraPipe implements PipeTransform {
     transform(hora: Horario | string | null | undefined, 
-        formato: 'corta' | 'fecha' | 'hora' | 'dia' | 'mes' = 'corta', zona?: string): string {
+        formato: 'corta' | 'fecha' | 'hora' | 'segundos' | 'dia' | 'mes' = 'corta', zona?: string): string {
     if (!hora) return '—';
     const utc = typeof hora === 'string' ? hora : hora.utc;
     const timeZone = zona ?? (typeof hora === 'string' ? undefined : hora.zona);
@@ -13,6 +13,7 @@ export class HoraPipe implements PipeTransform {
       corta: { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false },
       fecha: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' },
       hora: { hour: '2-digit', minute: '2-digit', hour12: false },
+      segundos: { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false },
       dia: { weekday: 'short', day: 'numeric', month: 'short' },
       mes: { month: 'long', year: 'numeric' },
     };

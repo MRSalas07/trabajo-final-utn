@@ -64,9 +64,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/estadisticas/**").hasRole("ADMIN")
                         // Perfil del usuario logueado
                         .requestMatchers("/api/usuarios/**").authenticated()
-                        // Controles de una transmisión de telemetría (piloto, velocidad, pausa): públicos, porque el
-                        // navegador abre la transmisión sin token (EventSource) y el id es un UUID aleatorio
-                        .requestMatchers(HttpMethod.PUT, "/api/telemetria/transmisiones/*").permitAll()
                         // El resto de las consultas es público
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .anyRequest().authenticated())

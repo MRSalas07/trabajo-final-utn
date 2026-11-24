@@ -13,13 +13,12 @@ import tools.jackson.databind.json.JsonMapper;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Módulo de telemetría HABILITADO (con OpenF1 simulado): sus endpoints existen, son públicos
- * (incluidos los controles de una transmisión), validan los parámetros y /api/salud lo informa.
+ * Módulo de telemetría HABILITADO (con OpenF1 simulado): sus endpoints existen, son públicos,
+ * validan los parámetros y /api/salud lo informa.
  */
 @SpringBootTest(properties = "app.telemetria.habilitada=true")
 @AutoConfigureMockMvc
@@ -56,22 +55,31 @@ class TelemetriaControllerTest {
     }
 
     @Test
-    void controlesDeUnaTransmisionInexistente_devuelve404SinPedirToken() throws Exception {
-        mvc.perform(put("/api/telemetria/transmisiones/no-existe").param("piloto", "44"))
+    void fotoConVueltaInvalida_devuelve400SinConsultarOpenF1() throws Exception {
+        mvc.perform(get("/api/telemetria/sesiones/9472/foto").param("vuelta", "0"))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(openF1);
+    }
+
+    @Test
+    void fotoDeUnaSesionInexistente_devuelve404() throws Exception {
+        when(openF1.get("sessions?session_key=2")).thenReturn(JsonMapper.builder().build().readTree("[]"));
+
+        mvc.perform(get("/api/telemetria/sesiones/2/foto"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void velocidadFueraDeRango_devuelve400() throws Exception {
-        mvc.perform(put("/api/telemetria/transmisiones/no-existe").param("velocidad", "20"))
+    void fotoConInstanteInvalido_devuelve400() throws Exception {
+        mvc.perform(get("/api/telemetria/sesiones/9472/foto").param("instante", "ayer"))
                 .andExpect(status().isBadRequest());
+        verifyNoInteractions(openF1);
     }
 
     @Test
-    void estadoDelVivoSinSuscripcion() throws Exception {
-        mvc.perform(get("/api/telemetria/vivo/estado"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.credenciales").value(false))
-                .andExpect(jsonPath("$.enVentanaVivo").value(false));
+    void versusDeTresPilotos_devuelve400() throws Exception {
+        mvc.perform(get("/api/telemetria/sesiones/9472/foto").param("pilotos", "1,4,16"))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(openF1);
     }
 }

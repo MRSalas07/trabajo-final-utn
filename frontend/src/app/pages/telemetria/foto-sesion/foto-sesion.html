@@ -1,0 +1,97 @@
+<!-- ------------------------------------------------------------ Barra: dónde está la sesión y controles -->
+<div class="barra">
+  <div class="barra-info">
+    <span class="modo" [class.vivo]="enVivo()">{{ enVivo() ? 'En vivo' : (reproduciendo() ? 'Repetición' : 'Sesión terminada') }}</span>
+    @if (foto(); as f) {
+      @if (f.totalVueltas) { <span class="dato">Vuelta <strong>{{ vueltaEnCurso() }}</strong> de {{ f.totalVueltas }}</span> }
+      @if (f.tanda) { <span class="dato">Tanda <strong>{{ f.tanda }}</strong> · {{ relojTanda() }}</span> }
+      @if (f.instante) { <span class="dato" title="Hora del instante que se muestra, en tu zona horaria">{{ f.instante | hora:'segundos':zona() }} h</span> }
+    }
+    @if (cargando() && !reproduciendo()) { <span class="spinner" aria-hidden="true"></span> }
+  </div>
+  @if (!enVivo() && foto()?.instante) {
+    <div class="barra-controles">
+      @if (porVueltas()) {
+        <button type="button" class="btn-chico" (click)="irAVuelta(vueltaMostrada() - 1)" [disabled]="vueltaMostrada() <= 1" title="Vuelta anterior">◀ V</button>
+      }
+      <button type="button" class="btn-chico" (click)="alternarReproduccion()">{{ reproduciendo() ? '❚❚ Pausa' : '▶ Reproducir' }}</button>
+      @if (porVueltas()) {
+        <button type="button" class="btn-chico" (click)="irAVuelta(vueltaMostrada() + 1)" [disabled]="vueltaMostrada() >= (foto()?.totalVueltas ?? 0)" title="Vuelta siguiente">V ▶</button>
+      }
+      <label class="control">Velocidad
+        <select (change)="elegirVelocidad($any($event.target).value)">
+          @for (v of velocidades; track v) {
+            <option [value]="v" [selected]="v === velocidad()">x{{ v }}</option>
+          }
+        </select>
+      </label>
+      <button type="button" class="btn-chico" (click)="verFinal()" [disabled]="enElFinal()">Final</button>
+    </div>
+  }
+</div>
+@if (!enVivo() && foto()?.instante) {
+  <label class="linea-tiempo">
+    <span class="suave chico">Tiempo de sesión <strong>{{ reloj(segundoActual()) }}</strong> de {{ reloj(segundoFinal()) }} · movelo para ir a otro momento</span>
+    <input type="range" min="0" [max]="segundoFinal()" [value]="segundoActual()"
+           (change)="reproduciendo.set(false); irAlSegundo($any($event.target).value)" aria-label="Tiempo de la sesión" />
+  </label>
+}
+@if (enVivo() && !foto()?.aviso) {
+  <p class="suave chico">Se actualiza sola cada 5 segundos.</p>
+}
+
+<app-estado-carga [cargando]="cargando() && !foto()" [error]="error()" />
+
+@if (foto(); as f) {
+  @if (f.aviso) {
+    <p class="aviso">{{ f.aviso }}</p>
+  } @else {
+    <div class="tablero">
+      <section class="panel area-torre" aria-labelledby="t-torre">
+        <div class="panel-titulo"><h2 id="t-torre">Tabla de posición y tiempos</h2></div>
+        <app-torre-tiempos [filas]="f.filas" />
+      </section>
+
+      <section class="panel area-versus" aria-labelledby="t-versus">
+        <div class="panel-titulo"><h2 id="t-versus">Versus</h2></div>
+        @if (f.versus; as v) {
+          <app-versus-pilotos [versus]="v" [filas]="f.filas" (elegir)="elegirPilotos($event)" />
+        } @else {
+          <p class="suave chico">Hacen falta al menos dos pilotos con datos.</p>
+        }
+      </section>
+
+      <section class="panel area-control" aria-labelledby="t-control">
+        <div class="panel-titulo"><h2 id="t-control">Dirección de carrera</h2></div>
+        @if (f.mensajes.length) {
+          <ul class="mensajes">
+            @for (m of f.mensajes; track $index) {
+              <li>
+                <span class="bandera" [attr.data-bandera]="m.bandera" [title]="m.bandera ?? ''"></span>
+                <span class="cuando suave">{{ m.fecha | hora:'hora':zona() }}@if (m.vuelta) { <span> · V{{ m.vuelta }}</span> }</span>
+                <span>{{ m.mensaje }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="suave chico">Sin mensajes hasta este momento.</p>
+        }
+      </section>
+
+      <section class="panel area-clima" aria-labelledby="t-clima">
+        <div class="panel-titulo"><h2 id="t-clima">Clima</h2></div>
+        @if (f.clima; as c) {
+          <div class="kpis">
+            <div class="kpi"><div class="valor">{{ c.aire ?? '—' }}°</div><div class="etiqueta">Aire (°C)</div></div>
+            <div class="kpi"><div class="valor">{{ c.pista ?? '—' }}°</div><div class="etiqueta">Pista (°C)</div></div>
+            <div class="kpi"><div class="valor">{{ c.humedad ?? '—' }}%</div><div class="etiqueta">Humedad</div></div>
+            <div class="kpi"><div class="valor">{{ c.viento ?? '—' }}</div><div class="etiqueta">Viento (m/s)</div></div>
+            <div class="kpi" [class.lluvia]="c.lluvia"><div class="valor">{{ c.lluvia ? 'Sí' : 'No' }}</div><div class="etiqueta">Lluvia</div></div>
+          </div>
+        } @else {
+          <p class="suave chico">Sin datos del clima hasta este momento.</p>
+        }
+      </section>
+    </div>
+  }
+}

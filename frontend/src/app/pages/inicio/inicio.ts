@@ -13,10 +13,9 @@ import { HoraPipe, TiempoPipe } from '../../shared/pipe/formato';
 import { CalendarioMes } from '../../shared/calendario-mes/calendario-mes';
 import { SaludServices } from '../../core/services/salud.service';
 import { EstadisticaService } from '../../core/services/estadistica.service';
-import { PanelVivo } from '../telemetria/panel-vivo/panel-vivo';
 
 @Component({
-  imports: [RouterLink,EstadoCarga, FilaEvento, HoraPipe, TiempoPipe, CalendarioMes, PanelVivo],
+  imports: [RouterLink,EstadoCarga, FilaEvento, HoraPipe, TiempoPipe, CalendarioMes],
   selector: 'app-inicio',
   styleUrl: './inicio.css',
   templateUrl: './inicio.html',

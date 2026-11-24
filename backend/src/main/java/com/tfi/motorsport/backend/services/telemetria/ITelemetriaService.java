@@ -1,8 +1,10 @@
 package com.tfi.motorsport.backend.services.telemetria;
 
+import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.FotoSesion;
 import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.SesionTelemetria;
 import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.TelemetriaSesion;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -20,4 +22,13 @@ public interface ITelemetriaService {
      * @param pilotos números de auto para el gráfico de vueltas (vacío = los mejor ubicados, hasta 6)
      */
     TelemetriaSesion sesion(int sessionKey, List<Integer> pilotos);
+
+    /**
+     * Cómo estaba la sesión en un instante: torre, versus de dos pilotos, mensajes y clima.
+     * Sesión en curso: el instante es ahora (requiere la suscripción de OpenF1).
+     * Sesión terminada: el final de la vuelta pedida del líder, el instante pedido o, sin ninguno, el final.
+     *
+     * @param pilotos hasta 2 números de auto para el versus (si falta alguno, se completa con los mejor ubicados)
+     */
+    FotoSesion foto(int sessionKey, Integer vuelta, Instant instante, List<Integer> pilotos);
 }

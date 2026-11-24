@@ -45,7 +45,7 @@ src/styles.css          estilos globales: variables de color, paneles y grilla d
 | `/pilotos`, `/pilotos/:id` | Listado con búsqueda y ficha de piloto |
 | `/equipos`, `/equipos/:id` | Listado y ficha de equipo |
 | `/estadisticas` | Campeonatos, evolución, tendencias, comparativas, marcas e histórico |
-| `/telemetria` | Telemetría F1: estado del vivo, análisis y repetición de sesiones (`?vivo=1` abre la transmisión en vivo) |
+| `/telemetria` | Telemetría F1: foto de la sesión (en vivo o en repetición) con torre y versus de dos pilotos, y análisis |
 | `/login`, `/cuenta` | Ingreso, registro y zona horaria del usuario |
 | `/admin` | Sincronización, importación y ABM (solo `ADMIN`) |
 
@@ -56,7 +56,7 @@ src/styles.css          estilos globales: variables de color, paneles y grilla d
 - **Horarios.** Se muestran en la zona elegida en la cabecera (`ZonaHorariaService` y el pipe `hora`); los servicios mandan `?zona=` cuando el backend convierte horarios.
 - **Errores y cargas.** `mensajeError()` arma el texto del error y `<app-estado-carga>` muestra carga, error o vacío.
 - **Gráficos.** `<app-grafico>` envuelve Chart.js. El backend hace los cálculos; el frontend solo los dibuja.
-- **Telemetría.** Las transmisiones llegan por Server-Sent Events con `EventSource` (`TelemetriaService.transmitir`), que no puede mandar el token: esas rutas son públicas en el backend. La página consulta `/api/salud` y solo muestra el módulo si está habilitado.
+- **Telemetría.** Todo son GET comunes: `FotoSesion` pide una foto cada 5 s en vivo o una por segundo al reproducir, con `setInterval` dentro de un `effect()` que lo frena en `onCleanup` (al salir de la pestaña o de la página). La página consulta `/api/salud` y solo muestra el módulo si está habilitado.
 
 ## Pruebas
 

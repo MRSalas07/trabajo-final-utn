@@ -8,6 +8,7 @@ import { ZonaHorariaService } from '../../core/services/zona-horaria.service';
 import { EventoDto, Sesion } from '../../core/modelos';
 import { diaLocal, diasDelEvento } from '../../shared/dias-evento';
 import { mensajeError } from '../../core/errores/error';
+import { NotificacionService } from '../../core/services/notificacion.service';
 
 const CATEGORIAS = ['F1', 'WRC', 'TC'];
 
@@ -32,7 +33,8 @@ interface DiaCalendario {
 })
 export class Calendario {
 
-  protected readonly calendarioService = inject(CalendarioService);
+  protected readonly calendarioService = inject(CalendarioService);  
+  private readonly notificacionService = inject(NotificacionService);
   protected readonly zonaService = inject(ZonaHorariaService);
   protected readonly categorias = CATEGORIAS;
 
@@ -100,6 +102,25 @@ export class Calendario {
         this.error.set(mensajeError(error));
         this.cargando.set(false);
       },
+    });
+  }
+
+    private guardarArchivo(archivo: Blob, nombre: string): void {
+    const url = URL.createObjectURL(archivo);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = nombre;
+    enlace.click();
+    URL.revokeObjectURL(url);
+  }
+
+  protected descargarTemporada(siglas: string): void {
+    const anio = this.anio();
+    this.calendarioService.descargarIcsTemporada(siglas, anio).subscribe({
+      next: (archivo) => this.guardarArchivo(archivo, `${siglas.toLowerCase()}-${anio}.ics`),
+      error: (errorHttp) => this.notificacionService.aviso(errorHttp.status === 404
+        ? `Todavía no hay datos de la temporada ${anio} de ${siglas}.`
+        : `No se pudo descargar el calendario (error ${errorHttp.status}).`),
     });
   }
 

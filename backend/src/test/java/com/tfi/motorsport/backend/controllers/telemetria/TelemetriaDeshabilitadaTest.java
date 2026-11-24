@@ -2,7 +2,6 @@ package com.tfi.motorsport.backend.controllers.telemetria;
 
 import com.tfi.motorsport.backend.clients.openf1.OpenF1Cliente;
 import com.tfi.motorsport.backend.services.telemetria.ITelemetriaService;
-import com.tfi.motorsport.backend.services.telemetria.ITransmisionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +34,6 @@ class TelemetriaDeshabilitadaTest {
     void noSeCreanLasClasesDelModulo() {
         assertThat(contexto.getBeanNamesForType(OpenF1Cliente.class)).isEmpty();
         assertThat(contexto.getBeanNamesForType(ITelemetriaService.class)).isEmpty();
-        assertThat(contexto.getBeanNamesForType(ITransmisionService.class)).isEmpty();
     }
 
     @Test

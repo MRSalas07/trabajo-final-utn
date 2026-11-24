@@ -28,7 +28,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * Cliente de OpenF1 (https://openf1.org), la fuente de la telemetría F1 del MVP 7.
  *
- * Es UNO SOLO para todo el módulo (análisis de sesiones, repetición y vivo), así el cupo del proveedor
+ * Es UNO SOLO para todo el módulo (análisis, foto de la sesión y vivo), así el cupo del proveedor
  * se respeta en conjunto: ClientHttpExternal separa las consultas (límite por segundo, reintentos ante
  * 429/5xx) y acá se suma el límite por minuto con una ventana deslizante.
  *

@@ -75,7 +75,7 @@ class OpenF1ClienteTest {
     private OpenF1Cliente cliente(String usuario, String password) {
         String base = "http://127.0.0.1:" + servidor.getAddress().getPort();
         AppProperties.Telemetria telemetria = new AppProperties.Telemetria(true, base + "/v1/", 0, 100,
-                base + "/token", usuario, password, 100, 5, 8000, 30000);
+                base + "/token", usuario, password, 100);
         AppProperties.Integracion integracion = new AppProperties.Integracion(2000, 2000, 0, null, null, false, null);
         return new OpenF1Cliente(new AppProperties(null, null, null, integracion, telemetria),
                 JsonMapper.builder().build());

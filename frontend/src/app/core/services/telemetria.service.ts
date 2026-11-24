@@ -2,37 +2,21 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EstadoTransmision, InfoVivo, SesionTelemetria, TelemetriaSesion } from '../modelos';
+import { FotoSesion, SesionTelemetria, TelemetriaSesion } from '../modelos';
 
-/** Lo que va llegando de una transmisión abierta. */
-export type EventoTransmision =
-  /** Una foto de la sesión (llega una por segundo). */
-  | { tipo: 'estado'; estado: EstadoTransmision }
-  /** El servidor no pudo transmitir y explicó por qué (ej: demasiadas repeticiones en curso). */
-  | { tipo: 'error'; mensaje: string }
-  /** Se cortó la conexión sin aviso (servidor caído, red, ruta inexistente). */
-  | { tipo: 'desconexion' };
-
-/** Opciones para empezar una repetición. inicioVuelta tiene prioridad sobre inicioMin. */
-export interface OpcionesRepeticion {
-  velocidad?: number;
-  inicioMin?: number;
-  inicioVuelta?: number | null;
-  /** Piloto a seguir desde el principio (sin piloto, se sigue al líder). */
-  piloto?: number | null;
-}
-
-/** Cambios para una transmisión en curso. piloto 0 = volver a seguir al líder. */
-export interface AjusteTransmision {
-  piloto?: number;
-  velocidad?: number;
-  pausa?: boolean;
+/** Qué foto se pide: una vuelta, un instante exacto (ISO 8601) o, sin ninguno, el final (o "ahora" en vivo). */
+export interface PedidoFoto {
+  vuelta?: number | null;
+  instante?: string | null;
+  /** Hasta 2 números de auto para el versus (si falta alguno, el backend completa con los mejor ubicados). */
+  pilotos?: number[];
 }
 
 /**
  * Telemetría de F1 (MVP 7, módulo plus con datos de OpenF1).
  * El backend solo publica estas rutas si TELEMETRIA_HABILITADA=true: antes de usarlas conviene
  * consultar /api/salud (campo "telemetria"), si no responden 404.
+ * Son todos GET comunes: el vivo y la repetición se arman pidiendo fotos cada tantos segundos.
  */
 @Injectable({ providedIn: 'root' })
 export class TelemetriaService {
@@ -54,80 +38,12 @@ export class TelemetriaService {
     return this.http.get<TelemetriaSesion>(`${this.api}/sesiones/${sessionKey}`, { params });
   }
 
-  /** Dirección del stream de una repetición (la ruta es pública: EventSource no puede mandar el token). */
-  urlRepeticion(sessionKey: number, opciones: OpcionesRepeticion = {}): string {
-    const params = new URLSearchParams({ sessionKey: String(sessionKey) });
-    if (opciones.velocidad !== undefined) params.set('velocidad', String(opciones.velocidad));
-    if (opciones.inicioVuelta) params.set('inicioVuelta', String(opciones.inicioVuelta));
-    else if (opciones.inicioMin) params.set('inicioMin', String(opciones.inicioMin));
-    if (opciones.piloto) params.set('piloto', String(opciones.piloto));
-    return `${this.api}/transmisiones/repeticion?${params}`;
-  }
-
-  /** Dirección del stream EN VIVO de la sesión en curso (el backend necesita la suscripción de OpenF1). */
-  urlVivo(piloto?: number | null): string {
-    const params = new URLSearchParams({ sessionKey: 'latest' });
-    if (piloto) params.set('piloto', String(piloto));
-    return `${this.api}/transmisiones/vivo?${params}`;
-  }
-
-  /** Si hay una sesión en curso y si el backend puede transmitirla en vivo. */
-  infoVivo(): Observable<InfoVivo> {
-    return this.http.get<InfoVivo>(`${this.api}/vivo/estado`);
-  }
-
-  /**
-   * Abre una transmisión (Server-Sent Events) y emite cada foto. La conexión se cierra al desuscribirse,
-   * cuando la transmisión termina (FINALIZADA o ERROR) o ante cualquier error. No se reconecta sola:
-   * EventSource reintentaría por su cuenta y, en una repetición, eso la empezaría de nuevo desde el principio.
-   */
-  transmitir(url: string): Observable<EventoTransmision> {
-    return new Observable<EventoTransmision>((suscriptor) => {
-      const fuente = new EventSource(url);
-      const terminar = (evento: EventoTransmision) => {
-        fuente.close();
-        suscriptor.next(evento);
-        suscriptor.complete();
-      };
-      fuente.addEventListener('estado', (evento) => {
-        let estado: EstadoTransmision;
-        try {
-          estado = JSON.parse((evento as MessageEvent<string>).data) as EstadoTransmision;
-        } catch {
-          return; // una foto ilegible se descarta: al segundo llega otra
-        }
-        if (estado.estado === 'FINALIZADA' || estado.estado === 'ERROR') {
-          terminar({ tipo: 'estado', estado });
-        } else {
-          suscriptor.next({ tipo: 'estado', estado });
-        }
-      });
-      // "error" llega en dos casos: el evento que manda el servidor (trae datos) o la falla de la conexión
-      fuente.addEventListener('error', (evento) => {
-        const datos = evento instanceof MessageEvent ? evento.data : null;
-        terminar(datos ? { tipo: 'error', mensaje: mensajeDelServidor(datos) } : { tipo: 'desconexion' });
-      });
-      return () => fuente.close();
-    });
-  }
-
-  /** Cambia el piloto seguido, la velocidad o la pausa de una transmisión propia (responde 204). */
-  ajustar(id: string, cambios: AjusteTransmision): Observable<void> {
+  /** Foto de la sesión: torre, versus, mensajes y clima en un instante. */
+  foto(sessionKey: number, pedido: PedidoFoto = {}): Observable<FotoSesion> {
     let params = new HttpParams();
-    if (cambios.piloto !== undefined) params = params.set('piloto', cambios.piloto);
-    if (cambios.velocidad !== undefined) params = params.set('velocidad', cambios.velocidad);
-    if (cambios.pausa !== undefined) params = params.set('pausa', cambios.pausa);
-    return this.http.put<void>(`${this.api}/transmisiones/${encodeURIComponent(id)}`, null, { params });
+    if (pedido.vuelta) params = params.set('vuelta', pedido.vuelta);
+    else if (pedido.instante) params = params.set('instante', pedido.instante);
+    if (pedido.pilotos?.length) params = params.set('pilotos', pedido.pilotos.join(','));
+    return this.http.get<FotoSesion>(`${this.api}/sesiones/${sessionKey}/foto`, { params });
   }
-}
-
-/** El servidor manda {"mensaje": "..."}; si no se puede leer, un texto genérico. */
-function mensajeDelServidor(datos: unknown): string {
-  try {
-    const cuerpo = JSON.parse(String(datos)) as { mensaje?: unknown };
-    if (typeof cuerpo.mensaje === 'string' && cuerpo.mensaje) return cuerpo.mensaje;
-  } catch {
-    // no era JSON
-  }
-  return 'El servidor no pudo iniciar la transmisión.';
 }

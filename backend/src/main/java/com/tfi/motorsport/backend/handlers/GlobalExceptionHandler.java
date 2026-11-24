@@ -17,7 +17,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -157,15 +156,6 @@ public class GlobalExceptionHandler {
 
 
     /** Errores de las APIs externas: se informa el proveedor pero no detalles internos. */
-    /**
-     * El navegador cerró una transmisión de telemetría (SSE): es lo normal al salir de la página.
-     * No hay a quién responder, así que no se escribe nada ni se registra como error.
-     */
-    @ExceptionHandler(AsyncRequestNotUsableException.class)
-    public void handleConexionCerrada(AsyncRequestNotUsableException ex) {
-        log.debug("Conexión cerrada por el cliente: {}", ex.getMessage());
-    }
-
     @ExceptionHandler(IntegrationExternalException.class)
     public ResponseEntity<ErrorDto> handleIntegracion(IntegrationExternalException ex) {
         log.warn("Fallo de integración externa: {}", ex.getMessage());

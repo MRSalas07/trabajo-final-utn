@@ -27,12 +27,12 @@
     <p class="suave chico">Descarga un archivo .ics: en Android se abre con Google Calendar y en iPhone con Calendario.</p>
     <div class="fila">
         @for (categoria of categorias; track categoria) {
-        <a class="btn-chico" [href]="calendarioService.urlIcsTemporada(categoria, anio())" download>{{ categoria }} {{ anio() }}</a>
+        <button type="button" class="btn-chico" (click)="descargarTemporada(categoria)">{{ categoria }} {{ anio() }}</button>
         }
     </div>
     </section>
 </aside>
-
+    
 <div class="cal-lista">
 <app-estado-carga [cargando]="cargando()" [error]="error()" [vacio]="!cargando() && !error() && dias().length === 0"
                     mensajeVacio="No hay eventos en este mes para las categorías seleccionadas." />

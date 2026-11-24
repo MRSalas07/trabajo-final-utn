@@ -1,15 +1,9 @@
 :host { display: block; }
 .torre { font-size: 0.85rem; }
 .torre th, .torre td { padding: 0.35rem 0.55rem; }
-.torre tr.foco { background: var(--superficie-2); box-shadow: inset 3px 0 0 var(--acento); }
 .piloto {
-  min-height: 0; padding: 0.1rem 0.45rem; border: none; border-left: 4px solid var(--borde); border-radius: 3px;
-  background: none; font-weight: 700; letter-spacing: 0.02em;
-}
-.piloto:hover { background: var(--superficie-3); transform: none; }
-.boxes {
-  margin-left: 0.35rem; font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.3rem; border-radius: 3px;
-  background: var(--texto); color: var(--fondo);
+  display: inline-block; padding: 0.1rem 0.45rem; border-left: 4px solid var(--borde); border-radius: 3px;
+  font-weight: 700; letter-spacing: 0.02em; border-right: 4px;
 }
 td.record { color: #b06cff; font-weight: 700; }
 .neum { white-space: nowrap; }

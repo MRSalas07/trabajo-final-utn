@@ -1,9 +1,8 @@
-package com.tfi.motorsport.backend.services.telemetria.transmision;
+package com.tfi.motorsport.backend.services.telemetria;
 
 import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.SesionTelemetria;
-import com.tfi.motorsport.backend.services.telemetria.transmision.DatosOpenF1.Piloto;
-import com.tfi.motorsport.backend.services.telemetria.transmision.DatosOpenF1.Ubicacion;
-import com.tfi.motorsport.backend.services.telemetria.transmision.DatosOpenF1.Vuelta;
+import com.tfi.motorsport.backend.services.telemetria.DatosOpenF1.Piloto;
+import com.tfi.motorsport.backend.services.telemetria.DatosOpenF1.Vuelta;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -45,14 +44,17 @@ class DatosOpenF1Test {
     }
 
     @Test
-    void ubicacionesSinSenalSeDescartan() {
-        List<Ubicacion> ubicaciones = DatosOpenF1.ubicaciones(json("""
-                [{'driver_number': 1, 'date': '2025-12-07T13:00:01+00:00', 'x': 0, 'y': 0},
-                 {'driver_number': 1, 'date': '2025-12-07T13:00:00+00:00', 'x': 1520, 'y': -320}]
+    void laVueltaTraeSectoresYVelocidades() {
+        List<Vuelta> vueltas = DatosOpenF1.vueltas(json("""
+                [{'driver_number': 1, 'lap_number': 10, 'date_start': '2024-03-02T15:18:15.404000+00:00',
+                  'lap_duration': 96.96, 'duration_sector_1': 30.986, 'duration_sector_2': 42.009,
+                  'duration_sector_3': 23.965, 'i1_speed': 232, 'i2_speed': 244, 'st_speed': 293,
+                  'is_pit_out_lap': false}]
                 """));
 
-        assertThat(ubicaciones).hasSize(1);
-        assertThat(ubicaciones.get(0).x()).isEqualTo(1520.0);
+        Vuelta vuelta = vueltas.get(0);
+        assertThat(vuelta.sector2()).isEqualByComparingTo("42.009");
+        assertThat(vuelta.velocidadTrampa()).isEqualTo(293);
     }
 
     @Test
@@ -98,5 +100,13 @@ class DatosOpenF1Test {
         assertThat(DatosOpenF1.vueltas(json("""
                 [{'driver_number': 4, 'lap_number': 1, 'date_start': '2025-12-07T13:00:00+00:00', 'lap_duration': 95.5}]
                 """)).get(0).duracion()).isEqualByComparingTo(new BigDecimal("95.5"));
+    }
+
+    @Test
+    void elPilotoTraeElEnlaceASuFoto() {
+        List<Piloto> pilotos = DatosOpenF1.pilotos(json(
+                "[{'driver_number': 1, 'name_acronym': 'VER', 'headshot_url': 'https://media.formula1.com/ver.png'}]"));
+
+        assertThat(pilotos.get(0).foto()).isEqualTo("https://media.formula1.com/ver.png");
     }
 }
