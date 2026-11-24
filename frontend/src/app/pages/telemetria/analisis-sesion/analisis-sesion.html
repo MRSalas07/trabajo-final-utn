@@ -108,7 +108,7 @@
                   <td class="pos">{{ f.posicion ?? '—' }}</td>
                   <td>
                     <span class="muestra" [class.punteada]="f.punteada" [style.border-top-color]="f.color"></span>
-                    <strong>{{ f.acronimo }}</strong> <span class="suave">{{ f.nombre }}</span>
+                    <strong>{{ f.acronimo }}  </strong> <span class="suave espacio">  {{ f.nombre }}</span>
                   </td>
                   <td>{{ f.equipo ?? '—' }}</td>
                   <td class="num" [class.record]="f.mejor !== null && f.mejor === mejorVuelta()">{{ f.mejor | tiempo }}</td>

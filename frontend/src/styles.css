@@ -562,6 +562,10 @@ app-fila-evento {
   color: var(--texto-suave);
 }
 
+.espacio {
+  padding-left: 10px;
+}
+
 .chico {
   font-size: 0.82rem;
 }

@@ -5,7 +5,7 @@
 <p class="suave chico intro">
   Sesiones de Fórmula 1 (desde 2023) con datos de
   <a href="https://openf1.org" target="_blank" rel="noopener">OpenF1</a>, una API abierta y no oficial:
-  la torre de tiempos en vivo o en repetición, un versus entre dos pilotos y gráficos. OpenF1 libera los datos de cada sesión media hora
+  la tabla de tiempos en vivo o en repetición, un versus entre dos pilotos y gráficos. OpenF1 libera los datos de cada sesión media hora
   después de que termina (antes, solo con su suscripción).
 </p>
 
@@ -51,7 +51,6 @@
       <button type="button" role="tab" [class.activa]="vista() === 'analisis'" [attr.aria-selected]="vista() === 'analisis'"
               (click)="vista.set('analisis')">Análisis</button>
     </div>
-    <!-- Solo existe la vista elegida: al salir de "Sesión" se destruye y se frenan sus intervalos (vivo y reproducción) -->
     @if (vista() === 'sesion') {
       <app-foto-sesion [sesion]="s" />
     } @else {
