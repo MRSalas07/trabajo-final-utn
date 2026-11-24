@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.controllers.telemetria;
 
+import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.FotoSesion;
 import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.SesionTelemetria;
 import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.TelemetriaSesion;
 import com.tfi.motorsport.backend.services.telemetria.ITelemetriaService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -41,5 +43,15 @@ public class TelemetriaController {
     public TelemetriaSesion sesion(@PathVariable @Min(1) int sessionKey,
                                    @RequestParam(required = false) List<Integer> pilotos) {
         return telemetria.sesion(sessionKey, pilotos);
+    }
+
+    @Operation(summary = "Foto de la sesión: en curso = ahora; terminada = al final de la vuelta pedida, en el "
+            + "instante pedido (ISO 8601) o, sin ninguno, el final. pilotos: hasta 2 para el versus")
+    @GetMapping("/sesiones/{sessionKey}/foto")
+    public FotoSesion foto(@PathVariable @Min(1) int sessionKey,
+                           @RequestParam(required = false) @Min(1) @Max(200) Integer vuelta,
+                           @RequestParam(required = false) Instant instante,
+                           @RequestParam(required = false) List<Integer> pilotos) {
+        return telemetria.foto(sessionKey, vuelta, instante, pilotos);
     }
 }
