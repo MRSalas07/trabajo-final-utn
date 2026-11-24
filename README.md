@@ -115,9 +115,12 @@ El desarrollo se organiza en MVPs: cada uno termina con algo que se puede probar
 ### MVP 7 — Telemetría de F1 (funcionalidad plus)
 
 - **Módulo opcional** (`TELEMETRIA_HABILITADA`) con datos de [OpenF1](https://openf1.org), una API abierta y no oficial con datos desde 2023. No usa la base de datos: consulta la API, guarda los datos un rato en memoria y respeta el cupo de consultas por minuto. Si está apagado, `/api/salud` lo informa: la página de telemetría muestra un aviso y la portada no muestra su panel.
+- **Foto de la sesión:** la idea central del módulo. Para un instante T, cada dato es el último que OpenF1 informó hasta T: torre de tiempos (posición, diferencias, vueltas, última y mejor vuelta, neumático y paradas), versus de dos pilotos, dirección de carrera y clima.
 - **Análisis de sesiones terminadas (`/telemetria`):** tiempos por vuelta de hasta seis pilotos, evolución de posiciones minuto a minuto y un resumen con la mejor vuelta de cada uno.
-- **Repetición:** reproduce una sesión terminada como si fuera en vivo, con una foto por segundo por *Server-Sent Events*: torre de tiempos, autos en el mapa del circuito, telemetría del piloto seguido (velocidad, marcha, rpm, DRS, acelerador y freno), dirección de carrera y clima. Se puede pausar, cambiar la velocidad (0.5x a 10x) y elegir a qué piloto seguir.
-- **En vivo:** el mismo tablero con la sesión en curso; requiere la suscripción de OpenF1 (`OPENF1_USUARIO` y `OPENF1_PASSWORD`). La portada y la página de telemetría muestran si hay una sesión en curso.
+- **Repetición (sesiones terminadas):** "Reproducir" pide una foto por segundo y en cada una T avanza según la velocidad elegida (x1 a x30). La sesión se descarga una vez y cada foto se calcula en memoria (unos milisegundos), sin volver a consultar OpenF1. Se puede saltar a un minuto con el deslizador o, en carrera y sprint, de a una vuelta.
+- **En vivo:** T es ahora y la página pide una foto nueva cada 5 segundos, el mínimo que permite el cupo de la suscripción de OpenF1 (`OPENF1_USUARIO` y `OPENF1_PASSWORD`).
+- **Versus:** dos pilotos a elección, lado a lado: última y mejor vuelta con sus 3 sectores, mejores sectores, velocidad en la trampa y máxima, paradas, tiempo en boxes y neumático. En carrera, además, sus últimas vueltas comparadas una por una (quién fue más rápido y por cuánto).
+- **Clasificación:** se cuenta por tandas (Q1, Q2, Q3) y no por vueltas; la mejor vuelta y las diferencias son las de la tanda en curso, como en la TV.
 
 ## Stack tecnológico
 
@@ -138,7 +141,6 @@ Monolito por capas con API REST en el backend y una SPA desacoplada en el fronte
 Navegador (Angular)                      Servidor (Spring Boot)
 página → servicio → interceptor  ──HTTP/JSON──►  seguridad (CORS + JWT) → controller → service → repository → PostgreSQL
                                                                                   └─► clientes de APIs externas
-EventSource (telemetría)  ◄──Server-Sent Events──  transmisión de telemetría (un evento por segundo)
 ```
 
 Convenciones que atraviesan todo el sistema:
@@ -166,7 +168,7 @@ Palmares        totales de cada piloto por categoría, recalculados con los resu
 - Autenticación sin estado con JWT (HS256). El token incluye id, email, zona horaria y roles, y vence según `JWT_EXPIRACION_MINUTOS`.
 - Las consultas (`GET /api/**`) son públicas. `/api/usuarios/**` requiere iniciar sesión. `/api/admin/**`, crear, modificar o dar de baja categorías y recalcular el palmarés requieren rol `ADMIN`.
 - El rol `ADMIN` se asigna a los emails configurados en `ADMIN_EMAILS`.
-- Los controles de una transmisión de telemetría (`PUT /api/telemetria/transmisiones/{id}`) son públicos: el navegador abre la transmisión sin token (EventSource no puede mandarlo) y el id es un UUID aleatorio. Las credenciales de OpenF1 quedan en el servidor.
+- Las credenciales de OpenF1 quedan en el servidor: el navegador solo hace GET públicos a `/api/telemetria`.
 - CORS: la API solo acepta peticiones del navegador desde los orígenes de `CORS_ALLOWED_ORIGINS`.
 
 ## API disponible
@@ -256,12 +258,9 @@ ABM: cada recurso tiene `GET /api/admin/{recurso}` (con los filtros de la tabla)
 |---|---|---|---|
 | GET | `/sesiones?anio=` | Público | Sesiones de un año con datos en OpenF1 (desde 2023), de la más reciente a la más vieja. |
 | GET | `/sesiones/{sessionKey}` | Público | Análisis de una sesión terminada: tiempos por vuelta (`pilotos` separados por coma, hasta 6) y posiciones. |
-| GET | `/transmisiones/repeticion` | Público | Repetición por SSE. Parámetros: `sessionKey`, `velocidad` (0.5 a 10), `inicioMin` o `inicioVuelta`, `piloto`. |
-| GET | `/transmisiones/vivo` | Público | Transmisión en vivo por SSE (`sessionKey=latest`); requiere la suscripción de OpenF1. |
-| PUT | `/transmisiones/{id}` | Público | Controles de una transmisión propia: `piloto` (0 = el líder), `velocidad` y `pausa`. |
-| GET | `/vivo/estado` | Público | Si hay credenciales de OpenF1 y si hay una sesión en curso. |
+| GET | `/sesiones/{sessionKey}/foto` | Público | Foto de la sesión. En curso: ahora (requiere la suscripción). Terminada: al final de la `vuelta` del líder, en el `instante` pedido (ISO 8601) o, sin ninguno, el final. `pilotos`: hasta 2 para el versus. |
 
-Las transmisiones envían un evento `estado` por segundo (o un evento `error` con el motivo) con el mismo formato en vivo y en repetición.
+Una sesión terminada se descarga una vez (8 consultas a OpenF1) y queda media hora en memoria: después cada foto se calcula sin consultar OpenF1. En vivo, posiciones, intervalos y vueltas se renuevan cada 5 segundos y el resto cada 30 (46 consultas por minuto, debajo del cupo de 55).
 
 ## Cómo levantar el proyecto
 
@@ -300,7 +299,7 @@ La API queda en `http://localhost:8080/api`.
 | `SYNC_AUTOMATICA`, `SYNC_CRON` | Sincronización automática diaria de la temporada en curso (`false` y todos los días a las 6:00 por defecto). |
 | `WRC_HABILITADO` | Activa la fuente de WRC (`true` por defecto). |
 | `TELEMETRIA_HABILITADA` | Activa el módulo de telemetría F1 (`false` por defecto). |
-| `OPENF1_USUARIO`, `OPENF1_PASSWORD` | Suscripción de OpenF1 para el modo en vivo. Sin ellas funcionan el análisis y la repetición. |
+| `OPENF1_USUARIO`, `OPENF1_PASSWORD` | Suscripción de OpenF1 para el modo en vivo. Sin ellas, las sesiones se ven media hora después de terminar. |
 
 Las demás variables (URLs de las APIs, tiempos de espera, reintentos y cupos de consultas) tienen valores por defecto y están comentadas en `.env.example`.
 
@@ -431,6 +430,6 @@ En esta etapa se avanzó desde la propuesta hacia el diseño de la solución y l
 
 ### **Avance actual:** MVP 7 — Telemetría F1 (versión 1.8.0)
 
-- **Backend:** módulo de telemetría con OpenF1 (cliente con cupo por minuto y token para el vivo), análisis de sesiones, repetición con reloj virtual y transmisión en vivo compartida por sesión, ambas por Server-Sent Events. Además: marca por participación en TC (`equipo_x_piloto.marca`), auditoría visible en el panel de administración y `ddl-auto=validate`.
-- **Frontend:** página de telemetría con el análisis de sesiones, la repetición (torre, mapa, telemetría del auto, dirección de carrera y clima), el modo en vivo y el panel en la portada.
-- **Pruebas:** 288 tests de backend en total; en este ciclo se sumaron los de gestión (ABM), auditoría y telemetría.
+- **Backend:** módulo de telemetría con OpenF1 (cliente con cupo por minuto y token para el vivo), análisis de sesiones y foto de la sesión en un instante (vivo cada 5 s, repetición segundo a segundo y versus de dos pilotos con sectores y velocidades) con funciones puras y caché en memoria. Además: marca por participación en TC (`equipo_x_piloto.marca`), auditoría visible en el panel de administración y `ddl-auto=validate`.
+- **Frontend:** página de telemetría con las pestañas Sesión (torre, versus, dirección de carrera y clima, con repetición o refresco en vivo) y Análisis.
+- **Pruebas:** 280 tests de backend en total; en este ciclo se sumaron los de gestión (ABM), auditoría y telemetría.

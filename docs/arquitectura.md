@@ -16,7 +16,7 @@ Esta decisión arquitectónica garantiza la separación de responsabilidades (Se
 ## Procesos en segundo plano y tiempo real
 
 *   **Sincronizaciones:** se ejecutan en segundo plano y su estado se consulta mientras avanzan. Una tarea programada puede sincronizar todos los días la temporada en curso (`SYNC_AUTOMATICA`).
-*   **Telemetría F1:** es un módulo opcional que no usa la base de datos: consulta OpenF1, guarda los datos un rato en memoria y los transmite al navegador por **Server-Sent Events** (una foto de la sesión por segundo). La repetición avanza con un reloj virtual por espectador; el vivo es una sola transmisión por sesión compartida por todos los espectadores. Los controles (piloto seguido, pausa y velocidad) viajan por un `PUT` aparte.
+*   **Telemetría F1:** es un módulo opcional que no usa la base de datos: consulta OpenF1 y guarda los datos un rato en memoria. Todo se resuelve con GET comunes: el navegador pide la "foto" de la sesión en un instante (cada dato es el último informado hasta ese momento). En vivo la pide cada 5 segundos y en una sesión terminada una por segundo (la repetición), calculada en memoria; el ritmo lo maneja el frontend, así el servidor no mantiene conexiones abiertas ni hilos propios.
 
 ## Frontend (Angular)
 

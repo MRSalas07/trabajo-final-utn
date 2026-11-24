@@ -404,97 +404,121 @@ export interface TelemetriaSesion {
   aviso: string | null;
 }
 
-// ---------- MVP 7: transmisión de telemetría por SSE (espejo de TransmisionDtos.java) ----------
-export type ModoTransmision = 'VIVO' | 'REPETICION';
-/** Estado de la pista: VERDE, AMARILLA, SC (auto de seguridad), VSC (virtual), ROJA o CUADROS. */
-export type EstadoPista = 'VERDE' | 'AMARILLA' | 'SC' | 'VSC' | 'ROJA' | 'CUADROS';
-/** Fase de la transmisión. FINALIZADA y ERROR son finales: el servidor cierra la conexión. */
-export type FaseTransmision = 'CARGANDO' | 'EN_CURSO' | 'PAUSADA' | 'ESPERANDO_DATOS' | 'FINALIZADA' | 'ERROR';
-
-/** Fila de la torre de tiempos. posicion 99 = todavía sin posición. Tiempos en segundos. */
-export interface FilaTorre {
-  posicion: number;
+// ---------- MVP 7: foto de la sesión en un instante (espejo de TelemetriaDtos.java) ----------
+/** Fila de la torre en el instante de la foto. Tiempos en segundos. */
+export interface FilaFoto {
+  /** null = todavía sin posición. */
+  posicion: number | null;
   numero: number;
   acronimo: string | null;
   nombre: string | null;
   equipo: string | null;
   color: string | null;
-  /** Diferencia con el líder: "+12.345", "+1 VUELTA" o "Líder". */
-  gap: string | null;
-  /** Diferencia con el auto de adelante (null para el líder). */
+  /** Con el líder ("+12.345", "+1 VUELTA") o, si no es carrera, con la mejor vuelta del primero. null para el primero. */
+  diferencia: string | null;
+  /** Con el de adelante. */
   intervalo: string | null;
-  ultimaVuelta: number | null;
-  mejorVuelta: number | null;
   vueltas: number | null;
+  ultimaVuelta: number | null;
+  /** En la clasificación, la mejor de la tanda en curso. */
+  mejorVuelta: number | null;
+  /** Tiene la vuelta más rápida (de la sesión o de la tanda) hasta ese momento. */
+  vueltaRapida: boolean;
   /** Compuesto según OpenF1: SOFT, MEDIUM, HARD, INTERMEDIATE o WET. */
   neumatico: string | null;
   edadNeumatico: number | null;
-  enBoxes: boolean;
-  /** Tiene la vuelta más rápida de la sesión hasta el momento. */
-  vueltaRapida: boolean;
+  paradas: number;
 }
-/** Mensaje de la dirección de carrera (en inglés, tal como lo publica la FIA). */
-export interface MensajeControl {
-  hora: string | null; vuelta: number | null; bandera: string | null; categoria: string | null; mensaje: string | null;
+/** Una vuelta con sus 3 sectores (segundos) y las velocidades (km/h) en los intermedios y en la trampa. */
+export interface VueltaDetalle {
+  vuelta: number | null;
+  tiempo: number | null;
+  sector1: number | null;
+  sector2: number | null;
+  sector3: number | null;
+  velocidadI1: number | null;
+  velocidadI2: number | null;
+  velocidadTrampa: number | null;
 }
-/** Temperaturas en °C, humedad en % y viento en m/s. */
-export interface ClimaSesion {
-  aire: number | null; pista: number | null; humedad: number | null; lluvia: boolean; viento: number | null;
+/**
+ * La vuelta que el piloto está dando en el instante de la foto: solo traen valor los sectores que ya completó
+ * (con la velocidad de su intermedio). segundos: cuánto lleva de vuelta.
+ */
+export interface VueltaEnCurso {
+  vuelta: number;
+  segundos: number;
+  sector1: number | null;
+  velocidadI1: number | null;
+  sector2: number | null;
+  velocidadI2: number | null;
 }
-/** Telemetría del piloto seguido: la última muestra y unos 30 s de traza (OpenF1 la mide a ~3.7 Hz). */
-export interface FocoTelemetria {
+/** Un piloto del versus hasta el instante de la foto. */
+export interface PilotoVersus {
   numero: number;
   acronimo: string | null;
+  nombre: string | null;
+  equipo: string | null;
   color: string | null;
-  velocidad: number | null;
-  rpm: number | null;
-  marcha: number | null;
-  acelerador: number | null;
-  freno: number | null;
-  drs: boolean;
-  trazaVelocidad: (number | null)[];
-  trazaAcelerador: (number | null)[];
-  trazaFreno: (number | null)[];
+  /** Dirección de la foto oficial: el navegador la carga directo desde Fórmula 1 (o null si OpenF1 no la tiene). */
+  foto: string | null;
+  posicion: number | null;
+  vueltas: number | null;
+  /** null si no está en pista (todavía no largó, abandonó o está en boxes). */
+  vueltaEnCurso: VueltaEnCurso | null;
+  ultimaVuelta: VueltaDetalle | null;
+  mejorVuelta: VueltaDetalle | null;
+  /** Su mejor tiempo en cada sector (pueden ser de vueltas distintas): [S1, S2, S3]. */
+  mejoresSectores: (number | null)[];
+  /** La velocidad más alta que marcó en los intermedios o en la trampa (km/h). */
+  velocidadMaxima: number | null;
+  paradas: number;
+  /** Segundos en la calle de boxes en su última parada. */
+  tiempoEnBoxes: number | null;
+  neumatico: string | null;
+  edadNeumatico: number | null;
 }
-/** Posición de un auto en la pista (coordenadas de OpenF1). */
-export interface PuntoMapa {
-  numero: number; acronimo: string | null; color: string | null; x: number; y: number;
+/** La misma vuelta de los dos pilotos: quién fue más rápido (número de auto) y por cuánto ("0.234"). */
+export interface VueltaComparada {
+  vuelta: number; tiempoA: number; tiempoB: number; masRapido: number | null; diferencia: string;
 }
-/** La "foto" de la sesión que llega una vez por segundo, igual en vivo y en repetición. */
-export interface EstadoTransmision {
-  /** Id del espectador: sirve para los controles (PUT /transmisiones/{id}). */
-  id: string;
-  modo: ModoTransmision;
-  sessionKey: number | null;
-  sesion: string | null;
-  circuito: string | null;
-  pais: string | null;
-  /** Instante de la sesión que se está mostrando (reloj virtual en la repetición). */
-  hora: string | null;
-  inicioSesion: string | null;
-  /** Minutos desde el inicio de la sesión. */
-  minuto: number | null;
-  /** Vuelta en curso del líder. */
+/** Dos pilotos frente a frente. mejoresSectoresSesion: el mejor de cada sector entre todos (violeta, como en la TV). */
+export interface Versus {
+  a: PilotoVersus;
+  b: PilotoVersus;
+  mejoresSectoresSesion: (number | null)[];
+  /** Las últimas vueltas que dieron los dos, la más reciente primero. */
+  vueltas: VueltaComparada[];
+}
+/** Mensaje de la dirección de carrera (en inglés, como lo publica la FIA). */
+export interface MensajeCarrera {
+  fecha: string; vuelta: number | null; bandera: string | null; mensaje: string | null;
+}
+/** Temperaturas en °C, humedad en % y viento en m/s. */
+export interface ClimaFoto {
+  aire: number | null; pista: number | null; humedad: number | null; lluvia: boolean; viento: number | null;
+}
+/**
+ * Cómo estaba la sesión en un instante: cada dato es el último que OpenF1 informó hasta ese momento.
+ * En vivo el instante es "ahora"; en una sesión terminada, el que se pidió (por vuelta o por hora exacta).
+ */
+export interface FotoSesion {
+  sesion: SesionTelemetria;
+  enVivo: boolean;
+  instante: string | null;
+  /** Entre qué instantes hay datos (los límites de la línea de tiempo). */
+  inicioDatos: string | null;
+  finDatos: string | null;
+  /** Vueltas que completó el líder (solo carrera y sprint). */
   vuelta: number | null;
-  estadoPista: EstadoPista;
-  estado: FaseTransmision;
-  velocidad: number;
-  torre: FilaTorre[];
-  mensajes: MensajeControl[];
-  clima: ClimaSesion | null;
-  foco: FocoTelemetria | null;
-  mapa: PuntoMapa[];
-  /** Contorno del circuito [x, y]: llega solo cuando cambia (si viene null, se conserva el anterior). */
-  trazado: [number, number][] | null;
+  totalVueltas: number | null;
+  /** Tanda de la clasificación ("Q1", "Q2", "Q3" o "SQ1"...) y cuándo empezó; null en el resto. */
+  tanda: string | null;
+  inicioTanda: string | null;
+  filas: FilaFoto[];
+  versus: Versus | null;
+  /** Los más recientes primero. */
+  mensajes: MensajeCarrera[];
+  clima: ClimaFoto | null;
+  /** Por qué no hay datos (ej: sesión en curso sin suscripción), o null. */
   aviso: string | null;
-}
-/** Estado del modo en vivo (GET /telemetria/vivo/estado). El backend lo guarda un minuto. */
-export interface InfoVivo {
-  /** El backend tiene configurada la suscripción de OpenF1 (OPENF1_USUARIO y OPENF1_PASSWORD). */
-  credenciales: boolean;
-  /** La sesión más reciente según OpenF1 (la que se corre ahora o la última), o null si OpenF1 no respondió. */
-  ultimaSesion: SesionTelemetria | null;
-  /** Hay una sesión en curso: desde media hora antes de que empiece hasta media hora después de que termine. */
-  enVentanaVivo: boolean;
-  mensaje: string;
 }
