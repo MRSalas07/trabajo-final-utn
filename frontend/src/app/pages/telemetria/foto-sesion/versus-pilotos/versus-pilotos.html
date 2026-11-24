@@ -1,0 +1,84 @@
+@let v = versus();
+<div class="encabezado">
+  <label class="piloto" [style.border-color]="v.a.color">
+    @if (v.a.foto) {
+      <!-- La foto la sirve Fórmula 1: si no carga, se oculta y queda el resto del versus -->
+      <img class="foto" [src]="v.a.foto" [alt]="v.a.nombre ?? v.a.acronimo" width="64" height="64" loading="lazy"
+           (error)="$any($event.target).hidden = true" />
+    }
+    <select (change)="elegirA($any($event.target).value)" aria-label="Primer piloto del versus">
+      @for (fila of filas(); track fila.numero) {
+        <option [value]="fila.numero" [selected]="fila.numero === v.a.numero" [disabled]="fila.numero === v.b.numero">{{ fila.acronimo ?? fila.numero }}</option>
+      }
+    </select>
+    <span class="suave chico">{{ v.a.equipo }}@if (v.a.neumatico) { · {{ v.a.neumatico }} ({{ v.a.edadNeumatico ?? '?' }}) }</span>
+  </label>
+  <span class="vs">VS</span>
+  <label class="piloto derecha" [style.border-color]="v.b.color">
+    @if (v.b.foto) {
+      <img class="foto" [src]="v.b.foto" [alt]="v.b.nombre ?? v.b.acronimo" width="64" height="64" loading="lazy"
+           (error)="$any($event.target).hidden = true" />
+    }
+    <select (change)="elegirB($any($event.target).value)" aria-label="Segundo piloto del versus">
+      @for (fila of filas(); track fila.numero) {
+        <option [value]="fila.numero" [selected]="fila.numero === v.b.numero" [disabled]="fila.numero === v.a.numero">{{ fila.acronimo ?? fila.numero }}</option>
+      }
+    </select>
+    <span class="suave chico">{{ v.b.equipo }}@if (v.b.neumatico) { · {{ v.b.neumatico }} ({{ v.b.edadNeumatico ?? '?' }}) }</span>
+  </label>
+</div>
+
+<p class="en-curso chico">
+  <span>@if (v.a.vueltaEnCurso; as c) { Vuelta <strong>{{ c.vuelta }}</strong> · {{ c.segundos }} s } @else { Sin vuelta en curso }</span>
+  <span class="suave">Vuelta en curso</span>
+  <span>@if (v.b.vueltaEnCurso; as c) { Vuelta <strong>{{ c.vuelta }}</strong> · {{ c.segundos }} s } @else { Sin vuelta en curso }</span>
+</p>
+
+<table class="comparacion">
+  <tbody>
+    @for (r of renglones(); track r.etiqueta) {
+      @let gana = ganador(r);
+      <tr [class.actual]="r.etiqueta.startsWith('En curso')">
+        <td class="num" [class.gana]="gana === 'a'" [class.record]="esRecord(r, r.a)">
+          @switch (r.formato) {
+            @case ('tiempo') { {{ r.a | tiempo }} }
+            @case ('velocidad') { {{ r.a ?? '—' }}@if (r.a !== null) { <small> km/h</small> } }
+            @default { {{ r.a ?? '—' }} }
+          }
+        </td>
+        <th scope="row">{{ r.etiqueta }}</th>
+        <td class="num" [class.gana]="gana === 'b'" [class.record]="esRecord(r, r.b)">
+          @switch (r.formato) {
+            @case ('tiempo') { {{ r.b | tiempo }} }
+            @case ('velocidad') { {{ r.b ?? '—' }}@if (r.b !== null) { <small> km/h</small> } }
+            @default { {{ r.b ?? '—' }} }
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+<p class="suave chico leyenda"><span class="muestra gana">verde</span> el mejor de los dos · <span class="muestra record">violeta</span> el mejor sector de la sesión</p>
+
+<h3 class="subtitulo">Vuelta a vuelta</h3>
+@if (v.vueltas.length) {
+  <p class="chico">En las últimas {{ v.vueltas.length }}: <strong>{{ acronimo(v.a.numero) }} {{ ganadas().a }}</strong> – <strong>{{ ganadas().b }} {{ acronimo(v.b.numero) }}</strong></p>
+  <table class="vueltas">
+    <thead>
+      <tr><th>V</th><th class="num">{{ acronimo(v.a.numero) }}</th><th class="num">{{ acronimo(v.b.numero) }}</th><th>Más rápido</th></tr>
+    </thead>
+    <tbody>
+      @for (vuelta of v.vueltas; track vuelta.vuelta) {
+        <tr>
+          <td>{{ vuelta.vuelta }}</td>
+          <td class="num" [class.gana]="vuelta.masRapido === v.a.numero">{{ vuelta.tiempoA | tiempo }}</td>
+          <td class="num" [class.gana]="vuelta.masRapido === v.b.numero">{{ vuelta.tiempoB | tiempo }}</td>
+          <td>@if (vuelta.masRapido) { {{ acronimo(vuelta.masRapido) }} por {{ vuelta.diferencia }} s } @else { Empate }</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else {
+  <p class="suave chico">Sin vueltas para comparar: en práctica y clasificación se comparan las mejores vueltas y los sectores;
+    en carrera, cuando los dos completen una misma vuelta.</p>
+}

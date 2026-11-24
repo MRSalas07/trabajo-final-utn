@@ -3,23 +3,17 @@
   <span class="chip-cat" data-cat="F1">F1</span>
 </div>
 <p class="suave chico intro">
-  Sesiones en vivo, análisis y repeticiones de Fórmula 1 (desde 2023) con datos de
-  <a href="https://openf1.org" target="_blank" rel="noopener">OpenF1</a>, una API abierta y no oficial.
-  OpenF1 libera los datos de cada sesión media hora después de que termina.
+  Sesiones de Fórmula 1 (desde 2023) con datos de
+  <a href="https://openf1.org" target="_blank" rel="noopener">OpenF1</a>, una API abierta y no oficial:
+  la torre de tiempos en vivo o en repetición, un versus entre dos pilotos y gráficos. OpenF1 libera los datos de cada sesión media hora
+  después de que termina (antes, solo con su suscripción).
 </p>
 
 @if (habilitada() === null) {
   <app-estado-carga [cargando]="!errorSalud()" [error]="errorSalud()" />
 } @else if (!habilitada()) {
   <p class="aviso">La telemetría de F1 es un módulo opcional y no está habilitada en este servidor.</p>
-} @else if (enVivo()) {
-  <app-transmision [url]="urlVivo" (detenida)="salirVivo()" />
 } @else {
-  <section class="panel en-vivo" aria-label="Sesión en curso">
-    <app-panel-vivo (ver)="verVivo()" />
-  </section>
-
-  <h2 class="subtitulo">Sesiones terminadas</h2>
   <div class="filtros">
     <label>Temporada
       <select [value]="anio()" (change)="elegirAnio($any($event.target).value)">
@@ -52,17 +46,16 @@
     </div>
 
     <div class="pestanas" role="tablist" aria-label="Vista de la sesión">
+      <button type="button" role="tab" [class.activa]="vista() === 'sesion'" [attr.aria-selected]="vista() === 'sesion'"
+              (click)="vista.set('sesion')">Sesión</button>
       <button type="button" role="tab" [class.activa]="vista() === 'analisis'" [attr.aria-selected]="vista() === 'analisis'"
               (click)="vista.set('analisis')">Análisis</button>
-      <button type="button" role="tab" [class.activa]="vista() === 'repeticion'" [attr.aria-selected]="vista() === 'repeticion'"
-              (click)="vista.set('repeticion')">Repetición</button>
     </div>
-    <!-- Las dos vistas quedan creadas: al cambiar de pestaña, la repetición sigue corriendo y el análisis conserva su elección -->
-    <div [hidden]="vista() !== 'analisis'">
+    <!-- Solo existe la vista elegida: al salir de "Sesión" se destruye y se frenan sus intervalos (vivo y reproducción) -->
+    @if (vista() === 'sesion') {
+      <app-foto-sesion [sesion]="s" />
+    } @else {
       <app-analisis-sesion [sesion]="s" />
-    </div>
-    <div [hidden]="vista() !== 'repeticion'">
-      <app-repeticion [sesion]="s" />
-    </div>
+    }
   }
 }
