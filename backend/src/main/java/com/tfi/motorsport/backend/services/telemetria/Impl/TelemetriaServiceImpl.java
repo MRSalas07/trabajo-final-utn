@@ -17,6 +17,9 @@ import com.tfi.motorsport.backend.services.telemetria.CalculadoraFoto;
 import com.tfi.motorsport.backend.services.telemetria.CalculadoraFoto.DatosSesion;
 import com.tfi.motorsport.backend.services.telemetria.ITelemetriaService;
 import com.tfi.motorsport.backend.services.telemetria.DatosOpenF1;
+import com.tfi.motorsport.backend.services.telemetria.DatosOpenF1.Piloto;
+import com.tfi.motorsport.backend.services.telemetria.DatosOpenF1.Posicion;
+import com.tfi.motorsport.backend.services.telemetria.DatosOpenF1.Vuelta;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
@@ -30,13 +33,11 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 
@@ -48,6 +49,7 @@ import java.util.function.Function;
  *
  * OpenF1 da gratis los datos históricos desde 2023. Desde 30 minutos antes hasta 30 minutos después
  * de una sesión sus datos son solo para suscriptores, por eso el análisis es de sesiones ya liberadas.
+ * El análisis (gráficos) y la foto usan los MISMOS datos de la sesión, guardados una vez en la caché.
  *
  * La foto de la sesión (vivo, repetición y versus) se arma con CalculadoraFoto: este servicio solo decide
  * el instante, descarga los datos (con caché, para cuidar el cupo de OpenF1) y le pasa todo. Una sesión
@@ -101,14 +103,11 @@ public class TelemetriaServiceImpl implements ITelemetriaService {
                     motivo + " El análisis se habilita cuando OpenF1 libera los datos (media hora después del final).");
         }
 
-        Map<Integer, PilotoTelemetria> porNumero = new LinkedHashMap<>();
-        for (PilotoTelemetria piloto : cache.obtener("pilotos-" + sessionKey, () -> pilotosDeSesion(sessionKey))) {
-            porNumero.put(piloto.numero(), piloto);
-        }
-        List<SeriePosiciones> posiciones = cache.obtener("posiciones-" + sessionKey,
-                () -> posiciones(sessionKey, sesion.inicio(), porNumero));
-        Map<Integer, SerieVueltas> vueltas = cache.obtener("vueltas-" + sessionKey,
-                () -> vueltas(sessionKey, porNumero));
+        // Los mismos datos que usa la foto (misma caché): abrir las dos pestañas descarga la sesión una sola vez
+        DatosSesion datos = datosTerminada(sessionKey);
+        Map<Integer, PilotoTelemetria> porNumero = pilotosDelAnalisis(datos.pilotos());
+        List<SeriePosiciones> posiciones = seriesDePosiciones(datos.posiciones(), sesion.inicio(), porNumero);
+        Map<Integer, SerieVueltas> vueltas = seriesDeVueltas(datos.vueltas(), porNumero);
 
         List<Integer> seleccion = (pilotos == null || pilotos.isEmpty())
                 ? mejorUbicados(posiciones, porNumero)
@@ -254,36 +253,25 @@ public class TelemetriaServiceImpl implements ITelemetriaService {
 
     // ------------------------------------------------------------------ análisis
 
-    private List<PilotoTelemetria> pilotosDeSesion(int sessionKey) {
-        List<PilotoTelemetria> lista = new ArrayList<>();
-        Set<Integer> vistos = new HashSet<>();
-        for (JsonNode d : FormatJson.lista(cliente.get("drivers?session_key=" + sessionKey))) {
-            Integer numero = FormatJson.aInt(d, "driver_number");
-            if (numero != null && vistos.add(numero)) {
-                lista.add(new PilotoTelemetria(numero, FormatJson.aString(d, "full_name"),
-                        FormatJson.aString(d, "name_acronym"), FormatJson.aString(d, "team_name"),
-                        color(FormatJson.aString(d, "team_colour"))));
-            }
+    /**
+     * Los pilotos para los gráficos, sin repetidos. Si OpenF1 no informa el color del equipo, se deja null
+     * para que el gráfico use su propia paleta (y no queden varias líneas del mismo gris).
+     */
+    private static Map<Integer, PilotoTelemetria> pilotosDelAnalisis(List<Piloto> pilotos) {
+        Map<Integer, PilotoTelemetria> porNumero = new LinkedHashMap<>();
+        for (Piloto piloto : pilotos) {
+            String color = DatosOpenF1.COLOR_POR_DEFECTO.equals(piloto.color()) ? null : piloto.color();
+            porNumero.putIfAbsent(piloto.numero(), new PilotoTelemetria(piloto.numero(), piloto.nombre(),
+                    piloto.acronimo(), piloto.equipo(), color));
         }
-        return List.copyOf(lista);
+        return porNumero;
     }
 
-    /** OpenF1 informa cada CAMBIO de posición con su hora: se arma una serie por piloto, en orden. */
-    private List<SeriePosiciones> posiciones(int sessionKey, Instant inicio, Map<Integer, PilotoTelemetria> pilotos) {
-        record Cambio(Integer numero, Instant fecha, Integer posicion) {
-        }
-        List<Cambio> cambios = new ArrayList<>();
-        for (JsonNode p : FormatJson.lista(cliente.get("position?session_key=" + sessionKey))) {
-            Cambio cambio = new Cambio(FormatJson.aInt(p, "driver_number"),
-                    FormatJson.instantUtc(FormatJson.aString(p, "date")), FormatJson.aInt(p, "position"));
-            if (cambio.numero() != null && cambio.fecha() != null && cambio.posicion() != null) {
-                cambios.add(cambio);
-            }
-        }
-        cambios.sort(Comparator.comparing(Cambio::fecha));
-
+    /** OpenF1 informa cada CAMBIO de posición con su hora (ya vienen ordenados): una serie por piloto. */
+    private static List<SeriePosiciones> seriesDePosiciones(List<Posicion> cambios, Instant inicio,
+                                                            Map<Integer, PilotoTelemetria> pilotos) {
         Map<Integer, SeriePosiciones> series = new LinkedHashMap<>();
-        for (Cambio cambio : cambios) {
+        for (Posicion cambio : cambios) {
             SeriePosiciones serie = series.computeIfAbsent(cambio.numero(),
                     numero -> new SeriePosiciones(numero, acronimo(numero, pilotos.get(numero)),
                             colorDe(pilotos.get(numero)), new ArrayList<>(), new ArrayList<>()));
@@ -294,19 +282,14 @@ public class TelemetriaServiceImpl implements ITelemetriaService {
         return List.copyOf(series.values());
     }
 
-    /**
-     * Las vueltas de TODOS los pilotos en una sola consulta (cuida el cupo de OpenF1): después se elige
-     * qué pilotos mostrar sin volver a consultar.
-     */
-    private Map<Integer, SerieVueltas> vueltas(int sessionKey, Map<Integer, PilotoTelemetria> pilotos) {
+    /** Las vueltas de todos los pilotos: después se elige qué pilotos mostrar sin volver a consultar. */
+    private static Map<Integer, SerieVueltas> seriesDeVueltas(List<Vuelta> vueltas, Map<Integer, PilotoTelemetria> pilotos) {
         Map<Integer, TreeMap<Integer, BigDecimal>> porPiloto = new LinkedHashMap<>();
-        for (JsonNode v : FormatJson.lista(cliente.get("laps?session_key=" + sessionKey))) {
-            Integer numero = FormatJson.aInt(v, "driver_number");
-            Integer vuelta = FormatJson.aInt(v, "lap_number");
-            BigDecimal tiempo = FormatJson.aDecimal(v, "lap_duration");
+        for (Vuelta vuelta : vueltas) {
             // Las vueltas sin tiempo o de salida de boxes distorsionan el gráfico: se omiten
-            if (numero != null && vuelta != null && tiempo != null && !FormatJson.booleano(v, "is_pit_out_lap")) {
-                porPiloto.computeIfAbsent(numero, n -> new TreeMap<>()).put(vuelta, tiempo.setScale(3, RoundingMode.HALF_UP));
+            if (vuelta.terminada() && !vuelta.salidaBoxes()) {
+                porPiloto.computeIfAbsent(vuelta.numero(), numero -> new TreeMap<>())
+                        .put(vuelta.vuelta(), vuelta.duracion().setScale(3, RoundingMode.HALF_UP));
             }
         }
         Map<Integer, SerieVueltas> series = new LinkedHashMap<>();
@@ -335,13 +318,5 @@ public class TelemetriaServiceImpl implements ITelemetriaService {
 
     private static String colorDe(PilotoTelemetria piloto) {
         return piloto != null ? piloto.color() : null;
-    }
-
-    /** OpenF1 manda el color del equipo sin "#" (ej: "3671C6"). */
-    static String color(String hex) {
-        if (hex == null || hex.isBlank()) {
-            return null;
-        }
-        return hex.startsWith("#") ? hex : "#" + hex;
     }
 }

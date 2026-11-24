@@ -20,7 +20,7 @@ import java.util.function.Function;
 public final class DatosOpenF1 {
 
     /** Color para los pilotos cuyo equipo no informa color. */
-    static final String COLOR_POR_DEFECTO = "#9aa6b5";
+    public static final String COLOR_POR_DEFECTO = "#9aa6b5";
     /**
      * Los datos de una sesión son solo para suscriptores desde 30 minutos antes hasta 30 minutos después
      * de la sesión: recién ahí quedan libres (gratis) para el análisis y la línea de tiempo.

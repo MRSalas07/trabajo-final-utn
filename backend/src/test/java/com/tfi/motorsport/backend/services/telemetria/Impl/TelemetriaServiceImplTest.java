@@ -1,6 +1,7 @@
 package com.tfi.motorsport.backend.services.telemetria.Impl;
 
 import com.tfi.motorsport.backend.clients.openf1.OpenF1Cliente;
+import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.PilotoTelemetria;
 import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.SeriePosiciones;
 import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.SerieVueltas;
 import com.tfi.motorsport.backend.dtos.telemetria.TelemetriaDtos.SesionTelemetria;
@@ -69,7 +70,7 @@ class TelemetriaServiceImplTest {
                  {'driver_number': 16, 'name_acronym': 'LEC', 'team_name': 'Ferrari', 'team_colour': 'E8002D'},
                  {'driver_number': 44, 'name_acronym': 'HAM', 'team_name': 'Ferrari', 'team_colour': 'E8002D'},
                  {'driver_number': 63, 'name_acronym': 'RUS', 'team_name': 'Mercedes', 'team_colour': '27F4D2'},
-                 {'driver_number': 12, 'name_acronym': 'ANT', 'team_name': 'Mercedes', 'team_colour': '27F4D2'}]
+                 {'driver_number': 12, 'name_acronym': 'ANT', 'team_name': 'Mercedes'}]
                 """));
         when(openF1.get("position?session_key=" + CARRERA)).thenReturn(json("""
                 [{'driver_number': 4, 'date': '2025-11-22T04:30:00.000000+00:00', 'position': 1},
@@ -83,13 +84,17 @@ class TelemetriaServiceImplTest {
                  {'driver_number': 1, 'date': '2025-11-22T04:30:00.000000+00:00', 'position': 2}]
                 """));
         when(openF1.get("laps?session_key=" + CARRERA)).thenReturn(json("""
-                [{'driver_number': 1, 'lap_number': 1, 'lap_duration': 95.123, 'is_pit_out_lap': false},
-                 {'driver_number': 1, 'lap_number': 2, 'lap_duration': 120.5, 'is_pit_out_lap': true},
-                 {'driver_number': 1, 'lap_number': 3, 'lap_duration': 93.4567, 'is_pit_out_lap': false},
-                 {'driver_number': 1, 'lap_number': 4, 'lap_duration': null, 'is_pit_out_lap': false},
-                 {'driver_number': 4, 'lap_number': 1, 'lap_duration': 94.2, 'is_pit_out_lap': false},
-                 {'driver_number': 12, 'lap_number': 1, 'lap_duration': 96.0, 'is_pit_out_lap': false}]
+                [{'driver_number': 1, 'lap_number': 1, 'date_start': '2025-11-22T04:03:00+00:00', 'lap_duration': 95.123, 'is_pit_out_lap': false},
+                 {'driver_number': 1, 'lap_number': 2, 'date_start': '2025-11-22T04:04:35+00:00', 'lap_duration': 120.5, 'is_pit_out_lap': true},
+                 {'driver_number': 1, 'lap_number': 3, 'date_start': '2025-11-22T04:06:36+00:00', 'lap_duration': 93.4567, 'is_pit_out_lap': false},
+                 {'driver_number': 1, 'lap_number': 4, 'date_start': '2025-11-22T04:08:10+00:00', 'lap_duration': null, 'is_pit_out_lap': false},
+                 {'driver_number': 4, 'lap_number': 1, 'date_start': '2025-11-22T04:03:00+00:00', 'lap_duration': 94.2, 'is_pit_out_lap': false},
+                 {'driver_number': 12, 'lap_number': 1, 'date_start': '2025-11-22T04:03:00+00:00', 'lap_duration': 96.0, 'is_pit_out_lap': false}]
                 """));
+        // El análisis usa los mismos datos que la foto: se descarga la sesión completa una sola vez
+        for (String resto : List.of("intervals", "stints", "pit", "race_control", "weather")) {
+            when(openF1.get(resto + "?session_key=" + CARRERA)).thenReturn(json("[]"));
+        }
     }
 
     // ---------------------------------------------------------------- sesiones de un año
@@ -189,6 +194,18 @@ class TelemetriaServiceImplTest {
     }
 
     @Test
+    void analisisYFoto_compartenLosDatos_seDescarganUnaSolaVez() {
+        carreraTerminada();
+
+        service.sesion(CARRERA, List.of());
+        service.foto(CARRERA, null, null, null);
+
+        verify(openF1, times(1)).get("laps?session_key=" + CARRERA);
+        verify(openF1, times(1)).get("position?session_key=" + CARRERA);
+        verify(openF1, times(1)).get("drivers?session_key=" + CARRERA);
+    }
+
+    @Test
     void sesion_queTodaviaNoTermino_devuelveUnAvisoSinPedirMasDatos() {
         String inicio = Instant.now().minus(Duration.ofMinutes(30)).toString();
         String fin = Instant.now().plus(Duration.ofMinutes(90)).toString();
@@ -228,10 +245,12 @@ class TelemetriaServiceImplTest {
     }
 
     @Test
-    void color_agregaElNumeralQueOpenF1NoManda() {
-        assertThat(TelemetriaServiceImpl.color("3671C6")).isEqualTo("#3671C6");
-        assertThat(TelemetriaServiceImpl.color("#FF8000")).isEqualTo("#FF8000");
-        assertThat(TelemetriaServiceImpl.color(" ")).isNull();
-        assertThat(TelemetriaServiceImpl.color(null)).isNull();
+    void pilotoSinColorDeEquipo_quedaSinColorParaQueElGraficoUseSuPaleta() {
+        carreraTerminada();
+
+        TelemetriaSesion analisis = service.sesion(CARRERA, List.of());
+
+        assertThat(analisis.pilotos()).filteredOn(piloto -> piloto.numero() == 12)
+                .extracting(PilotoTelemetria::color).containsExactly((String) null);
     }
 }

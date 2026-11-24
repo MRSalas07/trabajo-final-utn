@@ -27,6 +27,10 @@ export class CalendarioService {
         return `${this.apiUrl}/calendario/${siglas}/${anio}.ics`; 
     }
 
+    descargarIcsTemporada(siglas: string, anio: number): Observable<Blob> {
+        return this.http.get(this.urlIcsTemporada(siglas, anio), { responseType: 'blob' });
+    }
+
     private enviarConZona(params: Record<string, string | number | undefined | null> = {}): HttpParams {
         let param = new HttpParams().set('zona', this.zonaService.zona());
         for (const key in params) {
