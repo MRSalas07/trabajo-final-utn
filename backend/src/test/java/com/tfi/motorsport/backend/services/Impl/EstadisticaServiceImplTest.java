@@ -71,11 +71,15 @@ class EstadisticaServiceImplTest {
     @Mock
     private ResultadoSesionJPARepository resultadoSesionRepo;
     @Mock
+    private ResultadoEtapaJPARepository resultadoEtapaRepo;
+    @Mock
     private CategoriaJPARepository categoriaRepo;
     @Mock
     private PalmaresJPARepository palmaresRepo;
     @Mock
     private EquipoJPARepository equipoRepo;
+    @Mock
+    private EquipoPilotoJPARepository participacionRepo;
 
     @InjectMocks
     private EstadisticaServiceImpl service;
@@ -135,6 +139,7 @@ class EstadisticaServiceImplTest {
         when(categoriaRepo.findBySiglasIgnoreCase("F1")).thenReturn(Optional.of(categoria));
         when(resultadoSesionRepo.filasDeCategoria(CATEGORIA_ID)).thenReturn(temporadaDeDosFechas());
     }
+
 
     @Test
     void campeonatoPilotos_ordenaLaTablaPorPuntos() {
@@ -217,7 +222,6 @@ class EstadisticaServiceImplTest {
         assertThat(resumen.eventosTotales()).isEqualTo(1);
     }
 
-
     @Test
     void evolucionPilotos_conMasDeVeintePilotos_lanzaErrorDeNegocio() {
         // Arrange
@@ -298,6 +302,7 @@ class EstadisticaServiceImplTest {
         assertThat(comparativa.a().pilotoId()).isEqualTo(ALONSO);
         assertThat(comparativa.b().pilotoId()).isEqualTo(HAMILTON);
     }
+
 
     @Test
     void recalcularPalmares_creaElPalmaresConLosContadoresDeCadaPiloto() {
@@ -491,6 +496,7 @@ class EstadisticaServiceImplTest {
         // Assert
         assertThat(evolucion.tipo()).isEqualTo("MARCA");
     }
+
 
     @Test
     void historicoPiloto_conResultados_devuelveUnaTemporadaPorAnio() {
