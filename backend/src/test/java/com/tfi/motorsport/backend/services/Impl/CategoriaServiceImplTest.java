@@ -25,11 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.never;
 
-/**
- * Pruebas unitarias del servicio de categorías.
- * Los repositorios y servicios de los que depende se reemplazan por mocks: no se usa base de datos.
- * Cada prueba sigue el patrón AAA: Arrange (preparar), Act (ejecutar), Assert (verificar).
- */
+
 @ExtendWith(MockitoExtension.class)
 class CategoriaServiceImplTest {
 
