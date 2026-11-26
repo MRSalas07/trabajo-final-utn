@@ -1,5 +1,5 @@
 /** Configuración de DESARROLLO (ng serve): backend local. */
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080/api',
+  apiUrl: 'https://motorsport-analytics-api.onrender.com/api',
 };
