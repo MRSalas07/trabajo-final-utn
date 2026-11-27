@@ -60,4 +60,8 @@ src/styles.css          estilos globales: variables de color, paneles y grilla d
 
 ## Pruebas
 
-Todavía no hay tests del frontend.
+```sh
+npm test -- --watch=false      # ng test (Vitest): 36 tests en 7 archivos .spec.ts
+```
+
+Cubren la lógica del cliente: seguridad (interceptor, guards y sesión), formatos y pipes, seguimiento de sincronizaciones y reglas de la telemetría, incluido el componente del versus. No cubren todas las pantallas.
