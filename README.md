@@ -348,7 +348,7 @@ cd frontend
 npm test -- --watch=false
 ```
 
-Resultado en `develop` al cerrar el MVP 7: **471 tests del backend y 36 del frontend, todos aprobados**. `./gradlew test` genera además el reporte de cobertura de JaCoCo en `backend/build/reports/jacoco/test/html/index.html` (86,4 % de las líneas y 70,6 % de las ramas).
+Resultado en `develop` al cerrar el MVP 7: **471 tests del backend y 36 del frontend, todos aprobados**. `./gradlew test` genera además el reporte de cobertura de JaCoCo en `backend/build/reports/jacoco/test/html/index.html` (86 % de las líneas y 70,6 % de las ramas).
 
 Los tests del backend cubren las funciones puras (motor estadístico, foto de la telemetría, `.ics`, zonas horarias), los servicios con dependencias simuladas, los controladores con `MockMvc` (seguridad, validaciones y errores) y los adaptadores de F1 y WRC contra un servidor HTTP local. Los del frontend cubren la seguridad (interceptor, guards y sesión), los formatos, el seguimiento de sincronizaciones y las reglas de la telemetría, incluido el versus. H2 no replica las reglas propias de PostgreSQL (valores por defecto de auditoría, disparadores e índices únicos parciales): esas se verifican a mano sobre PostgreSQL.
 
