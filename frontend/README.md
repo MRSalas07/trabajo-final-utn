@@ -15,8 +15,10 @@ Necesita el backend levantado. La dirección de la API se configura por entorno:
 
 | Archivo | Cuándo se usa | `apiUrl` |
 |---|---|---|
-| `src/environments/environment.development.ts` | `npm start` (`ng serve`) | `http://localhost:8080/api` |
-| `src/environments/environment.ts` | `npm run build` (producción) | Cambiarla por la URL del backend desplegado antes de publicar. |
+| `src/environments/environment.development.ts` | `npm start` (`ng serve`) | Hoy apunta al backend publicado en Render (`https://motorsport-analytics-api.onrender.com/api`). Para usar el backend local, cambiarla a `http://localhost:8080/api`. |
+| `src/environments/environment.ts` | `npm run build` (producción) | `https://motorsport-analytics-api.onrender.com/api` (backend desplegado en Render). |
+
+El frontend de producción se publica en Vercel con [`vercel.json`](vercel.json) (ver el [README principal](../README.md#despliegue-en-la-nube)).
 
 ## Estructura
 
