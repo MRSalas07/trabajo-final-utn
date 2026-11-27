@@ -1,0 +1,52 @@
+:host { display: block; }
+
+/* ------------------------------------------------------------ barra y línea de tiempo */
+.barra {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem 1rem;
+  padding: 0.7rem 0.9rem; background: var(--superficie); border: 1px solid var(--borde-suave);
+  border-left: 6px solid var(--ok); border-radius: var(--radio);
+}
+.barra-info, .barra-controles { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.9rem; }
+.barra-controles { gap: 0.5rem; }
+.control { display: flex; flex-direction: row; align-items: center; gap: 0.4rem; font-size: 0.85rem; }
+.control select { min-height: 34px; padding: 0.2rem 0.45rem; }
+.modo {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 0.15rem 0.5rem; border-radius: 4px; background: var(--superficie-3);
+}
+.modo.vivo { background: var(--vivo); color: #fff; }
+.dato { color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.dato strong { color: var(--texto); }
+.linea-tiempo { display: flex; flex-direction: column; gap: 0.3rem; margin: 0.75rem 0; }
+.linea-tiempo input { width: 100%; accent-color: var(--acento); }
+
+/* ------------------------------------------------------------ tablero: en el celular todo en una columna */
+.tablero {
+  display: grid; gap: var(--gap); margin-top: 0.75rem; grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'torre' 'versus' 'control' 'clima';
+}
+@media (min-width: 1100px) {
+  .tablero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'torre versus' 'control clima'; }
+}
+.area-torre { grid-area: torre; }
+.area-versus { grid-area: versus; }
+.area-control { grid-area: control; }
+.area-clima { grid-area: clima; }
+.panel { gap: 0.6rem; }
+.panel p { margin: 0; }
+
+/* ------------------------------------------------------------ dirección de carrera */
+.mensajes { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; max-height: 260px; overflow-y: auto; }
+.mensajes li { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 0.55rem; align-items: baseline; font-size: 0.82rem; }
+.cuando { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bandera { width: 10px; height: 10px; border-radius: 2px; background: var(--borde); align-self: center; }
+.bandera[data-bandera='GREEN'], .bandera[data-bandera='CLEAR'] { background: var(--ok); }
+.bandera[data-bandera='YELLOW'], .bandera[data-bandera='DOUBLE YELLOW'] { background: var(--oro); }
+.bandera[data-bandera='RED'] { background: var(--vivo); }
+.bandera[data-bandera='BLUE'] { background: var(--cat-tc); }
+.bandera[data-bandera='CHEQUERED'] { background: repeating-conic-gradient(#fff 0 25%, #111 0 50%) 50% / 5px 5px; }
+.bandera[data-bandera='BLACK AND WHITE'] { background: linear-gradient(135deg, #fff 50%, #111 50%); }
+
+/* ------------------------------------------------------------ clima */
+.kpi .valor { font-size: 1.3rem; }
+.kpi.lluvia { background: rgb(47 124 246 / 0.18); }

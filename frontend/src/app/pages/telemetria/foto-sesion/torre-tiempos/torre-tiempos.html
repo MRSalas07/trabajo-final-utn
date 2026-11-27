@@ -1,0 +1,40 @@
+<div class="tabla-scroll">
+  <table class="torre">
+    <thead>
+      <tr>
+        <th>Pos</th>
+        <th>Piloto</th>
+        <th class="num" title="Diferencia con el primero">Dif.</th>
+        <th class="num" title="Diferencia con el de adelante">Int.</th>
+        <th class="num" title="Vueltas completadas">V</th>
+        <th class="num">Última</th>
+        <th class="num">Mejor</th>
+        <th title="Neumático y vueltas de uso">Neum.</th>
+        <th class="num" title="Paradas en boxes">Par.</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (fila of filas(); track fila.numero) {
+        @let compuesto = neumatico(fila.neumatico);
+        <tr [class.podio-1]="fila.posicion === 1" [class.podio-2]="fila.posicion === 2" [class.podio-3]="fila.posicion === 3">
+          <td class="pos">{{ fila.posicion ?? '—' }}</td>
+          <td>
+            <span class="piloto" [style.border-left-color]="fila.color" [title]="fila.nombre ?? ''">
+              {{ fila.acronimo ?? fila.numero }}
+            </span>
+          </td>
+          <td class="num">{{ fila.posicion === 1 ? 'Líder' : (fila.diferencia ?? '—') }}</td>
+          <td class="num">{{ fila.intervalo ?? '' }}</td>
+          <td class="num">{{ fila.vueltas ?? '—' }}</td>
+          <td class="num">{{ fila.ultimaVuelta | tiempo }}</td>
+          <td class="num" [class.record]="fila.vueltaRapida">{{ fila.mejorVuelta | tiempo }}</td>
+          <td class="neum">
+            @if (compuesto) { <span class="neumatico" [attr.data-compuesto]="fila.neumatico" [title]="compuesto.nombre">{{ compuesto.letra }}</span> }
+            <span class="suave">{{ fila.edadNeumatico ?? '' }}</span>
+          </td>
+          <td class="num">{{ fila.paradas }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

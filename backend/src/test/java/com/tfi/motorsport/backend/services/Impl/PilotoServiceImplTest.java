@@ -44,10 +44,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-/**
- * Pruebas unitarias del servicio de pilotos (repositorios reemplazados por mocks, sin base de datos).
- * Las consultas se validan aparte: Spring las compila al iniciar el contexto en PerfilesControllerTest.
- */
+
 @ExtendWith(MockitoExtension.class)
 class PilotoServiceImplTest {
 

@@ -2,7 +2,6 @@ package com.tfi.motorsport.backend.config;
 
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +18,8 @@ public record AppProperties(
         Jwt jwt,
         Admin admin,
         Cors cors,
-        Integracion integracion
+        Integracion integracion,
+        Telemetria telemetria
 ) {
 
     /** Configuración del token JWT. */
@@ -60,6 +60,23 @@ public record AppProperties(
 
     /** WRC se puede deshabilitar porque su API es no oficial. */
     public record ProveedorWrc(String urlBase, long intervaloMinimoMs, boolean habilitado) {
+    }
+
+    /**
+     * Módulo plus de telemetría F1 (MVP 7, datos de OpenF1).
+     * Con habilitada=false sus clases ni se crean: no existen sus endpoints ni se consulta a OpenF1.
+     *
+     * intervaloMs y limiteMinuto respetan el cupo del plan gratuito (3 consultas/s y 30/min).
+     * usuario y password son los de la suscripción paga de OpenF1: habilitan el modo en vivo y el
+     * cupo limiteMinutoSuscripcion.
+     */
+    public record Telemetria(boolean habilitada, String urlBase, long intervaloMs, int limiteMinuto,
+                             String tokenUrl, String usuario, String password, int limiteMinutoSuscripcion) {
+
+        /** true si están configurados el usuario y la contraseña de la suscripción de OpenF1. */
+        public boolean credencialesVivo() {
+            return usuario != null && !usuario.isBlank() && password != null && !password.isBlank();
+        }
     }
 
     private static List<String> separarPorComa(String valor) {

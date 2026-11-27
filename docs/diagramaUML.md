@@ -1,3 +1,9 @@
+# Modelo de datos
+
+Diagrama entidad-relación de la base (PostgreSQL). El DDL completo está en [`database/schema.sql`](../database/schema.sql).
+
+Todas las tablas tienen además las columnas de auditoría `fechaCreacion`, `fechaActualizacion`, `creadopor` y `actualizadopor` (estas dos, claves foráneas a `USUARIO`) y `eliminado` (baja lógica). No se dibujan para no recargar el diagrama.
+
 ```mermaid
 erDiagram
 
@@ -18,6 +24,7 @@ erDiagram
         VARCHAR nombre
         DATE fecha_inicio
         DATE fecha_fin
+        BIGINT id_piloto_campeon FK
     }
 
     EVENTO {
@@ -33,6 +40,7 @@ erDiagram
         DATETIME fecha_inicio
         DATETIME fecha_fin
         VARCHAR estado
+        VARCHAR zona_horaria
     }
 
     SESION {
@@ -97,6 +105,7 @@ erDiagram
         INT numero
         INT nro_piloto
         VARCHAR rol
+        VARCHAR marca
         DATE fecha_desde
         DATE fecha_hasta
     }
@@ -189,4 +198,6 @@ erDiagram
 
     PILOTO ||--o{ PALMARES : "posee"
     CATEGORIA ||--o{ PALMARES : "corresponde"
+
+    PILOTO |o--o{ TEMPORADA : "campeón de"
 ```

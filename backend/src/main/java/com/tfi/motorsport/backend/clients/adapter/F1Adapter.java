@@ -233,7 +233,8 @@ public class F1Adapter implements FuenteDatosCategoria{
                     FormatJson.aInt(f, "laps"),
                     tiempoVuelta(FormatJson.aString(f, "FastestLap", "Time", "time")),
                     estado,
-                    EstadoResultado.FINALIZADO.equals(estado) ? null : status));
+                    EstadoResultado.FINALIZADO.equals(estado) ? null : status,
+                    null)); // en F1 la marca es la del equipo
         }
         return lista;
     }
@@ -262,14 +263,14 @@ public class F1Adapter implements FuenteDatosCategoria{
                     piloto(f.get("Driver")), equipo(f.get("Constructor")),
                     pos, FormatJson.aInt(f, "number"), BigDecimal.ZERO,
                     mejor, null, null, mejor,
-                    mejor != null ? EstadoResultado.FINALIZADO : EstadoResultado.NO_LARGO, null));
+                    mejor != null ? EstadoResultado.FINALIZADO : EstadoResultado.NO_LARGO, null, null));
         }
         // Diferencia con la pole (segundo recorrido porque la pole puede no venir primera)
         final BigDecimal tiempoPole = pole;
         return lista.stream().map(r -> tiempoPole == null || r.tiempo() == null ? r
                 : new ResultadoNorm(r.piloto(), r.equipo(), r.posicion(), r.numero(), r.puntos(), r.tiempo(),
                 r.tiempo().subtract(tiempoPole).max(BigDecimal.ZERO), r.vueltas(), r.mejorVuelta(),
-                r.estado(), r.motivoAbandono())).toList();
+                r.estado(), r.motivoAbandono(), r.marca())).toList();
     }
 
     private PilotoNorm piloto(JsonNode d) {

@@ -38,10 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-/**
- * Pruebas del servicio de eventos: el armado de EventoDto (que antes no tenía tests)
- * y las consultas nuevas del calendario.
- */
+
 @ExtendWith(MockitoExtension.class)
 class EventoServiceImplTest {
 

@@ -11,10 +11,20 @@ Esta decisión arquitectónica garantiza la separación de responsabilidades (Se
 1. **Capa de Controladores (API REST):** Recibe las peticiones HTTP del cliente, valida los parámetros de entrada y delega la ejecución a la capa de servicios. Retorna respuestas estructuradas en formato JSON.
 2. **Capa de Servicios (Lógica de Negocio):** Contiene el núcleo funcional del sistema. Aquí se ejecutan los cálculos de campeonatos, la lógica de conversión de zonas horarias y el procesamiento estadístico.
 3. **Capa de Acceso a Datos (Repositorios):** Implementada con Spring Data JPA. Gestiona las consultas y transacciones hacia la base de datos relacional mediante la especificación JPA y Hibernate, abstrayendo las sentencias SQL nativas.
+4. **Clientes de integración:** Consumen las APIs externas (Jolpica para F1, la API de wrc.com para WRC y OpenF1 para la telemetría) con tiempos de espera, reintentos y un límite de consultas por proveedor. Un adaptador por proveedor traduce sus datos a un modelo normalizado común, y un único persistidor los guarda buscando por `id_externo`, de modo que repetir una carga actualiza los datos en lugar de duplicarlos.
+
+## Procesos en segundo plano y tiempo real
+
+*   **Sincronizaciones:** se ejecutan en segundo plano y su estado se consulta mientras avanzan. Una tarea programada puede sincronizar todos los días la temporada en curso (`SYNC_AUTOMATICA`).
+*   **Telemetría F1:** es un módulo opcional que no usa la base de datos: consulta OpenF1 y guarda los datos un rato en memoria. Todo se resuelve con GET comunes: el navegador pide la "foto" de la sesión en un instante (cada dato es el último informado hasta ese momento). En vivo la pide cada 5 segundos y en una sesión terminada una por segundo (la repetición), calculada en memoria; el ritmo lo maneja el frontend, así el servidor no mantiene conexiones abiertas ni hilos propios.
+
+## Frontend (Angular)
+
+SPA con componentes standalone, rutas con carga diferida y estado en signals (sin zone.js). Los servicios HTTP viven en `core/`, un interceptor agrega el token JWT y los componentes reutilizables (gráfico sobre Chart.js, íconos SVG propios, estados de carga) están en `shared/`. El backend hace todos los cálculos: el frontend solo los presenta.
 
 ## Tecnologías Definitivas
 
 *   **Backend:** Java 21 + Spring Boot 4.1.2. Justificación: Tipado estático fuerte, excelente manejo transaccional y robustez en la exposición de APIs.
 *   **Base de Datos:** PostgreSQL. Justificación: Motor relacional open-source de nivel empresarial. Ideal para mantener la integridad ACID, manejo nativo de fechas/timestamps complejos (crucial para los calendarios internacionales del automovilismo) y excelente integración con Hibernate.
-*   **Frontend:** Angular + TypeScript. Justificación: Arquitectura basada en componentes que facilita la creación de dashboards interactivos, gráficos estadísticos y tablas dinámicas.
+*   **Frontend:** Angular 22 + TypeScript, con Chart.js para los gráficos. Justificación: Arquitectura basada en componentes que facilita la creación de dashboards interactivos, gráficos estadísticos y tablas dinámicas.
 *   **Despliegue (Cloud):** PaaS (Render / Railway / Vercel). Justificación: Integración continua (CI/CD) nativa con repositorios de GitHub.

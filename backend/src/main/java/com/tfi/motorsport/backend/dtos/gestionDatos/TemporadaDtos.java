@@ -27,7 +27,8 @@ public final class TemporadaDtos {
     }
 
     public record Registro(Long id, Long categoriaId, String categoria, Integer anio, String nombre,
-                           LocalDate fechaInicio, LocalDate fechaFin) {
+                           LocalDate fechaInicio, LocalDate fechaFin,
+                           AuditoriaDto auditoria) {
     }
 }
 

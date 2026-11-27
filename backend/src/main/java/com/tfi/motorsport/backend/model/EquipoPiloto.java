@@ -51,6 +51,13 @@ public class EquipoPiloto extends AuditableEntity {
     @Column(columnDefinition = "varchar")
     private String rol;
 
+    /**
+     * Marca/motor con el que corrió el piloto esa temporada (TC: Ford, Chevrolet, Toyota...).
+     * Null = la del equipo (equipo.nombre_corto), como en F1 y WRC. Ver MarcasPorParticipacion.
+     */
+    @Column(length = 40)
+    private String marca;
+
     @Column(name = "fecha_desde")
     private LocalDate fechaDesde;
 

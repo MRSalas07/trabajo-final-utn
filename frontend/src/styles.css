@@ -390,6 +390,13 @@ h3 {
   }
 }
 
+/* Entre 1000 y 1199 px las seis secciones y el selector de zona entran justo: se achica el relleno */
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .subnav a {
+    padding: 0 0.6rem;
+  }
+}
+
 @media (max-width: 520px) {
   .logo-texto {
     font-size: 1.1rem;
@@ -416,8 +423,7 @@ h3 {
     grid-column: span 12;
   }
 
-  .tablero > .col-3,
-  .tablero > .col-4 {
+  .tablero > .col-3 {
     grid-column: span 6;
   }
 }
@@ -425,10 +431,6 @@ h3 {
 @media (min-width: 1200px) {
   .tablero > .col-3 {
     grid-column: span 3;
-  }
-
-  .tablero > .col-4 {
-    grid-column: span 4;
   }
 
   .tablero > .col-6 {
@@ -446,7 +448,6 @@ h3 {
     animation-iteration-count: 1 !important;
   }
 
-  .tarjeta-evento:hover,
   a.fila-evento:hover,
   button:hover,
   .btn:hover,
@@ -534,7 +535,6 @@ h2.panel-titulo {
   min-width: 0;
 }
 
-app-tarjeta-evento,
 app-fila-evento {
   display: block;
 }
@@ -553,6 +553,10 @@ app-fila-evento {
 
 .suave {
   color: var(--texto-suave);
+}
+
+.espacio {
+  padding-left: 10px;
 }
 
 .chico {
@@ -1111,10 +1115,3 @@ a.fila-evento:hover {
   background: rgb(229 9 20 / 0.15);
   color: #ffb4b8;
 }
-
-/* Celdas con texto largo (ej: lista de equipos de una marca): permiten salto de línea */
-td.envolver {
-  white-space: normal;
-  min-width: 160px;
-}
-

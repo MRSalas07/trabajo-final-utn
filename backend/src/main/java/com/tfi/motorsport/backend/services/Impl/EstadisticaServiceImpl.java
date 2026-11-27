@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import com.tfi.motorsport.backend.model.Catalogo.*;
 import com.tfi.motorsport.backend.services.estadisticas.AnalisisEquiposYMarcas;
 import com.tfi.motorsport.backend.services.estadisticas.AnalisisHistorico;
+import com.tfi.motorsport.backend.services.estadisticas.MarcasPorParticipacion;
 import com.tfi.motorsport.backend.services.estadisticas.MotorEstadistico;
 import com.tfi.motorsport.backend.services.estadisticas.MotorEstadistico.*;
 
@@ -38,6 +39,7 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
     private final CategoriaJPARepository categoriaRepo;
     private final PalmaresJPARepository palmaresRepo;
     private final EquipoJPARepository equipoRepo;
+    private final EquipoPilotoJPARepository participacionRepo;
 
     @Override
     public List<FilaCampeonatoPiloto> campeonatoPilotos(String siglas, int anio) {
@@ -226,7 +228,10 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
     private List<Participacion> consolidarParticipacionesDe(Temporada t) {
         List<FilaResultado> filas = new ArrayList<>(resultadoSesionRepo.filasDeTemporada(t.getId()));
         filas.addAll(resultadoEtapaRepo.filasDeTemporada(t.getId()));
-        return MotorEstadistico.consolidar(filas);
+        // En TC la marca es la de la participación de cada piloto, no la del equipo
+        List<FilaResultado> conMarcas = MarcasPorParticipacion.aplicar(filas,
+                participacionRepo.marcasDeCategoria(t.getCategoria().getId(), t.getAnio()));
+        return MotorEstadistico.consolidar(conMarcas);
     }
 
     private Temporada buscarTemporada(String siglas, int anio) {
@@ -289,7 +294,9 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
     private List<Participacion> consolidarParticipacionesDeCategoria(Categoria categoria) {
         List<FilaResultado> filas = new ArrayList<>(resultadoSesionRepo.filasDeCategoria(categoria.getId()));
         filas.addAll(resultadoEtapaRepo.filasDeCategoria(categoria.getId()));
-        return MotorEstadistico.consolidar(filas);
+        List<FilaResultado> conMarcas = MarcasPorParticipacion.aplicar(filas,
+                participacionRepo.marcasDeCategoria(categoria.getId(), null));
+        return MotorEstadistico.consolidar(conMarcas);
     }
 
     private  String aEstadoEfectivo(String estadoGuardado, Instant inicio, Instant fin) {

@@ -25,3 +25,14 @@ El desarrollo del MVP de **Motorsport Analytics** se estructurará mediante los 
 ### 6. Módulo de Telemetría en Vivo (Funcionalidad plus; prioridad baja)
 *   **Descripción:** Extensión opcional del MVP para enriquecer la experiencia de seguimiento de Fórmula 1.
 *   **Responsabilidades:** Consumir una API externa que provea telemetría en vivo de F1 y presentar los datos disponibles durante una sesión. El alcance se limita exclusivamente a Fórmula 1 y depende de la disponibilidad, condiciones de uso y límites de consumo del proveedor; no se considera funcionalidad base para WRC ni Turismo Carretera.
+
+## Estado de implementación
+
+| Módulo | MVP | Dónde está |
+|---|---|---|
+| 1. Gestión de Usuarios | 1 | Registro, login con JWT y zona horaria: `/api/auth`, `/api/usuarios`; pantallas `/login` y `/cuenta`. |
+| 2. Extracción e Integración de Datos | 3 | Jolpica (F1) y la API de wrc.com (WRC) con sincronización desde `/admin`; TC por importación JSON. Paquete `clients/`. |
+| 3. Core de Gestión Deportiva | 1, 2 y 5 | Consultas públicas (categorías, eventos, resultados, pilotos y equipos) y ABM con baja lógica y auditoría en `/admin`. |
+| 4. Calendario Unificado | 2 | Calendario mensual en `/calendario` y archivos `.ics` por evento y por temporada. |
+| 5. Estadístico y Visual | 4 y 6 | Campeonatos, evolución, tendencias, comparativas, marcas e histórico en `/estadisticas`. |
+| 6. Telemetría en Vivo | 7 | OpenF1 en `/telemetria`: foto de la sesión con repetición segundo a segundo, versus de dos pilotos y análisis de sesiones terminadas (datos gratuitos), y vivo con refresco cada 5 s, que requiere la suscripción de OpenF1. |

@@ -17,7 +17,6 @@ import { EstadisticaService } from '../../core/services/estadistica.service';
 @Component({
   imports: [RouterLink,EstadoCarga, FilaEvento, HoraPipe, TiempoPipe, CalendarioMes],
   selector: 'app-inicio',
-  styleUrl: './inicio.css',
   templateUrl: './inicio.html',
 })
 export class Inicio {
@@ -36,6 +35,8 @@ export class Inicio {
 
   protected readonly ultimo = computed(() => this.recientesEventos()[0] ?? null);
   protected readonly tiempos = signal<ResultadoSesion[]>([]);
+  protected readonly errorTiempos = signal<string | null>(null);
+  protected readonly errorRecientes = signal<string | null>(null);
 
   protected readonly mes = signal(this.mesActual());
   protected readonly eventosMes = signal<EventoDto[]>([]);
@@ -48,6 +49,10 @@ export class Inicio {
   protected readonly cargandoCampeonato = signal(false);
   protected readonly errorCampeonato = signal<string | null>(null);
   private pedidoCampeonato = 0;
+
+  /** Panel de telemetría F1 (MVP 7): solo si el backend tiene el módulo habilitado. */
+  protected readonly telemetria = signal(false);
+
   protected readonly hoy = computed(() =>
     new Intl.DateTimeFormat('en-CA', { timeZone: this.zonaService.zona(), year: 'numeric', month: '2-digit', day: '2-digit' }).format(
       new Date(this.ahora()),
@@ -65,8 +70,9 @@ export class Inicio {
       const ultimo= this.ultimo();
       untracked(() => {
         const carrera = ultimo?.sesiones.find((s) => s.tipo === 'CARRERA' && s.cantidadResultados > 0);
-        if (carrera) this.resultadoService.resultadosSesion(carrera.id).subscribe((t) => {
-          this.tiempos.set(t.resultados.slice(0, 8));
+        if (carrera) this.resultadoService.resultadosSesion(carrera.id).subscribe({
+          next: (t) => { this.tiempos.set(t.resultados.slice(0, 8)); this.errorTiempos.set(null); },
+          error: (e) => { this.tiempos.set([]); this.errorTiempos.set(mensajeError(e)); },
         });
       });
     });
@@ -76,6 +82,10 @@ export class Inicio {
     });
     interval(60_000).pipe(takeUntilDestroyed()).subscribe(() => {
       this.ahora.set(Date.now())
+    });
+    this.serviceSalud.probarSalud().subscribe({
+      next: (salud) => this.telemetria.set(salud.telemetria === true),
+      error: () => this.telemetria.set(false),
     });
   }
 
@@ -112,8 +122,9 @@ export class Inicio {
         this.error.set(mensajeError(error)); this.cargando.set(false); 
       },
     });
-    this.eventoService.recientes(4).subscribe((response) => {
-      this.recientesEventos.set(response)
+    this.eventoService.recientes(4).subscribe({
+      next: (response) => { this.recientesEventos.set(response); this.errorRecientes.set(null); },
+      error: (e) => this.errorRecientes.set(mensajeError(e)),
     });
   }
 

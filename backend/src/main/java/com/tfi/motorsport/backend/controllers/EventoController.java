@@ -5,7 +5,6 @@ import com.tfi.motorsport.backend.dtos.evento.TablaEtapaDto;
 import com.tfi.motorsport.backend.dtos.sesion.TablaSesionDto;
 import com.tfi.motorsport.backend.dtos.temporada.TemporadaDto;
 import com.tfi.motorsport.backend.services.IEventoService;
-import com.tfi.motorsport.backend.services.ZonaHoraria;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;

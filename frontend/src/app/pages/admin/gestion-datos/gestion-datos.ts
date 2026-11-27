@@ -404,6 +404,7 @@ export class GestionDatos {
     { clave: 'temporada', etiqueta: 'Año' },
     { clave: 'piloto', etiqueta: 'Piloto' },
     { clave: 'equipo', etiqueta: 'Equipo' },
+    { clave: 'marca', etiqueta: 'Marca' },
     { clave: 'numero', etiqueta: '#' },
     { clave: 'rol', etiqueta: 'Rol' },
   ];
@@ -414,6 +415,8 @@ export class GestionDatos {
     { clave: 'equipoId', etiqueta: 'Equipo', tipo: 'busqueda', requerido: true, busqueda: buscarEquipo },
     { clave: 'numero', etiqueta: 'Número', tipo: 'numero' },
     { clave: 'rol', etiqueta: 'Rol', tipo: 'select', opciones: ROLES_PARTICIPACION, porDefecto: 'PILOTO' },
+    { clave: 'marca', etiqueta: 'Marca / motor', tipo: 'texto',
+      ayuda: 'TC: Ford, Chevrolet, Dodge, Torino, Toyota, Mercedes-Benz o BMW. En F1 y WRC dejala vacía: se usa la del equipo.' },
     { clave: 'fechaDesde', etiqueta: 'Desde', tipo: 'fecha' },
     { clave: 'fechaHasta', etiqueta: 'Hasta', tipo: 'fecha' },
   ]);

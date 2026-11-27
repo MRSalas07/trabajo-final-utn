@@ -97,8 +97,20 @@ class ParticipantesPersistidor {
 
     /** Registra (una sola vez) que un piloto corrió para un equipo en una categoría y temporada. */
     void registrarParticipacion(Long equipoId, Long pilotoId, Integer numero, String rol, ContextoNormalizacion ctx) {
-        if (!ctx.participaciones.add(equipoId + "-" + pilotoId + "-" + rol)) {
-            return; // ya registrada en esta ejecución
+        registrarParticipacion(equipoId, pilotoId, numero, rol, null, ctx);
+    }
+
+    /**
+     * Igual que el anterior, y además guarda la marca/motor del piloto en la participación (TC).
+     * Si la marca viene vacía no se toca la que ya tenía (por ejemplo, la cargada a mano en el ABM).
+     */
+    void registrarParticipacion(Long equipoId, Long pilotoId, Integer numero, String rol, String marca,
+                                ContextoNormalizacion ctx) {
+        String clave = equipoId + "-" + pilotoId + "-" + rol;
+        String marcaLimpia = marca != null && !marca.isBlank() ? marca.trim() : null;
+        boolean primeraVez = ctx.participaciones.add(clave);
+        if (!primeraVez && (marcaLimpia == null || marcaLimpia.equals(ctx.marcas.get(clave)))) {
+            return; // ya registrada en esta ejecución (y sin marca nueva para guardar)
         }
         EquipoPiloto ep = equipoPilotoRepo
                 .findByEquipoIdAndPilotoIdAndCategoriaIdAndTemporadaAndRol(equipoId, pilotoId, ctx.categoriaId, ctx.anio, rol)
@@ -111,11 +123,20 @@ class ParticipantesPersistidor {
             ep.setTemporada(ctx.anio);
             ep.setRol(rol);
             ep.setNumero(numero);
+            ep.setMarca(marcaLimpia);
             equipoPilotoRepo.save(ep);
-        } else if (numero != null && !numero.equals(ep.getNumero())) {
+        } else {
             // Sin save(): la entidad está administrada por JPA dentro de la transacción
-            // y el cambio se guarda solo al confirmarla (dirty checking).
-            ep.setNumero(numero);
+            // y los cambios se guardan solos al confirmarla (dirty checking).
+            if (numero != null && !numero.equals(ep.getNumero())) {
+                ep.setNumero(numero);
+            }
+            if (marcaLimpia != null && !marcaLimpia.equals(ep.getMarca())) {
+                ep.setMarca(marcaLimpia);
+            }
+        }
+        if (marcaLimpia != null) {
+            ctx.marcas.put(clave, marcaLimpia);
         }
     }
 }

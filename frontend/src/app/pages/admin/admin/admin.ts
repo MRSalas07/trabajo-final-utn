@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { catchError, concatMap, from, map, of, toArray } from 'rxjs';
 import { SyncServices } from '../../../core/services/sync.service';
 import { mensajeError } from '../../../core/errores/error';
-import { FuenteDisponible, ResumenSincronizacion } from '../../../core/modelos';
+import { ResumenSincronizacion } from '../../../core/modelos';
 import { HoraPipe } from '../../../shared/pipe/formato';
 import { NotificacionService } from '../../../core/services/notificacion.service';
 import { SeguimientoService } from '../../../core/services/seguimiento.service';
@@ -27,7 +27,6 @@ export class Admin {
   protected categoria = 'F1';
   protected anioDesde = new Date().getFullYear();
   protected anioHasta = new Date().getFullYear();
-  protected readonly fuentes = signal<FuenteDisponible[]>([]);
   protected readonly encolando = signal(false);
   protected readonly mensaje = signal<string | null>(null);
   protected readonly importacion = signal<ResumenSincronizacion | null>(null);
@@ -38,9 +37,6 @@ export class Admin {
   protected readonly vista = signal<'datos' | 'sync'>('datos');
 
   constructor() {
-    this.syncServices.obtenerFuentes().subscribe((fuente) => {
-      this.fuentes.set(fuente);
-    });
     this.seguimientoService.consultar();
   }
 

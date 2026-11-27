@@ -11,6 +11,7 @@ Motor: PostgreSQL. El backend no crea tablas: las **valida** al iniciar (`ddl-au
 | `datos_ejemplo/seed_tc_2025.sql` | Opcional: temporada 2025 de Turismo Carretera relevada a mano. Se puede ejecutar más de una vez. |
 | `migraciones/001_indices_unicos.sql` | Solo para bases creadas con un `schema.sql` anterior al 20/11/2026. Una base nueva no la necesita. |
 | `migraciones/002_campeon_temporada.sql` | Solo para bases creadas antes del 22/11/2026 (agrega `temporada.id_piloto_campeon`). Una base nueva no la necesita. Si tu base es anterior, ejecutala o el backend no arranca. También sirve si la base pasó por `ddl-auto=update`: no duplica la clave foránea. |
+| `migraciones/003_marca_participacion.sql` | Solo para bases creadas antes del 23/11/2026 (agrega `equipo_x_piloto.marca`). Una base nueva no la necesita. Si tu base es anterior, ejecutala o el backend no arranca. |
 | `respaldos/exportar_temporada.sql` | Exporta una temporada a JSON (respaldo de F1/WRC y formato de carga de TC). |
 | `respaldos/*.json` | Temporadas exportadas, listas para importar desde `/admin`. |
 
@@ -90,7 +91,7 @@ temporada: siglasCategoria*, anio*, nombre, fuente, idExternoCampeon (id_externo
   evento: idExterno*, nombre*, nombreCorto, numeroFecha, pais, ciudad, circuito, zonaHoraria (IANA),
           inicio* (ISO-8601 UTC, ej. "2025-03-16T04:00:00Z"), fin, estado, sesiones[], etapas[]
     sesion (circuito): idExterno*, nombre*, tipo*, numero, inicio, fin, vueltasProgramadas, distancia, estado, resultados[]
-      resultado: piloto*, equipo*, posicion, numero, puntos, tiempo, diferencia, vueltas, mejorVuelta, estado, motivoAbandono
+      resultado: piloto*, equipo*, posicion, numero, puntos, tiempo, diferencia, vueltas, mejorVuelta, estado, motivoAbandono, marca
     etapa (rally): idExterno*, numero, nombre*, dia, distancia, inicio, fin, estado, resultados[]
       resultado: piloto*, copiloto*, equipo*, numero, posicion, tiempo, diferencia, puntos, estado, motivoAbandono
   piloto: idExterno*, nombre, apellido*, fechaNacimiento (AAAA-MM-DD), nacionalidad, pais, codigo, numero
@@ -104,3 +105,4 @@ temporada: siglasCategoria*, anio*, nombre, fuente, idExternoCampeon (id_externo
 - **Tiempos y diferencias:** en segundos.
 - **`id_externo` de pilotos y equipos:** con prefijo de categoría (`TC:agustin_canapino`), y hay que repetir siempre el mismo. Un id distinto crea otro piloto.
 - **Un piloto sin resultados** no queda asociado a su equipo. Esa relación se crea a partir de los resultados.
+- **`marca`** (en los resultados de circuito): la marca o motor con el que corrió el piloto, por ejemplo `"Chevrolet"` en TC. Se guarda en su participación de esa temporada (`equipo_x_piloto.marca`). En F1 y WRC se deja vacía: ahí la marca es la del equipo.

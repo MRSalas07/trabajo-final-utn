@@ -26,6 +26,7 @@ export class App {
     { ruta: '/pilotos', texto: 'Pilotos', icono: 'pilotos' },
     { ruta: '/equipos', texto: 'Equipos', icono: 'equipos' },
     { ruta: '/estadisticas', texto: 'Estadísticas', icono: 'estadisticas' },
+    { ruta: '/telemetria', texto: 'Telemetría', icono: 'telemetria' },
   ];
 
 

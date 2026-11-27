@@ -2,7 +2,6 @@ package com.tfi.motorsport.backend.clients.adapter;
 
 import com.tfi.motorsport.backend.config.AppProperties;
 import com.tfi.motorsport.backend.handlers.exceptions.IntegrationExternalException;
-import com.tfi.motorsport.backend.clients.adapter.FuenteDatosCategoria;
 import com.tfi.motorsport.backend.clients.clientHttpExternal.ClientHttpExternal;
 import com.tfi.motorsport.backend.clients.clientHttpExternal.FormatJson;
 import com.tfi.motorsport.backend.clients.normalization.ModeloNormalizado.EquipoNorm;

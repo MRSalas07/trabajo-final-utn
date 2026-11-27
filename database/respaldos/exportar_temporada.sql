@@ -123,7 +123,12 @@ SELECT jsonb_pretty(jsonb_strip_nulls(jsonb_build_object(
                             'piloto', pg_temp.piloto_json(r.id_piloto), 'equipo', pg_temp.equipo_json(r.id_equipo),
                             'posicion', r.posicion, 'numero', r.numero, 'puntos', r.puntos, 'tiempo', r.tiempo,
                             'diferencia', r.diferencia, 'vueltas', r.vueltas, 'mejorVuelta', r.mejor_vuelta,
-                            'estado', r.estado, 'motivoAbandono', r.motivo_abandono)
+                            'estado', r.estado, 'motivoAbandono', r.motivo_abandono,
+                            -- marca de la participacion del piloto (TC); NULL en F1/WRC y la quita jsonb_strip_nulls
+                            'marca', (SELECT max(ep.marca) FROM equipo_x_piloto ep
+                                      WHERE ep.id_piloto = r.id_piloto AND ep.id_equipo = r.id_equipo
+                                        AND ep.id_categoria = t.id_categoria AND ep.temporada = t.anio
+                                        AND ep.eliminado = FALSE))
                             ORDER BY r.posicion NULLS LAST, r.id_resultado)
                         FROM resultado_sesion r WHERE r.id_sesion = s.id_sesion AND r.eliminado = FALSE)
                 ) ORDER BY s.fecha_inicio NULLS LAST, s.id_sesion)

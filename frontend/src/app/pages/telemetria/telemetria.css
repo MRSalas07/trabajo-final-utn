@@ -1,0 +1,8 @@
+.intro { margin: -0.4rem 0 1rem; max-width: 75ch; }
+.intro a { color: var(--texto); }
+.filtros label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; }
+.filtros .selector-sesion { flex: 1 1 320px; max-width: 520px; }
+.filtros .selector-sesion select { width: 100%; }
+.sesion-elegida { margin: 0.25rem 0 1rem; }
+.sesion-elegida h2 { margin: 0; font-size: 1.3rem; }
+.sesion-elegida p { margin: 0.2rem 0 0; }

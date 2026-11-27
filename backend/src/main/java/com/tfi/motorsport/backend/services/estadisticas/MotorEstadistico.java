@@ -1,13 +1,10 @@
 package com.tfi.motorsport.backend.services.estadisticas;
 
 
-import com.tfi.motorsport.backend.dtos.estadistica.EstadisticaDto;
 import com.tfi.motorsport.backend.dtos.estadistica.EstadisticaDto.*;
 
-import com.tfi.motorsport.backend.model.Catalogo;
 import com.tfi.motorsport.backend.model.Catalogo.*;
 import com.tfi.motorsport.backend.repositories.unificacion.FilaResultado;
-import org.springframework.boot.SpringApplication;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

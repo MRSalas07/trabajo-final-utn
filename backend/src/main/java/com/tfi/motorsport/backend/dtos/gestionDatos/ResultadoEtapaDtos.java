@@ -33,7 +33,8 @@ public final class ResultadoEtapaDtos {
 
     public record Registro(Long id, Long etapaId, Long tripulacionId, String tripulacion,
                            Integer posicion, BigDecimal tiempo, BigDecimal diferencia,
-                           BigDecimal puntos, String estado, String motivoAbandono) {
+                           BigDecimal puntos, String estado, String motivoAbandono,
+                           AuditoriaDto auditoria) {
     }
 }
 

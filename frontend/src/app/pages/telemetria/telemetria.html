@@ -1,0 +1,60 @@
+<div class="encabezado">
+  <h1>Telemetría F1</h1>
+  <span class="chip-cat" data-cat="F1">F1</span>
+</div>
+<p class="suave chico intro">
+  Sesiones de Fórmula 1 (desde 2023) con datos de
+  <a href="https://openf1.org" target="_blank" rel="noopener">OpenF1</a>, una API abierta y no oficial:
+  la tabla de tiempos en vivo o en repetición, un versus entre dos pilotos y gráficos. OpenF1 libera los datos de cada sesión media hora
+  después de que termina (antes, solo con su suscripción).
+</p>
+
+@if (habilitada() === null) {
+  <app-estado-carga [cargando]="!errorSalud()" [error]="errorSalud()" />
+} @else if (!habilitada()) {
+  <p class="aviso">La telemetría de F1 es un módulo opcional y no está habilitada en este servidor.</p>
+} @else {
+  <div class="filtros">
+    <label>Temporada
+      <select [value]="anio()" (change)="elegirAnio($any($event.target).value)">
+        @for (a of anios; track a) {
+          <option [value]="a" [selected]="a === anio()">{{ a }}</option>
+        }
+      </select>
+    </label>
+    <label class="selector-sesion">Sesión
+      <select (change)="elegirSesion($any($event.target).value)" [disabled]="!sesiones().length">
+        @for (g of grupos(); track g.clave) {
+          <optgroup [label]="g.titulo">
+            @for (o of g.sesiones; track o.sessionKey) {
+              <option [value]="o.sessionKey" [selected]="o.sessionKey === sesion()?.sessionKey">{{ o.texto }}</option>
+            }
+          </optgroup>
+        }
+      </select>
+    </label>
+  </div>
+
+  <app-estado-carga [cargando]="cargandoSesiones()" [error]="errorSesiones()"
+                    [vacio]="!cargandoSesiones() && !errorSesiones() && !sesiones().length"
+                    [mensajeVacio]="'OpenF1 todavía no tiene sesiones de ' + anio() + '.'" />
+
+  @if (sesion(); as s) {
+    <div class="sesion-elegida">
+      <h2>{{ nombre() }} <span class="suave">· {{ lugar() }}</span></h2>
+      <p class="suave chico">{{ s.inicio | hora:'fecha':zona() }} · {{ s.inicio | hora:'hora':zona() }} h</p>
+    </div>
+
+    <div class="pestanas" role="tablist" aria-label="Vista de la sesión">
+      <button type="button" role="tab" [class.activa]="vista() === 'sesion'" [attr.aria-selected]="vista() === 'sesion'"
+              (click)="vista.set('sesion')">Sesión</button>
+      <button type="button" role="tab" [class.activa]="vista() === 'analisis'" [attr.aria-selected]="vista() === 'analisis'"
+              (click)="vista.set('analisis')">Análisis</button>
+    </div>
+    @if (vista() === 'sesion') {
+      <app-foto-sesion [sesion]="s" />
+    } @else {
+      <app-analisis-sesion [sesion]="s" />
+    }
+  }
+}

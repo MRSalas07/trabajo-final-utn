@@ -22,6 +22,7 @@
 
 <section class="panel col-6" aria-labelledby="t-tiempos">
    <div class="panel-titulo"><h2 id="t-tiempos">Tiempos de la última carrera</h2></div>
+   <app-estado-carga [error]="errorTiempos()" />
    @if (ultimo(); as ultimo) { <p class="chico"><strong>{{ ultimo.nombre }}</strong> · {{ ultimo.inicio | hora: 'dia' }}</p> }
    <table>
       <tbody>
@@ -71,11 +72,23 @@
 
 <section class="panel col-3" aria-labelledby="t-recientes">
    <div class="panel-titulo"><h2 id="t-recientes">Últimos eventos</h2></div>
+   <app-estado-carga [error]="errorRecientes()" />
    <div class="lista-eventos">
       @for (evento of recientesEventos(); track evento.id) { 
          <app-fila-evento [eventoEntrada]="evento" modo="reciente" /> 
       }
    </div>
 </section>
+
+@if (telemetria()) {
+<section class="panel col-6" aria-labelledby="t-telemetria">
+   <div class="panel-titulo">
+      <h2 id="t-telemetria">Telemetría F1</h2>
+      <a routerLink="/telemetria">Abrir</a>
+   </div>
+   <p class="suave chico">Cualquier sesión de Fórmula 1 desde 2023, en vivo o en repetición: torre de tiempos, versus de dos
+      pilotos con sus sectores, dirección de carrera y clima, con datos de OpenF1.</p>
+</section>
+}
 </div>
 

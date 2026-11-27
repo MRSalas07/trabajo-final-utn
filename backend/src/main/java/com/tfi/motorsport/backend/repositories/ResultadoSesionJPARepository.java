@@ -1,13 +1,11 @@
 package com.tfi.motorsport.backend.repositories;
 
-import com.tfi.motorsport.backend.model.ResultadoEtapa;
 import com.tfi.motorsport.backend.model.ResultadoSesion;
 import com.tfi.motorsport.backend.repositories.unificacion.FilaResultado;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

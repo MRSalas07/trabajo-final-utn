@@ -38,6 +38,9 @@ export const routes: Routes = [
   { path: 'estadisticas', title: 'Estadísticas', loadComponent: () => 
     import('./pages/estadisticas/estadisticas').then((m) => m.Estadisticas) 
   },
+  { path: 'telemetria', title: 'Telemetría F1', loadComponent: () =>
+    import('./pages/telemetria/telemetria').then((m) => m.Telemetria)
+  },
   { path: 'admin', title: 'Administración', canActivate: [adminGuard], loadComponent: () => 
     import('./pages/admin/admin/admin').then((m) => m.Admin) },
 

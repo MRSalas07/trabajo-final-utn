@@ -1,6 +1,5 @@
 package com.tfi.motorsport.backend.dtos.categoria;
 
-import com.tfi.motorsport.backend.dtos.estadistica.EstadisticaDto;
 import com.tfi.motorsport.backend.dtos.estadistica.EstadisticaDto.*;
 import com.tfi.motorsport.backend.dtos.evento.EventoDto;
 import com.tfi.motorsport.backend.dtos.temporada.TemporadaDto;

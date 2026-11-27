@@ -1,5 +1,6 @@
 package com.tfi.motorsport.backend.services.gestion.Impl;
 
+import com.tfi.motorsport.backend.dtos.gestionDatos.AuditoriaDto;
 import com.tfi.motorsport.backend.dtos.gestionDatos.PalmaresDtos;
 import com.tfi.motorsport.backend.repositories.CategoriaJPARepository;
 import com.tfi.motorsport.backend.repositories.PalmaresJPARepository;
@@ -27,7 +28,8 @@ public class PalmaresGestionServiceImpl implements IPalmaresGestionService {
         return palmaresRepo.deCategoria(categoriaId).stream()
                 .map(p -> new PalmaresDtos.Registro(p.getId(), p.getPiloto().getId(), nombre(p.getPiloto()),
                         p.getCategoria().getSiglas(), p.getCarreras(), p.getVictorias(), p.getPodios(), p.getPoles(),
-                        p.getCampeonatos(), p.getPuntosTotales(), p.getAbandonos()))
+                        p.getCampeonatos(), p.getPuntosTotales(), p.getAbandonos(),
+                        AuditoriaDto.de(p)))
                 .toList();
     }
 }

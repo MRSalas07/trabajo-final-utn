@@ -80,7 +80,8 @@ public final class ModeloNormalizado {
             @Min(0) Integer vueltas,
             @DecimalMin("0") BigDecimal mejorVuelta, //Mejor vuelta en segundos
             @Pattern(regexp = "FINALIZADO|ABANDONO|DESCALIFICADO|NO_LARGO") String estado,
-            @Size(max = 120) String motivoAbandono
+            @Size(max = 120) String motivoAbandono,
+            @Size(max = 40) String marca // Marca/motor del piloto (TC). Null en F1: la marca es la del equipo
     ) {
     }
 

@@ -1,0 +1,18 @@
+:host { display: block; }
+.torre { font-size: 0.85rem; }
+.torre th, .torre td { padding: 0.35rem 0.55rem; }
+.piloto {
+  display: inline-block; padding: 0.1rem 0.45rem; border-left: 4px solid var(--borde); border-radius: 3px;
+  font-weight: 700; letter-spacing: 0.02em;
+}
+td.record { color: #b06cff; font-weight: 700; }
+.neum { white-space: nowrap; }
+.neumatico {
+  display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; margin-right: 0.2rem;
+  border-radius: 50%; border: 2px solid var(--borde); font-size: 0.7rem; font-weight: 700;
+}
+.neumatico[data-compuesto='SOFT'] { border-color: #e50914; color: #ff4b54; }
+.neumatico[data-compuesto='MEDIUM'] { border-color: #f5c518; color: #f5c518; }
+.neumatico[data-compuesto='HARD'] { border-color: #f5f6f7; color: #f5f6f7; }
+.neumatico[data-compuesto='INTERMEDIATE'] { border-color: #2ecc71; color: #2ecc71; }
+.neumatico[data-compuesto='WET'] { border-color: #2f7cf6; color: #5b9bff; }
