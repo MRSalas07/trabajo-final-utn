@@ -54,6 +54,97 @@ src/test/          tests que espejan la estructura de main/
 Dockerfile         imagen para Render (compila con JDK 21 y ejecuta con JRE)
 ```
 
+## Endopoint disponibles
+
+La documentación interactiva queda disponible en `/swagger-ui.html` con el backend levantado. Las consultas aceptan `?zona=<zona IANA>` para devolver los horarios convertidos.
+
+### Autenticación y usuario
+
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| POST | `/api/auth/registro` | Público | Crea un usuario y devuelve el token. |
+| POST | `/api/auth/login` | Público | Inicia sesión y devuelve el token. |
+| GET | `/api/usuarios/me` | Autenticado | Datos del usuario. |
+| PUT | `/api/usuarios/me/preferencias` | Autenticado | Guarda la zona horaria y devuelve un token actualizado. |
+
+### Consulta
+
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| GET | `/api/salud` | Público | Estado del servicio y módulos habilitados (`telemetria`, `wrcAutomatico`). |
+| GET | `/api/categorias` | Público | Lista de categorías (filtro opcional `?activo=`). |
+| GET | `/api/categorias/{id}` | Público | Detalle de una categoría. |
+| GET | `/api/categorias/{siglas}/perfil` | Público | Ficha de la categoría: temporadas, líder, último ganador y próximo evento. |
+| GET | `/api/categorias/{siglas}/temporadas` | Público | Temporadas de una categoría. |
+| GET | `/api/categorias/{siglas}/temporadas/{anio}/eventos` | Público | Eventos de una temporada con sus sesiones o etapas. |
+| GET | `/api/eventos/{id}` | Público | Detalle de un evento. |
+| GET | `/api/sesiones/{id}/resultados` | Público | Tabla de posiciones de una sesión. |
+| GET | `/api/etapas/{id}/resultados` | Público | Tabla de tiempos de una etapa de rally o su clasificación general. |
+| GET | `/api/pilotos` | Público | Listado paginado de pilotos. Filtros: `filPiloto`, `filtroCategoria`, `filtroAnio`; paginado: `paginado` (desde 0) y `cantidad` (1 a 100, 24 por defecto). |
+| GET | `/api/pilotos/{id}` | Público | Ficha de un piloto: datos, palmarés, trayectoria y últimos resultados. |
+| GET | `/api/equipos` | Público | Equipos de una categoría (`categoria` obligatoria, `anio` opcional). |
+| GET | `/api/equipos/{id}` | Público | Ficha de un equipo: plantel, estadísticas y últimos resultados. |
+| GET | `/api/calendario` | Público | Eventos entre `desde` y `hasta` (`yyyy-MM-dd`, en la zona del usuario; hasta 366 días), filtro opcional `categorias` separadas por coma. |
+| GET | `/api/calendario/proximos` | Público | Próximos eventos, incluidos los que están en curso (`limite` de 1 a 20). |
+| GET | `/api/calendario/recientes` | Público | Últimos eventos finalizados (`limite` de 1 a 20). |
+| GET | `/api/calendario/eventos/{id}.ics` | Público | Archivo `.ics` de un evento. |
+| GET | `/api/calendario/{siglas}/{anio}.ics` | Público | Archivo `.ics` de una temporada completa. |
+
+### Estadísticas (`/api/estadisticas/{siglas}`)
+
+Todo se calcula con los resultados cargados en la base.
+
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| GET | `/{anio}/resumen` | Público | Resumen de la temporada: líder, ganadores por fecha y fechas disputadas. |
+| GET | `/{anio}/campeonato/pilotos` | Público | Campeonato de pilotos. |
+| GET | `/{anio}/campeonato/equipos` | Público | Campeonato de equipos (suma de los puntos de sus pilotos). |
+| GET | `/{anio}/evolucion` | Público | Puntos acumulados y posición fecha a fecha (`pilotos` separados por coma o los `top` primeros, 5 por defecto). |
+| GET | `/{anio}/tendencia/{pilotoId}` | Público | Tendencia de un piloto: media móvil, regresión lineal e interpretación. |
+| GET | `/{anio}/comparativa?a=&b=` | Público | Comparativa entre dos pilotos en la temporada. |
+| GET | `/{anio}/marcas` | Público | Ranking de marcas. |
+| GET | `/{anio}/tendencia-equipo/{equipoId}` | Público | Tendencia de un equipo (puntos por fecha, media móvil y regresión). |
+| GET | `/{anio}/tendencia-marca?marca=` | Público | Tendencia de una marca (ej: Toyota, Ford). |
+| GET | `/{anio}/evolucion-grupos?tipo=EQUIPO\|MARCA` | Público | Puntos acumulados por equipo o por marca (`top`, 6 por defecto). |
+| GET | `/historico/pilotos/{pilotoId}` | Público | Historial de un piloto temporada por temporada. |
+| GET | `/historico/equipos/{equipoId}` | Público | Historial de un equipo temporada por temporada. |
+| GET | `/historico/comparativa?a=&b=` | Público | Comparativa histórica entre dos pilotos. |
+| POST | `/palmares/recalcular` | ADMIN | Recalcula el palmarés de la categoría. |
+
+### Administración (rol `ADMIN`)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST · PUT · DELETE | `/api/categorias`, `/api/categorias/{id}` | Alta, modificación y baja lógica de categorías. |
+| GET | `/api/admin/categorias` | Categorías no dadas de baja (activas e inactivas), con su auditoría. |
+| GET | `/api/admin/fuentes` | Fuentes automáticas disponibles por categoría. |
+| POST | `/api/admin/sincronizaciones` | Inicia la sincronización de una temporada desde su API (en segundo plano). |
+| GET | `/api/admin/sincronizaciones`, `/api/admin/sincronizaciones/{id}` | Historial y estado de las sincronizaciones. |
+| POST | `/api/admin/importaciones` | Importa una temporada en JSON (formato en [`database/README.md`](database/README.md)). |
+
+ABM: cada recurso tiene `GET /api/admin/{recurso}` (con los filtros de la tabla), `POST`, `PUT /{id}` y `DELETE /{id}` (baja lógica).
+
+| Recurso | Filtros del listado |
+|---|---|
+| `temporadas` | `categoriaId` |
+| `eventos` | `temporadaId` |
+| `sesiones`, `etapas` | `eventoId` |
+| `resultados-sesion` | `sesionId` |
+| `resultados-etapa` | `etapaId` |
+| `pilotos`, `equipos` | `q` (búsqueda) y `limit` (hasta 500) |
+| `participaciones`, `tripulaciones` | `categoriaId` y `anio` opcional |
+| `palmares` | `categoriaId` (solo consulta) |
+
+### Telemetría F1 (`/api/telemetria`, con `TELEMETRIA_HABILITADA=true`)
+
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| GET | `/sesiones?anio=` | Público | Sesiones de un año con datos en OpenF1 (desde 2023), de la más reciente a la más vieja. |
+| GET | `/sesiones/{sessionKey}` | Público | Análisis de una sesión terminada: tiempos por vuelta (`pilotos` separados por coma, hasta 6) y posiciones. |
+| GET | `/sesiones/{sessionKey}/foto` | Público | Foto de la sesión. En curso: ahora (requiere la suscripción). Terminada: al final de la `vuelta` del líder, en el `instante` pedido (ISO 8601) o, sin ninguno, el final. `pilotos`: hasta 2 para el versus. |
+
+Una sesión terminada se descarga una vez (8 consultas a OpenF1) y queda media hora en memoria: después cada foto se calcula sin consultar OpenF1. En vivo, posiciones, intervalos y vueltas se renuevan cada 5 segundos y el resto cada 30 (46 consultas por minuto, debajo del cupo de 55).
+
 ## Pruebas
 
 ```sh
