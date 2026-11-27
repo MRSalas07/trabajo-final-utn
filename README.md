@@ -421,9 +421,7 @@ Las ramas de trabajo son cortas: se crean desde `develop` actualizado, se integr
 
 ## Limitaciones y pendientes conocidos
 
-- **Validación con usuarios:** todavía no se hizo una prueba de uso con personas ajenas al equipo.
 - **Plan gratuito:** el backend en Render se duerme sin tráfico (primera respuesta lenta) y Neon tiene límites de almacenamiento y de horas de cómputo.
-- **Búsqueda sin acentos:** buscar "rovanpera" no encuentra "Rovanperä".
 - **Datos:** los respaldos JSON no traen el campeón oficial (`idExternoCampeon`), así que el palmarés usa el campeonato calculado; falta el respaldo de F1 2026 y las marcas de TC 2025.
 - **Fuentes externas:** la API de WRC no es oficial y puede dejar de responder (los respaldos JSON permiten reconstruir la base). El modo en vivo de la telemetría requiere la suscripción paga de OpenF1.
 - **Pruebas:** los tests del backend corren sobre H2, así que las reglas propias de PostgreSQL se verifican a mano. Los del frontend cubren la lógica (seguridad, formatos, telemetría y seguimiento de sincronizaciones), no todas las pantallas.
