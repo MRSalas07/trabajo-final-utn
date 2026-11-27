@@ -1,6 +1,6 @@
 /**
  * Configuración de PRODUCCIÓN (ng build).
- * apiUrl: URL pública del backend desplegado (Render/Railway). Cambiarla antes de desplegar.
+ * apiUrl: URL pública del backend desplegado en Render.
  */
 export const environment = {
   production: true,
